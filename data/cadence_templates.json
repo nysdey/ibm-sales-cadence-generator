@@ -1,0 +1,250 @@
+{
+  "version": "2.0",
+  "last_updated": "2026-06-19",
+  "description": "Cadence structure templates for IBM infrastructure sales outreach",
+  "products": {
+    "ibm_fusion": {
+      "name": "IBM Fusion",
+      "description": "Hybrid cloud infrastructure platform",
+      "key_value_props": [
+        "40-60% lower TCO than VMware",
+        "Zero licensing surprises",
+        "Enterprise-grade reliability",
+        "Seamless hybrid cloud"
+      ]
+    },
+    "ibm_powervs": {
+      "name": "IBM PowerVS",
+      "description": "Cloud-based Power Systems infrastructure",
+      "key_value_props": [
+        "AIX/IBM i workload flexibility",
+        "Cloud economics for Power",
+        "Rapid deployment (hours vs months)",
+        "Hybrid Power infrastructure"
+      ]
+    },
+    "ibm_flashsystems": {
+      "name": "IBM FlashSystems",
+      "description": "High-performance enterprise storage",
+      "key_value_props": [
+        "Sub-millisecond latency",
+        "Cyber resilience built-in",
+        "Up to 5:1 data reduction",
+        "AI-powered management"
+      ]
+    }
+  },
+  "templates": [
+    {
+      "name": "Virtualization - VMware Migration",
+      "product": "ibm_fusion",
+      "category": "virtualization",
+      "target_persona": ["VP Infrastructure", "CIO", "Director IT Operations", "Head of Cloud"],
+      "duration_weeks": 4,
+      "total_touches": 10,
+      "value_proposition": "40-60% lower TCO than VMware, zero licensing surprises, enterprise-grade reliability",
+      "key_triggers": [
+        "Broadcom VMware acquisition",
+        "VMware license renewal",
+        "Budget pressure",
+        "Cloud migration initiatives"
+      ],
+      "differentiation": "vs VMware: Lower cost, predictable pricing; vs Nutanix: Better hybrid cloud; vs DIY: Enterprise support",
+      "typical_structure": [
+        {"day": 1, "channel": "Email", "focus": "Pain point + trigger event"},
+        {"day": 3, "channel": "LinkedIn", "focus": "Social proof"},
+        {"day": 5, "channel": "Call", "focus": "ROI discussion"},
+        {"day": 7, "channel": "Email", "focus": "Case study"},
+        {"day": 10, "channel": "Email", "focus": "Competitive insight"},
+        {"day": 14, "channel": "Call", "focus": "Technical deep dive offer"},
+        {"day": 17, "channel": "LinkedIn", "focus": "Industry trend"},
+        {"day": 21, "channel": "Email", "focus": "Assessment offer"},
+        {"day": 24, "channel": "Call", "focus": "Executive briefing"},
+        {"day": 28, "channel": "Email", "focus": "Final value summary"}
+      ]
+    },
+    {
+      "name": "Application Modernization - Container Platform",
+      "product": "ibm_fusion",
+      "category": "application_modernization",
+      "target_persona": ["CTO", "VP Engineering", "VP Platform", "Head of DevOps"],
+      "duration_weeks": 3,
+      "total_touches": 9,
+      "value_proposition": "40% faster deployments, consistent dev experience, built-in security",
+      "key_triggers": [
+        "Kubernetes complexity",
+        "Multi-cloud strategy",
+        "Developer productivity issues",
+        "Platform engineering initiatives"
+      ],
+      "differentiation": "vs DIY K8s: Managed complexity; vs Cloud-native: Hybrid flexibility; vs Legacy: Modern architecture",
+      "typical_structure": [
+        {"day": 1, "channel": "Email", "focus": "Developer velocity challenge"},
+        {"day": 3, "channel": "Email", "focus": "Platform engineering trend"},
+        {"day": 6, "channel": "LinkedIn", "focus": "Technical insight"},
+        {"day": 9, "channel": "Call", "focus": "Architecture discussion"},
+        {"day": 12, "channel": "Email", "focus": "Customer success story"},
+        {"day": 15, "channel": "Email", "focus": "Workshop offer"},
+        {"day": 18, "channel": "Call", "focus": "Technical demo"},
+        {"day": 21, "channel": "LinkedIn", "focus": "Industry benchmark"},
+        {"day": 24, "channel": "Email", "focus": "POC proposal"}
+      ]
+    },
+    {
+      "name": "Generative AI - Infrastructure Readiness",
+      "product": "ibm_fusion",
+      "category": "generative_ai",
+      "target_persona": ["CIO", "Chief AI Officer", "VP Data", "Head of AI/ML"],
+      "duration_weeks": 3,
+      "total_touches": 8,
+      "value_proposition": "Secure AI workload isolation, 60% lower AI infrastructure costs, rapid deployment",
+      "key_triggers": [
+        "GenAI pilot projects",
+        "AI strategy development",
+        "Data security concerns",
+        "Infrastructure cost pressure"
+      ],
+      "differentiation": "vs Cloud AI: Cost control; vs On-prem only: Flexibility; vs DIY: Time to value",
+      "typical_structure": [
+        {"day": 1, "channel": "Email", "focus": "AI infrastructure challenge"},
+        {"day": 4, "channel": "Email", "focus": "Security + compliance"},
+        {"day": 7, "channel": "LinkedIn", "focus": "AI industry insight"},
+        {"day": 10, "channel": "Call", "focus": "AI readiness assessment"},
+        {"day": 14, "channel": "Email", "focus": "Reference architecture"},
+        {"day": 17, "channel": "Email", "focus": "ROI model"},
+        {"day": 20, "channel": "Call", "focus": "Executive briefing"},
+        {"day": 24, "channel": "Email", "focus": "Pilot program offer"}
+      ]
+    },
+    {
+      "name": "Power Systems Modernization - Cloud Migration",
+      "product": "ibm_powervs",
+      "category": "power_modernization",
+      "target_persona": ["CIO", "VP Infrastructure", "Director AIX/IBM i", "Head of Mainframe"],
+      "duration_weeks": 4,
+      "total_touches": 10,
+      "value_proposition": "Cloud flexibility for AIX/IBM i, 50% faster deployment, pay-as-you-go economics",
+      "key_triggers": [
+        "Power hardware refresh cycles",
+        "Data center consolidation",
+        "DR/BC modernization",
+        "Cost optimization initiatives",
+        "Hybrid cloud strategy"
+      ],
+      "differentiation": "vs On-prem Power: Cloud economics; vs x86 migration: Keep proven workloads; vs Public cloud: Power-optimized",
+      "typical_structure": [
+        {"day": 1, "channel": "Email", "focus": "Power infrastructure challenge"},
+        {"day": 3, "channel": "Email", "focus": "Cloud economics for Power"},
+        {"day": 6, "channel": "LinkedIn", "focus": "AIX/IBM i modernization"},
+        {"day": 9, "channel": "Call", "focus": "Workload assessment"},
+        {"day": 12, "channel": "Email", "focus": "Customer migration story"},
+        {"day": 15, "channel": "Email", "focus": "DR/BC benefits"},
+        {"day": 18, "channel": "Call", "focus": "Technical architecture"},
+        {"day": 21, "channel": "LinkedIn", "focus": "Industry trend"},
+        {"day": 24, "channel": "Email", "focus": "Assessment offer"},
+        {"day": 28, "channel": "Email", "focus": "Migration roadmap"}
+      ]
+    },
+    {
+      "name": "Storage Modernization - Performance & Resilience",
+      "product": "ibm_flashsystems",
+      "category": "storage_modernization",
+      "target_persona": ["VP Infrastructure", "Director Storage", "CIO", "Head of Data Center"],
+      "duration_weeks": 3,
+      "total_touches": 9,
+      "value_proposition": "10x performance improvement, cyber resilience, 5:1 data reduction, AI-powered management",
+      "key_triggers": [
+        "Storage refresh cycles",
+        "Performance bottlenecks",
+        "Ransomware concerns",
+        "Capacity constraints",
+        "Cost optimization"
+      ],
+      "differentiation": "vs Legacy storage: Modern performance; vs Pure/NetApp: Better cyber resilience; vs Cloud: Lower TCO",
+      "typical_structure": [
+        {"day": 1, "channel": "Email", "focus": "Storage performance challenge"},
+        {"day": 4, "channel": "Email", "focus": "Cyber resilience"},
+        {"day": 7, "channel": "LinkedIn", "focus": "Storage modernization"},
+        {"day": 10, "channel": "Call", "focus": "Performance assessment"},
+        {"day": 13, "channel": "Email", "focus": "ROI case study"},
+        {"day": 16, "channel": "Email", "focus": "Data reduction benefits"},
+        {"day": 19, "channel": "Call", "focus": "Technical demo"},
+        {"day": 22, "channel": "LinkedIn", "focus": "Industry benchmark"},
+        {"day": 25, "channel": "Email", "focus": "POC proposal"}
+      ]
+    },
+    {
+      "name": "Whitespace - New Client Introduction",
+      "product": "multi_product",
+      "category": "whitespace",
+      "target_persona": ["CIO", "CTO", "VP Infrastructure", "Head of IT"],
+      "duration_weeks": 4,
+      "total_touches": 10,
+      "value_proposition": "Comprehensive infrastructure modernization, hybrid cloud flexibility, cost optimization",
+      "key_triggers": [
+        "Digital transformation initiatives",
+        "Infrastructure refresh cycles",
+        "Budget pressure",
+        "Cloud strategy development",
+        "Technology consolidation"
+      ],
+      "differentiation": "Comprehensive IBM infrastructure portfolio, proven enterprise scale, hybrid cloud expertise",
+      "typical_structure": [
+        {"day": 1, "channel": "Email", "focus": "Introduction + value hypothesis"},
+        {"day": 3, "channel": "LinkedIn", "focus": "Thought leadership"},
+        {"day": 6, "channel": "Email", "focus": "Industry-specific insight"},
+        {"day": 9, "channel": "Call", "focus": "Discovery conversation"},
+        {"day": 12, "channel": "Email", "focus": "Relevant case study"},
+        {"day": 15, "channel": "Email", "focus": "Multi-product value"},
+        {"day": 18, "channel": "LinkedIn", "focus": "Executive content"},
+        {"day": 21, "channel": "Call", "focus": "Strategic discussion"},
+        {"day": 24, "channel": "Email", "focus": "Assessment offer"},
+        {"day": 28, "channel": "Email", "focus": "Executive briefing invite"}
+      ]
+    },
+    {
+      "name": "Multi-Product - Infrastructure Transformation",
+      "product": "multi_product",
+      "category": "infrastructure_transformation",
+      "target_persona": ["CIO", "CTO", "VP Infrastructure"],
+      "duration_weeks": 4,
+      "total_touches": 11,
+      "value_proposition": "End-to-end infrastructure modernization: compute, storage, and Power workloads",
+      "key_triggers": [
+        "Data center consolidation",
+        "Infrastructure refresh",
+        "Hybrid cloud strategy",
+        "Cost optimization",
+        "Technology standardization"
+      ],
+      "differentiation": "Integrated IBM portfolio, single vendor relationship, comprehensive support",
+      "typical_structure": [
+        {"day": 1, "channel": "Email", "focus": "Infrastructure challenge"},
+        {"day": 3, "channel": "Email", "focus": "Multi-product value"},
+        {"day": 6, "channel": "LinkedIn", "focus": "Transformation insight"},
+        {"day": 9, "channel": "Call", "focus": "Strategic discussion"},
+        {"day": 12, "channel": "Email", "focus": "Fusion + FlashSystems"},
+        {"day": 15, "channel": "Email", "focus": "PowerVS integration"},
+        {"day": 18, "channel": "Call", "focus": "Architecture review"},
+        {"day": 21, "channel": "LinkedIn", "focus": "Customer success"},
+        {"day": 24, "channel": "Email", "focus": "Comprehensive assessment"},
+        {"day": 27, "channel": "Call", "focus": "Executive alignment"},
+        {"day": 30, "channel": "Email", "focus": "Roadmap proposal"}
+      ]
+    }
+  ],
+  "best_practices": {
+    "email_length": "Under 150 words",
+    "subject_lines": "Question format or specific insight (not generic)",
+    "personalization": "Company name in every email, industry-specific challenges",
+    "cta": "Always clear, low-friction (15-min call, not 'demo')",
+    "tone": "Executive-level: concise, insight-driven, outcome-focused",
+    "timing": "Space touches 2-4 days apart, accelerate if engagement",
+    "channels": "Mix Email (60%), Call (25%), LinkedIn (15%)"
+  },
+  "success_metrics": {
+    "target_open_rate": 0.45,
+    "target_reply_rate": 0.12,
+    "target_meeting_rate": 0.08
+  }
+}

@@ -1,0 +1,393 @@
+{
+  "version": "2.0",
+  "last_updated": "2026-06-19",
+  "description": "Company and industry intelligence for personalization across IBM infrastructure products",
+  "industries": {
+    "Financial Services": {
+      "common_challenges": [
+        "VMware licensing cost increases (3-5x post-Broadcom)",
+        "Regulatory compliance (SOX, PCI-DSS, GDPR)",
+        "Legacy mainframe and Power Systems modernization",
+        "Trading system reliability and performance requirements",
+        "Cost optimization pressure",
+        "Data protection and cyber resilience",
+        "High-performance storage for trading platforms"
+      ],
+      "priorities": [
+        "Security and compliance",
+        "Operational resilience",
+        "Cost reduction",
+        "Digital transformation",
+        "Risk management",
+        "Performance and latency"
+      ],
+      "trigger_events": [
+        "Broadcom VMware acquisition",
+        "License renewal cycles",
+        "Cloud migration initiatives",
+        "Regulatory changes",
+        "Merger and acquisition activity",
+        "Power Systems refresh cycles",
+        "Storage performance issues"
+      ],
+      "typical_tech_stack": [
+        "VMware-heavy infrastructure",
+        "IBM Power Systems (AIX, IBM i)",
+        "Mainframes (IBM Z, AS/400)",
+        "Traditional data centers",
+        "High-performance storage arrays",
+        "Private cloud"
+      ],
+      "decision_makers": [
+        "CIO",
+        "VP Infrastructure",
+        "CISO",
+        "Head of IT Operations",
+        "Chief Technology Officer",
+        "Director of Storage"
+      ],
+      "product_fit": {
+        "ibm_fusion": "VMware migration, hybrid cloud, cost optimization",
+        "ibm_powervs": "AIX/IBM i modernization, cloud flexibility for Power workloads",
+        "ibm_flashsystems": "Trading platform performance, cyber resilience, compliance"
+      },
+      "proof_points": [
+        "50-60% infrastructure cost reduction",
+        "Zero downtime migrations",
+        "SOX/PCI compliance maintained",
+        "Sub-millisecond storage latency",
+        "3-4 month implementation timeline"
+      ]
+    },
+    "Healthcare": {
+      "common_challenges": [
+        "HIPAA compliance requirements",
+        "Legacy EHR system integration",
+        "Patient data security and cyber resilience",
+        "Interoperability challenges",
+        "Cost containment pressure",
+        "Storage performance for imaging (PACS)",
+        "24/7 system availability requirements"
+      ],
+      "priorities": [
+        "Patient data security",
+        "System reliability (24/7 uptime)",
+        "Regulatory compliance",
+        "Interoperability",
+        "Cost efficiency",
+        "Performance for clinical systems"
+      ],
+      "trigger_events": [
+        "EHR modernization projects",
+        "Cloud adoption initiatives",
+        "Cybersecurity incidents",
+        "Telehealth expansion",
+        "System consolidation",
+        "PACS upgrades",
+        "Data center refresh"
+      ],
+      "typical_tech_stack": [
+        "Epic or Cerner EHR",
+        "Legacy clinical systems",
+        "Hybrid infrastructure",
+        "On-premises data centers",
+        "PACS systems",
+        "High-capacity storage"
+      ],
+      "decision_makers": [
+        "CIO",
+        "CMIO (Chief Medical Information Officer)",
+        "VP IT",
+        "Director of Infrastructure",
+        "CISO",
+        "Director of Clinical Systems"
+      ],
+      "product_fit": {
+        "ibm_fusion": "Infrastructure modernization, hybrid cloud for clinical apps",
+        "ibm_powervs": "Legacy system migration, DR/BC for critical workloads",
+        "ibm_flashsystems": "PACS performance, data protection, cyber resilience"
+      },
+      "proof_points": [
+        "HIPAA-compliant infrastructure",
+        "99.99% uptime for clinical systems",
+        "40% faster EHR performance",
+        "Reduced security risk",
+        "10x faster PACS image retrieval"
+      ]
+    },
+    "Retail": {
+      "common_challenges": [
+        "Seasonal scalability (Black Friday, holidays)",
+        "Omnichannel experience consistency",
+        "Supply chain optimization",
+        "Real-time inventory management",
+        "Customer data analytics",
+        "E-commerce platform performance",
+        "POS system reliability"
+      ],
+      "priorities": [
+        "Customer experience",
+        "Agility and speed",
+        "Cost efficiency",
+        "Real-time data access",
+        "Innovation velocity",
+        "Peak season readiness"
+      ],
+      "trigger_events": [
+        "Peak season preparation",
+        "Digital transformation initiatives",
+        "Supply chain disruption",
+        "E-commerce platform upgrades",
+        "Store modernization",
+        "Infrastructure refresh"
+      ],
+      "typical_tech_stack": [
+        "E-commerce platforms",
+        "POS systems",
+        "Inventory management",
+        "Customer data platforms",
+        "Hybrid cloud",
+        "Legacy retail systems"
+      ],
+      "decision_makers": [
+        "CIO",
+        "CTO",
+        "VP Digital",
+        "VP IT Operations",
+        "Chief Digital Officer",
+        "VP E-commerce"
+      ],
+      "product_fit": {
+        "ibm_fusion": "Scalable infrastructure, hybrid cloud for omnichannel",
+        "ibm_powervs": "Legacy retail system modernization",
+        "ibm_flashsystems": "E-commerce performance, real-time inventory data"
+      },
+      "proof_points": [
+        "3x traffic handling during peak",
+        "50% faster deployment cycles",
+        "30% infrastructure cost reduction",
+        "Improved customer experience metrics",
+        "Zero downtime during Black Friday"
+      ]
+    },
+    "Technology": {
+      "common_challenges": [
+        "Developer velocity and productivity",
+        "Infrastructure cost optimization",
+        "Scaling AI/ML workloads",
+        "Multi-cloud complexity",
+        "Platform engineering",
+        "Storage performance for data pipelines",
+        "Container platform management"
+      ],
+      "priorities": [
+        "Innovation speed",
+        "Developer experience",
+        "Cloud-native architecture",
+        "Cost efficiency",
+        "Competitive advantage",
+        "AI/ML infrastructure"
+      ],
+      "trigger_events": [
+        "Product launches",
+        "Scaling challenges",
+        "Competitive pressure",
+        "Platform consolidation",
+        "AI/ML initiatives",
+        "Developer productivity issues"
+      ],
+      "typical_tech_stack": [
+        "Cloud-native applications",
+        "Kubernetes",
+        "Microservices",
+        "Modern DevOps tools",
+        "Multi-cloud",
+        "High-performance storage"
+      ],
+      "decision_makers": [
+        "CTO",
+        "VP Engineering",
+        "VP Platform",
+        "Head of Infrastructure",
+        "Chief Architect",
+        "VP DevOps"
+      ],
+      "product_fit": {
+        "ibm_fusion": "Container platform, app modernization, AI infrastructure",
+        "ibm_powervs": "Hybrid workload flexibility",
+        "ibm_flashsystems": "AI/ML data pipelines, high-performance storage"
+      },
+      "proof_points": [
+        "40% faster deployment cycles",
+        "60% reduction in platform complexity",
+        "Improved developer satisfaction",
+        "Lower cloud costs",
+        "10x faster AI model training"
+      ]
+    },
+    "Manufacturing": {
+      "common_challenges": [
+        "OT/IT convergence",
+        "Supply chain visibility",
+        "Legacy system modernization",
+        "Predictive maintenance",
+        "Industry 4.0 transformation",
+        "Edge computing requirements",
+        "Data management for IoT"
+      ],
+      "priorities": [
+        "Operational efficiency",
+        "Supply chain resilience",
+        "Quality control",
+        "Cost reduction",
+        "Innovation",
+        "Real-time analytics"
+      ],
+      "trigger_events": [
+        "Industry 4.0 initiatives",
+        "Supply chain disruption",
+        "Automation projects",
+        "Plant modernization",
+        "IoT deployments",
+        "ERP upgrades"
+      ],
+      "typical_tech_stack": [
+        "SCADA systems",
+        "MES (Manufacturing Execution Systems)",
+        "ERP systems (SAP, Oracle)",
+        "Edge computing",
+        "Legacy industrial systems",
+        "IBM Power Systems"
+      ],
+      "decision_makers": [
+        "CIO",
+        "VP Operations",
+        "VP IT",
+        "Plant Managers",
+        "Head of Digital Transformation",
+        "VP Supply Chain"
+      ],
+      "product_fit": {
+        "ibm_fusion": "Edge computing, hybrid cloud for manufacturing apps",
+        "ibm_powervs": "SAP/ERP modernization, legacy system migration",
+        "ibm_flashsystems": "Real-time data analytics, IoT data management"
+      },
+      "proof_points": [
+        "20% improvement in OEE",
+        "Reduced downtime",
+        "Better supply chain visibility",
+        "Faster time to market",
+        "50% faster data processing"
+      ]
+    },
+    "Energy": {
+      "common_challenges": [
+        "Critical infrastructure reliability",
+        "Regulatory compliance",
+        "Legacy system modernization",
+        "Real-time monitoring and control",
+        "Cybersecurity for OT systems",
+        "Data management for sensors/IoT",
+        "Cost optimization"
+      ],
+      "priorities": [
+        "Safety and reliability",
+        "Operational efficiency",
+        "Compliance",
+        "Security",
+        "Cost reduction",
+        "Digital transformation"
+      ],
+      "trigger_events": [
+        "Infrastructure modernization",
+        "Regulatory changes",
+        "Cybersecurity incidents",
+        "Digital transformation initiatives",
+        "System refresh cycles"
+      ],
+      "typical_tech_stack": [
+        "SCADA systems",
+        "Distributed control systems",
+        "Legacy industrial systems",
+        "IBM Power Systems",
+        "Traditional data centers",
+        "Edge computing"
+      ],
+      "decision_makers": [
+        "CIO",
+        "VP Operations",
+        "VP IT",
+        "CISO",
+        "Head of Infrastructure",
+        "Director of Engineering"
+      ],
+      "product_fit": {
+        "ibm_fusion": "Hybrid cloud for critical apps, edge computing",
+        "ibm_powervs": "Legacy system modernization, DR/BC",
+        "ibm_flashsystems": "Real-time data management, cyber resilience"
+      },
+      "proof_points": [
+        "99.999% uptime for critical systems",
+        "Enhanced cybersecurity posture",
+        "40% cost reduction",
+        "Faster incident response",
+        "Improved operational efficiency"
+      ]
+    },
+    "Enterprise": {
+      "common_challenges": [
+        "Infrastructure cost optimization",
+        "Hybrid cloud complexity",
+        "Legacy system modernization",
+        "Security and compliance",
+        "Digital transformation",
+        "Multi-vendor complexity",
+        "Technology debt"
+      ],
+      "priorities": [
+        "Cost optimization",
+        "Agility",
+        "Security",
+        "Operational efficiency",
+        "Innovation",
+        "Vendor consolidation"
+      ],
+      "trigger_events": [
+        "VMware cost increases",
+        "Cloud migration",
+        "Digital transformation",
+        "Budget pressure",
+        "Technology refresh cycles",
+        "Data center consolidation"
+      ],
+      "typical_tech_stack": [
+        "Mixed legacy and modern",
+        "Hybrid cloud",
+        "Traditional data centers",
+        "Various virtualization platforms",
+        "Diverse application portfolio",
+        "Multiple storage vendors"
+      ],
+      "decision_makers": [
+        "CIO",
+        "CTO",
+        "VP Infrastructure",
+        "Director IT",
+        "Head of Cloud",
+        "VP Operations"
+      ],
+      "product_fit": {
+        "ibm_fusion": "VMware migration, hybrid cloud, infrastructure consolidation",
+        "ibm_powervs": "Power workload modernization, cloud flexibility",
+        "ibm_flashsystems": "Storage consolidation, performance, cyber resilience"
+      },
+      "proof_points": [
+        "40-60% cost reduction",
+        "Faster time to value",
+        "Improved agility",
+        "Better security posture",
+        "Simplified operations"
+      ]
+    }
+  }
+}

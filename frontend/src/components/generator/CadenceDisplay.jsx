@@ -1,0 +1,194 @@
+import { useState } from 'react';
+import { Copy, Check, Mail, Phone, Linkedin } from 'lucide-react';
+
+const CadenceDisplay = ({ cadences, prospectName, companyName }) => {
+  const [copiedId, setCopiedId] = useState(null);
+
+  const copyToClipboard = async (text, id) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  const getChannelIcon = (channel) => {
+    switch (channel.toLowerCase()) {
+      case 'email':
+        return <Mail className="w-4 h-4" />;
+      case 'call':
+        return <Phone className="w-4 h-4" />;
+      case 'linkedin':
+        return <Linkedin className="w-4 h-4" />;
+      default:
+        return <Mail className="w-4 h-4" />;
+    }
+  };
+
+  const getChannelColor = (channel) => {
+    switch (channel.toLowerCase()) {
+      case 'email':
+        return 'bg-blue-100 text-blue-800';
+      case 'call':
+        return 'bg-green-100 text-green-800';
+      case 'linkedin':
+        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const formatCadenceForCopy = (cadence) => {
+    let text = `${cadence.name}\n`;
+    text += `Target: ${cadence.targetPersona}\n`;
+    text += `Value Proposition: ${cadence.valueProposition}\n\n`;
+    
+    cadence.steps.forEach((step, index) => {
+      text += `--- Step ${index + 1}: Day ${step.day} - ${step.channel} ---\n`;
+      if (step.subject) {
+        text += `Subject: ${step.subject}\n\n`;
+      }
+      text += `${step.body}\n\n`;
+    });
+    
+    return text;
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+        <div className="flex items-center space-x-2">
+          <Check className="w-5 h-5 text-green-600" />
+          <p className="text-green-800 font-medium">
+            Generated 3 personalized cadences for {prospectName} at {companyName}
+          </p>
+        </div>
+      </div>
+
+      {cadences.map((cadence, cadenceIndex) => (
+        <div key={cadenceIndex} className="card">
+          {/* Cadence Header */}
+          <div className="border-b border-gray-200 pb-4 mb-4">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  {cadence.name}
+                </h3>
+                <div className="space-y-1 text-sm text-gray-600">
+                  <p><strong>Target:</strong> {cadence.targetPersona}</p>
+                  <p><strong>Value Prop:</strong> {cadence.valueProposition}</p>
+                  {cadence.triggerEvents && cadence.triggerEvents.length > 0 && (
+                    <p><strong>Triggers:</strong> {cadence.triggerEvents.join(', ')}</p>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={() => copyToClipboard(formatCadenceForCopy(cadence), `cadence-${cadenceIndex}`)}
+                className="btn-secondary flex items-center space-x-2 ml-4"
+              >
+                {copiedId === `cadence-${cadenceIndex}` ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    <span>Copy All</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Cadence Steps */}
+          <div className="space-y-4">
+            {cadence.steps.map((step, stepIndex) => (
+              <div key={stepIndex} className="border border-gray-200 rounded-lg p-4 hover:border-ibm-blue transition-colors">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-sm font-semibold text-gray-500">
+                      Day {step.day}
+                    </span>
+                    <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${getChannelColor(step.channel)}`}>
+                      {getChannelIcon(step.channel)}
+                      <span>{step.channel}</span>
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => copyToClipboard(
+                      step.subject ? `Subject: ${step.subject}\n\n${step.body}` : step.body,
+                      `step-${cadenceIndex}-${stepIndex}`
+                    )}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                    title="Copy this step"
+                  >
+                    {copiedId === `step-${cadenceIndex}-${stepIndex}` ? (
+                      <Check className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+
+                {step.subject && (
+                  <div className="mb-2">
+                    <p className="text-xs font-medium text-gray-500 mb-1">Subject:</p>
+                    <p className="text-sm font-semibold text-gray-900">{step.subject}</p>
+                  </div>
+                )}
+
+                <div>
+                  {step.channel.toLowerCase() === 'email' && (
+                    <p className="text-xs font-medium text-gray-500 mb-1">Email Body:</p>
+                  )}
+                  {step.channel.toLowerCase() === 'call' && (
+                    <p className="text-xs font-medium text-gray-500 mb-1">Call Script:</p>
+                  )}
+                  {step.channel.toLowerCase() === 'linkedin' && (
+                    <p className="text-xs font-medium text-gray-500 mb-1">LinkedIn Message:</p>
+                  )}
+                  <div className="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded border border-gray-200">
+                    {step.body}
+                  </div>
+                </div>
+
+                {step.cta && (
+                  <div className="mt-2 pt-2 border-t border-gray-200">
+                    <p className="text-xs font-medium text-gray-500">CTA:</p>
+                    <p className="text-sm text-ibm-blue font-medium">{step.cta}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Cadence Footer */}
+          {cadence.differentiation && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <p className="text-xs font-medium text-gray-500 mb-1">Differentiation:</p>
+              <p className="text-sm text-gray-700">{cadence.differentiation}</p>
+            </div>
+          )}
+        </div>
+      ))}
+
+      {/* Export Options */}
+      <div className="card bg-gray-50">
+        <h4 className="font-semibold text-gray-900 mb-2">Next Steps</h4>
+        <ul className="text-sm text-gray-700 space-y-1">
+          <li>• Copy individual steps or entire cadences using the copy buttons above</li>
+          <li>• Paste into Salesloft cadence builder</li>
+          <li>• Adjust timing and channels based on your sales process</li>
+          <li>• Track performance and refine based on results</li>
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+export default CadenceDisplay;
+
+// Made with Bob

@@ -1,0 +1,174 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-06-19",
+  "description": "Training examples for IBM Fusion cadence generation. Includes both sample examples and empty templates for adding your own.",
+  "examples": [
+    {
+      "id": "virt_fs_001",
+      "category": "virtualization",
+      "input": {
+        "prospect_name": "Sarah Chen",
+        "company_name": "Goldman Sachs",
+        "industry": "Financial Services",
+        "inferred_role": "VP Infrastructure"
+      },
+      "output": {
+        "cadence_name": "Virtualization - VMware Cost Optimization",
+        "steps": [
+          {
+            "day": 1,
+            "channel": "Email",
+            "subject": "VMware costs at Goldman Sachs?",
+            "body": "Sarah,\n\nMany financial services firms are seeing 3-5x VMware cost increases post-Broadcom. Goldman Sachs' infrastructure scale likely means significant budget impact.\n\nIBM Fusion offers:\n• 40-60% lower TCO vs. VMware\n• Zero licensing surprises\n• Same enterprise reliability you need for trading systems\n\nWorth a 15-minute conversation on what we're seeing in FinServ?\n\nBest,\nBob",
+            "cta": "15-min cost assessment call"
+          },
+          {
+            "day": 3,
+            "channel": "LinkedIn",
+            "subject": null,
+            "body": "Sarah - Following up on my email about VMware cost optimization. Several tier-1 banks have moved to IBM Fusion and are seeing 50%+ savings. Would love to share what's working in financial services. Open to a brief call?",
+            "cta": "Connect and schedule call"
+          },
+          {
+            "day": 5,
+            "channel": "Call",
+            "subject": null,
+            "body": "Hi Sarah, Bob from IBM calling about infrastructure cost optimization.\n\nTalking points:\n• Broadcom VMware pricing impact on Goldman Sachs\n• How tier-1 banks are responding (50-60% cost reduction)\n• Fusion's SOX/PCI compliance for financial services\n• Quick ROI assessment - 15 minutes\n\nIf voicemail: 'Sarah, Bob from IBM. Quick question about your VMware infrastructure costs post-Broadcom. Seeing major savings at similar FinServ firms. Worth 15 minutes? [phone/email]'",
+            "cta": "Schedule 15-min assessment"
+          }
+        ]
+      },
+      "quality_score": 9,
+      "notes": "Strong industry-specific hooks, quantified value, timely trigger event"
+    },
+    {
+      "id": "appmod_tech_001",
+      "category": "application_modernization",
+      "input": {
+        "prospect_name": "Marcus Rodriguez",
+        "company_name": "Stripe",
+        "industry": "Technology",
+        "inferred_role": "VP Engineering"
+      },
+      "output": {
+        "cadence_name": "Application Modernization - Platform Engineering",
+        "steps": [
+          {
+            "day": 1,
+            "channel": "Email",
+            "subject": "Platform engineering at Stripe",
+            "body": "Marcus,\n\nStripe's developer velocity is legendary. But as you scale globally, platform complexity grows exponentially.\n\nIBM Fusion + OpenShift gives you:\n• Consistent dev experience across 20+ regions\n• 40% faster deployment cycles\n• Built-in security for payment processing\n\nSeveral fintech unicorns are using this stack. 20 minutes to discuss your platform roadmap?\n\nBob",
+            "cta": "20-min platform strategy call"
+          },
+          {
+            "day": 4,
+            "channel": "Email",
+            "subject": "Re: Platform engineering at Stripe",
+            "body": "Marcus,\n\nQuick follow-up - saw Stripe's recent expansion into Asia-Pacific. That's exactly where our platform engineering approach shines.\n\nOne fintech customer reduced their multi-region deployment time from 6 weeks to 3 days.\n\nWorth exploring for Stripe's global scale?\n\nBob",
+            "cta": "Brief call this week"
+          }
+        ]
+      },
+      "quality_score": 8,
+      "notes": "Tech-forward language, specific to company's known initiatives"
+    },
+    {
+      "id": "genai_retail_001",
+      "category": "generative_ai",
+      "input": {
+        "prospect_name": "Jennifer Park",
+        "company_name": "Target",
+        "industry": "Retail",
+        "inferred_role": "CIO"
+      },
+      "output": {
+        "cadence_name": "Generative AI - Retail Innovation",
+        "steps": [
+          {
+            "day": 1,
+            "channel": "Email",
+            "subject": "AI infrastructure for Target's scale",
+            "body": "Jennifer,\n\nTarget's omnichannel experience is industry-leading. As you explore GenAI for personalization and inventory optimization, infrastructure becomes critical.\n\nIBM Fusion provides:\n• Secure AI workload isolation (PCI compliant)\n• Scale for peak season (Black Friday ready)\n• 60% lower AI infrastructure costs\n\nMajor retailers are seeing 3-4 month faster AI deployment. Worth discussing?\n\nBob",
+            "cta": "30-min AI infrastructure briefing"
+          }
+        ]
+      },
+      "quality_score": 8,
+      "notes": "Retail-specific AI use cases, compliance awareness"
+    }
+  ],
+  "empty_templates": [
+    {
+      "id": "template_001",
+      "category": "virtualization",
+      "input": {
+        "prospect_name": "",
+        "company_name": "",
+        "industry": "",
+        "inferred_role": ""
+      },
+      "output": {
+        "cadence_name": "",
+        "steps": [
+          {
+            "day": 1,
+            "channel": "Email",
+            "subject": "",
+            "body": "",
+            "cta": ""
+          }
+        ]
+      },
+      "quality_score": null,
+      "notes": "Add your own virtualization example here"
+    },
+    {
+      "id": "template_002",
+      "category": "application_modernization",
+      "input": {
+        "prospect_name": "",
+        "company_name": "",
+        "industry": "",
+        "inferred_role": ""
+      },
+      "output": {
+        "cadence_name": "",
+        "steps": [
+          {
+            "day": 1,
+            "channel": "Email",
+            "subject": "",
+            "body": "",
+            "cta": ""
+          }
+        ]
+      },
+      "quality_score": null,
+      "notes": "Add your own app modernization example here"
+    },
+    {
+      "id": "template_003",
+      "category": "generative_ai",
+      "input": {
+        "prospect_name": "",
+        "company_name": "",
+        "industry": "",
+        "inferred_role": ""
+      },
+      "output": {
+        "cadence_name": "",
+        "steps": [
+          {
+            "day": 1,
+            "channel": "Email",
+            "subject": "",
+            "body": "",
+            "cta": ""
+          }
+        ]
+      },
+      "quality_score": null,
+      "notes": "Add your own GenAI example here"
+    }
+  ]
+}
