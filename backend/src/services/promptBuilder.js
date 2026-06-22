@@ -136,17 +136,28 @@ class PromptBuilder {
    * @param {string} prospectName - Prospect name
    * @param {string} companyName - Company name
    * @param {Array<string>} cadenceTypes - Array of cadence types to generate (optional)
+   * @param {string} industry - Industry (optional, will be inferred if not provided)
+   * @param {string} additionalContext - Additional context to integrate naturally (optional)
    * @returns {string} - User prompt
    */
-  buildUserPrompt(prospectName, companyName, cadenceTypes = null) {
-    const industry = this.inferIndustry(companyName);
-    const relevantExamples = this.getRelevantExamples(industry, 2);
+  buildUserPrompt(prospectName, companyName, cadenceTypes = null, industry = null, additionalContext = null) {
+    const inferredIndustry = industry || this.inferIndustry(companyName);
+    const relevantExamples = this.getRelevantExamples(inferredIndustry, 2);
     
     // Get industry-specific context
-    const industryContext = this.getIndustryContext(industry);
+    const industryContext = this.getIndustryContext(inferredIndustry);
     
     // Get product fit information
-    const productFit = this.getProductFit(industry);
+    const productFit = this.getProductFit(inferredIndustry);
+    
+    // Add additional context section if provided
+    let additionalContextSection = '';
+    if (additionalContext) {
+      additionalContextSection = `\n## ADDITIONAL CONTEXT TO INTEGRATE NATURALLY:
+${additionalContext}
+
+IMPORTANT: Weave this context naturally into the email body. Do NOT add it as a P.S. or separate section. Instead, integrate it into the main narrative where it makes sense contextually.\n`;
+    }
     
     // Build examples section
     let examplesSection = '';
@@ -184,11 +195,13 @@ class PromptBuilder {
 ## INPUT DATA:
 Prospect Name: ${prospectName}
 Company Name: ${companyName}
-Inferred Industry: ${industry}
+Inferred Industry: ${inferredIndustry}
 
 ${industryContext}
 
 ${productFit}
+
+${additionalContextSection}
 
 ${examplesSection}
 
@@ -197,7 +210,7 @@ ${cadenceInstructions}
 
 CRITICAL REQUIREMENTS:
 1. Use the REAL prospect name "${prospectName}" and company name "${companyName}" in EVERY email
-2. Make specific, credible references to ${industry} industry challenges
+2. Make specific, credible references to ${inferredIndustry} industry challenges
 3. NO generic placeholders or example text
 4. Each cadence must have 8-12 touches across 3-4 weeks
 5. Mix Email, Call, and LinkedIn touches
@@ -336,9 +349,11 @@ Return a valid JSON object with this exact structure:
    * @param {string} prospectName - Prospect name
    * @param {string} companyName - Company name
    * @param {Array<string>} cadenceTypes - Array of cadence types to generate (optional)
+   * @param {string} industry - Industry (optional)
+   * @param {string} additionalContext - Additional context (optional)
    * @returns {Object} - { systemPrompt, userPrompt }
    */
-  async buildPrompt(prospectName, companyName, cadenceTypes = null) {
+  async buildPrompt(prospectName, companyName, cadenceTypes = null, industry = null, additionalContext = null) {
     // Ensure data is loaded
     if (!this.trainingExamples) {
       await this.loadData();
@@ -346,7 +361,7 @@ Return a valid JSON object with this exact structure:
     
     return {
       systemPrompt: this.buildSystemPrompt(),
-      userPrompt: this.buildUserPrompt(prospectName, companyName, cadenceTypes)
+      userPrompt: this.buildUserPrompt(prospectName, companyName, cadenceTypes, industry, additionalContext)
     };
   }
 }

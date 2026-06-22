@@ -10,7 +10,7 @@ const router = express.Router();
  */
 router.post('/generate', async (req, res) => {
   try {
-    const { prospectName, companyName, cadenceTypes } = req.body;
+    const { prospectName, companyName, cadenceTypes, industry, additionalContext } = req.body;
 
     // Validate input
     if (!prospectName || !companyName) {
@@ -33,11 +33,13 @@ router.post('/generate', async (req, res) => {
       : 'with default cadences';
     console.log(`Generating cadences for ${prospectName} at ${companyName} ${cadenceInfo}...`);
 
-    // Build prompts
+    // Build prompts with enhanced context
     const { systemPrompt, userPrompt } = await promptBuilder.buildPrompt(
       prospectName,
       companyName,
-      cadenceTypes
+      cadenceTypes,
+      industry,
+      additionalContext
     );
 
     // Generate cadences using Watsonx.ai

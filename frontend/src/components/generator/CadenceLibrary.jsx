@@ -280,12 +280,17 @@ const CadenceLibrary = () => {
     setGeneratingEmail(true);
     setEmailSaved(false);
     try {
-      // Use the actual AI generation API
-      const result = await generateCadences({
+      // Build enhanced context for AI generation
+      const enhancedContext = {
         prospectName: personalizationData.prospectName,
         companyName: personalizationData.companyName,
-        cadenceTypes: [selectedCadence.campaign.toLowerCase().replace(/\s+/g, '_')]
-      });
+        cadenceTypes: [selectedCadence.campaign.toLowerCase().replace(/\s+/g, '_')],
+        industry: personalizationData.industry,
+        additionalContext: personalizationData.additionalContext
+      };
+
+      // Use the actual AI generation API with enhanced context
+      const result = await generateCadences(enhancedContext);
       
       // Get the first email from the generated cadence
       if (result.cadences && result.cadences.length > 0) {
@@ -319,8 +324,20 @@ const CadenceLibrary = () => {
         .replace(/\{\{industry\}\}/g, personalizationData.industry || 'your industry')
         .replace(/\{\{sender_name\}\}/g, 'Your Name');
       
+      // Integrate additional context naturally into the email body
       if (personalizationData.additionalContext) {
-        personalizedBody += `\n\nP.S. ${personalizationData.additionalContext}`;
+        // Find a natural place to insert the context (after first paragraph)
+        const paragraphs = personalizedBody.split('\n\n');
+        if (paragraphs.length > 1) {
+          // Insert context as a new paragraph after the opening
+          paragraphs.splice(1, 0, personalizationData.additionalContext);
+          personalizedBody = paragraphs.join('\n\n');
+        } else {
+          // If only one paragraph, add context before the closing
+          const lines = personalizedBody.split('\n');
+          lines.splice(lines.length - 2, 0, `\n${personalizationData.additionalContext}\n`);
+          personalizedBody = lines.join('\n');
+        }
       }
       
       setGeneratedEmail({
