@@ -107,7 +107,8 @@ const DatabaseManager = () => {
     { id: 'emails', label: 'Generated Emails', icon: Mail },
     { id: 'companies', label: 'Companies', icon: Building2 },
     { id: 'industries', label: 'Industries', icon: Briefcase },
-    { id: 'techKnowledge', label: 'Tech Knowledge', icon: Cpu }
+    { id: 'techKnowledge', label: 'Use Cases', icon: Cpu },
+    { id: 'trainingData', label: 'Training Data', icon: FileText }
   ];
 
   const getCurrentData = () => {
@@ -182,29 +183,37 @@ const DatabaseManager = () => {
       {filteredData.map((company) => (
         <div key={company.id} className="bg-bg-elevated rounded-xl border border-border p-6 hover:border-ibm-blue transition-all">
           <div className="flex items-start justify-between mb-4">
-            <div>
-              <h3 className="text-lg font-semibold text-text-primary">{company.name}</h3>
-              <p className="text-sm text-text-secondary mt-1">{company.industry} • {company.size} • {company.revenue}</p>
+            <div className="flex-1">
+              <div className="flex items-center space-x-3 mb-2">
+                <h3 className="text-xl font-semibold text-text-primary">{company.name}</h3>
+                <span className="px-2.5 py-1 bg-ibm-blue/10 text-ibm-blue text-xs font-medium rounded-lg border border-ibm-blue/30">
+                  {company.keyContacts} contacts
+                </span>
+                <span className="px-2.5 py-1 bg-purple-500/10 text-purple-400 text-xs font-medium rounded-lg border border-purple-500/30">
+                  Whale
+                </span>
+                <span className="px-2.5 py-1 bg-green-500/10 text-green-400 text-xs font-medium rounded-lg border border-green-500/30">
+                  {company.industry}
+                </span>
+              </div>
+              <p className="text-base text-text-secondary">{company.size} • {company.revenue}</p>
             </div>
-            <span className="px-3 py-1 bg-ibm-blue/10 text-ibm-blue text-xs font-medium rounded-lg border border-ibm-blue/30">
-              {company.keyContacts} contacts
-            </span>
           </div>
           
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <p className="text-xs text-text-tertiary mb-2">Tech Stack</p>
+              <p className="text-sm text-text-tertiary mb-2 font-medium">Tech Stack</p>
               <div className="flex flex-wrap gap-2">
                 {company.techStack.map((tech, idx) => (
-                  <span key={idx} className="px-2 py-1 bg-bg-raised text-text-secondary text-xs rounded border border-border">
+                  <span key={idx} className="px-2.5 py-1 bg-bg-raised text-text-secondary text-sm rounded border border-border">
                     {tech}
                   </span>
                 ))}
               </div>
             </div>
             <div>
-              <p className="text-xs text-text-tertiary mb-2">Pain Points</p>
-              <ul className="text-xs text-text-secondary space-y-1">
+              <p className="text-sm text-text-tertiary mb-2 font-medium">Pain Points</p>
+              <ul className="text-sm text-text-secondary space-y-1">
                 {company.painPoints.slice(0, 2).map((point, idx) => (
                   <li key={idx}>• {point}</li>
                 ))}
@@ -214,7 +223,7 @@ const DatabaseManager = () => {
           
           {company.recentNews && (
             <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-3">
-              <p className="text-xs text-blue-300">📰 {company.recentNews}</p>
+              <p className="text-sm text-blue-300">📰 {company.recentNews}</p>
             </div>
           )}
         </div>
@@ -286,12 +295,18 @@ const DatabaseManager = () => {
           
           <div className="grid grid-cols-2 gap-6 mb-4">
             <div>
-              <p className="text-xs text-text-tertiary mb-2">IBM Alternative</p>
+              <p className="text-xs text-text-tertiary mb-2 font-medium">IBM Alternative & Use Cases</p>
               <p className="text-sm font-semibold text-ibm-blue">{tech.ibmAlternative}</p>
               <p className="text-xs text-text-secondary mt-1">{tech.migrationPath}</p>
+              <div className="mt-3 space-y-1">
+                <p className="text-xs text-text-tertiary font-medium">Common Use Cases:</p>
+                <p className="text-xs text-text-secondary">• IBM PowerVS for AIX/IBM i renewals & DR</p>
+                <p className="text-xs text-text-secondary">• FlashSystems for cyber resilience & compliance</p>
+                <p className="text-xs text-text-secondary">• Fusion for VMware takeout & cost reduction</p>
+              </div>
             </div>
             <div>
-              <p className="text-xs text-text-tertiary mb-2">Key Benefits</p>
+              <p className="text-xs text-text-tertiary mb-2 font-medium">Key Benefits</p>
               <ul className="text-xs text-text-secondary space-y-1">
                 {tech.keyBenefits.map((benefit, idx) => (
                   <li key={idx}>✓ {benefit}</li>
@@ -301,7 +316,7 @@ const DatabaseManager = () => {
           </div>
           
           <div className="bg-bg-raised rounded-lg p-4 border border-border">
-            <p className="text-xs text-text-tertiary mb-2">Common Objections & Responses</p>
+            <p className="text-xs text-text-tertiary mb-2 font-medium">Common Objections & Responses</p>
             <div className="space-y-2">
               {tech.commonObjections.map((objection, idx) => (
                 <div key={idx}>
@@ -316,6 +331,82 @@ const DatabaseManager = () => {
     </div>
   );
 
+  const renderTrainingDataTable = () => (
+    <div className="space-y-6">
+      {/* Good Examples */}
+      <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-6">
+        <h3 className="text-lg font-semibold text-green-400 mb-4 flex items-center space-x-2">
+          <span>✓</span>
+          <span>Good Examples</span>
+        </h3>
+        <div className="space-y-4">
+          <div className="bg-bg-elevated rounded-lg p-4 border border-border">
+            <div className="mb-3">
+              <span className="text-xs text-text-tertiary font-medium">Prompt:</span>
+              <p className="text-sm text-text-primary mt-1">Generate email for Goldman Sachs CIO about VMware cost reduction</p>
+            </div>
+            <div className="mb-3">
+              <span className="text-xs text-text-tertiary font-medium">Subject:</span>
+              <p className="text-sm text-text-primary mt-1">Goldman Sachs + IBM Fusion: 50% VMware Cost Reduction</p>
+            </div>
+            <div className="mb-3">
+              <span className="text-xs text-text-tertiary font-medium">Body:</span>
+              <p className="text-sm text-text-secondary mt-1 whitespace-pre-wrap">Hi [Name],
+
+Given the recent VMware licensing changes, I wanted to reach out about how IBM Fusion can help Goldman Sachs reduce infrastructure costs by 50% while maintaining performance.
+
+We've helped 3 major financial institutions migrate from VMware with zero downtime. Would you be open to a brief conversation?
+
+Best regards</p>
+            </div>
+            <div className="flex items-center space-x-4 text-xs">
+              <span className="text-green-400">✓ Personalized</span>
+              <span className="text-green-400">✓ Timely</span>
+              <span className="text-green-400">✓ Specific metrics</span>
+              <span className="text-green-400">✓ Social proof</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bad Examples */}
+      <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-6">
+        <h3 className="text-lg font-semibold text-red-400 mb-4 flex items-center space-x-2">
+          <span>✗</span>
+          <span>Bad Examples (Learn What to Avoid)</span>
+        </h3>
+        <div className="space-y-4">
+          <div className="bg-bg-elevated rounded-lg p-4 border border-border">
+            <div className="mb-3">
+              <span className="text-xs text-text-tertiary font-medium">Prompt:</span>
+              <p className="text-sm text-text-primary mt-1">Generate email for IT leader about infrastructure</p>
+            </div>
+            <div className="mb-3">
+              <span className="text-xs text-text-tertiary font-medium">Subject:</span>
+              <p className="text-sm text-text-primary mt-1">IBM Infrastructure Solutions</p>
+            </div>
+            <div className="mb-3">
+              <span className="text-xs text-text-tertiary font-medium">Body:</span>
+              <p className="text-sm text-text-secondary mt-1 whitespace-pre-wrap">Hi,
+
+I'm reaching out from IBM about our infrastructure solutions. We help companies improve their IT infrastructure.
+
+Would you be interested in learning more?
+
+Thanks</p>
+            </div>
+            <div className="flex items-center space-x-4 text-xs">
+              <span className="text-red-400">✗ Too generic</span>
+              <span className="text-red-400">✗ No personalization</span>
+              <span className="text-red-400">✗ No value prop</span>
+              <span className="text-red-400">✗ Weak CTA</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -327,12 +418,12 @@ const DatabaseManager = () => {
           </p>
         </div>
         <div className="flex space-x-3">
-          <button className="btn-secondary flex items-center space-x-2">
-            <Plus className="w-4 h-4" />
+          <button className="bg-bg-raised/50 backdrop-blur-sm hover:bg-bg-elevated text-text-primary font-medium py-2 px-4 text-sm rounded-xl transition-all duration-300 flex items-center space-x-2">
+            <Plus className="w-3.5 h-3.5" />
             <span>Add New</span>
           </button>
-          <button onClick={handleExportCSV} className="btn-secondary flex items-center space-x-2">
-            <Download className="w-4 h-4" />
+          <button onClick={handleExportCSV} className="bg-bg-raised/50 backdrop-blur-sm hover:bg-bg-elevated text-text-primary font-medium py-2 px-4 text-sm rounded-xl transition-all duration-300 flex items-center space-x-2">
+            <Download className="w-3.5 h-3.5" />
             <span>Export</span>
           </button>
         </div>
@@ -383,6 +474,7 @@ const DatabaseManager = () => {
         {activeTab === 'companies' && renderCompaniesTable()}
         {activeTab === 'industries' && renderIndustriesTable()}
         {activeTab === 'techKnowledge' && renderTechKnowledgeTable()}
+        {activeTab === 'trainingData' && renderTrainingDataTable()}
 
         {filteredData.length === 0 && (
           <div className="text-center py-12">

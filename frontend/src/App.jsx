@@ -13,63 +13,65 @@ function App() {
   ]
 
   return (
-    <div className="min-h-screen bg-bg-base">
-      <header className="bg-bg-surface/80 backdrop-blur-sm border-b border-border sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-5">
+    <div className="min-h-screen bg-gradient-ombre">
+      <header className="backdrop-blur-md bg-bg-surface sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-8 py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-5">
-              {/* IBM Logo - White bee for dark mode */}
+            <div className="flex items-center gap-4">
+              {/* IBM Logo - Larger and closer */}
               <img
                 src="/ibm-blue-bee.png"
                 alt="IBM"
-                className="h-14 w-auto drop-shadow-lg"
+                className="h-20 w-auto"
+                style={{ filter: 'drop-shadow(0 0 10px rgba(69, 137, 255, 0.5))' }}
               />
-              <div className="border-l border-border-light pl-5">
-                <h1 className="text-2xl font-semibold text-text-primary tracking-tight">
+              <div>
+                <h1 className="text-3xl font-bold text-text-primary tracking-tight">
                   Sales Cadence Generator
                 </h1>
-                <p className="text-sm text-text-secondary mt-1">
+                <p className="text-sm text-text-secondary mt-1.5">
                   AI-Powered Outreach Personalization for Infrastructure Sellers
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="px-3 py-1.5 bg-bg-elevated rounded-lg border border-border">
-                <span className="text-xs text-text-tertiary font-medium">Powered by Watsonx.ai</span>
-              </div>
+            <div className="flex items-center">
+              <span className="text-xs text-text-secondary font-medium">Powered by Watsonx.ai</span>
             </div>
           </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="max-w-7xl mx-auto px-6">
-          <nav className="flex space-x-8 -mb-px">
+        {/* Tab Navigation - No borders */}
+        <div className="max-w-7xl mx-auto px-8">
+          <nav className="flex space-x-8">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 ${
+                className={`py-4 px-2 font-medium text-sm transition-all duration-300 relative ${
                   activeTab === tab.id
-                    ? 'border-ibm-blue text-ibm-blue'
-                    : 'border-transparent text-text-tertiary hover:text-text-primary hover:border-border-light'
+                    ? 'text-ibm-blue-light'
+                    : 'text-text-secondary hover:text-text-primary'
                 }`}
               >
                 {tab.label}
+                {activeTab === tab.id && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-ibm-blue-glow to-ibm-blue-light shadow-glow"></div>
+                )}
               </button>
             ))}
           </nav>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-10">
+      <main className="max-w-7xl mx-auto px-8 py-12">
         {activeTab === 'library' && <CadenceLibrary />}
         {activeTab === 'emails' && <GeneratedEmails />}
         {activeTab === 'database' && <DatabaseManager />}
       </main>
 
-      <footer className="bg-bg-surface/50 border-t border-border mt-16">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <p className="text-center text-sm text-text-muted">
+      <footer className="backdrop-blur-sm bg-bg-surface/30 mt-20">
+        <div className="max-w-7xl mx-auto px-8 py-8">
+          <p className="text-center text-sm text-text-secondary">
             IBM Infrastructure Sales Team • Powered by Watsonx.ai
           </p>
         </div>

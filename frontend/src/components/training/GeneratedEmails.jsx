@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ThumbsUp, ThumbsDown, Star, Mail, Calendar, User, Building2, TrendingUp, Filter, Search, Loader2 } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Star, Mail, Calendar, User, Building2, MessageSquare, Filter, Search, Loader2, Send } from 'lucide-react';
 import { getGeneratedEmails } from '../../services/api';
 
 // Sample generated emails with grades
@@ -158,6 +158,14 @@ const GeneratedEmails = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [userComment, setUserComment] = useState('');
+  const [userScores, setUserScores] = useState({
+    personalization: 0,
+    relevance: 0,
+    clarity: 0,
+    callToAction: 0,
+    overall: 0
+  });
 
   // Load emails from database on mount
   useEffect(() => {
@@ -206,10 +214,53 @@ const GeneratedEmails = () => {
   });
 
   const handleFeedback = (emailId, feedbackType) => {
-    setEmails(emails.map(email => 
+    setEmails(emails.map(email =>
       email.id === emailId ? { ...email, feedback: feedbackType } : email
     ));
   };
+
+  const handleSubmitFeedback = () => {
+    // Save user feedback and scores
+    const updatedEmail = {
+      ...selectedEmail,
+      userComment,
+      userScores,
+      feedbackSubmittedAt: new Date().toISOString()
+    };
+    
+    setEmails(emails.map(email =>
+      email.id === selectedEmail.id ? updatedEmail : email
+    ));
+    
+    // Reset form
+    setUserComment('');
+    setUserScores({
+      personalization: 0,
+      relevance: 0,
+      clarity: 0,
+      callToAction: 0,
+      overall: 0
+    });
+    
+    alert('Feedback submitted! The model will learn from your input.');
+  };
+
+  const ScoreSlider = ({ label, value, onChange }) => (
+    <div className="space-y-2">
+      <div className="flex justify-between items-center">
+        <label className="text-sm font-medium text-gray-300">{label}</label>
+        <span className="text-sm font-semibold text-ibm-blue">{value}/10</span>
+      </div>
+      <input
+        type="range"
+        min="0"
+        max="10"
+        value={value}
+        onChange={(e) => onChange(parseInt(e.target.value))}
+        className="w-full h-2 bg-bg-raised rounded-lg appearance-none cursor-pointer accent-ibm-blue"
+      />
+    </div>
+  );
 
   const getGradeColor = (grade) => {
     if (grade.startsWith('A')) return 'text-green-400 bg-green-500/10 border-green-500/30';
@@ -305,46 +356,95 @@ const GeneratedEmails = () => {
             </div>
           </div>
 
-          <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-6">
-            <h3 className="text-sm font-semibold text-gray-100 mb-4 flex items-center space-x-2">
-              <TrendingUp className="w-4 h-4" />
-              <span>AI Analysis</span>
+          {/* User Feedback Section */}
+          <div className="bg-bg-elevated border border-border rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center space-x-2">
+              <MessageSquare className="w-5 h-5" />
+              <span>Your Feedback</span>
             </h3>
-            <div className="space-y-4">
-              <div>
-                <h4 className="text-xs font-semibold text-gray-300 mb-2">Strengths:</h4>
-                <ul className="space-y-1">
-                  {selectedEmail.aiAnalysis.strengths.map((strength, idx) => (
-                    <li key={idx} className="text-sm text-gray-300 flex items-start space-x-2">
-                      <span className="text-green-500 mt-0.5">✓</span>
-                      <span>{strength}</span>
-                    </li>
-                  ))}
-                </ul>
+            
+            <div className="space-y-6">
+              {/* Score Criteria */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium text-gray-300 mb-3">Rate this email (0-10):</h4>
+                
+                <ScoreSlider
+                  label="Personalization"
+                  value={userScores.personalization}
+                  onChange={(val) => setUserScores({...userScores, personalization: val})}
+                />
+                
+                <ScoreSlider
+                  label="Relevance to Prospect"
+                  value={userScores.relevance}
+                  onChange={(val) => setUserScores({...userScores, relevance: val})}
+                />
+                
+                <ScoreSlider
+                  label="Clarity & Conciseness"
+                  value={userScores.clarity}
+                  onChange={(val) => setUserScores({...userScores, clarity: val})}
+                />
+                
+                <ScoreSlider
+                  label="Call-to-Action Strength"
+                  value={userScores.callToAction}
+                  onChange={(val) => setUserScores({...userScores, callToAction: val})}
+                />
+                
+                <ScoreSlider
+                  label="Overall Quality"
+                  value={userScores.overall}
+                  onChange={(val) => setUserScores({...userScores, overall: val})}
+                />
               </div>
+
+              {/* Comment Section */}
               <div>
-                <h4 className="text-xs font-semibold text-gray-300 mb-2">Areas for Improvement:</h4>
-                <ul className="space-y-1">
-                  {selectedEmail.aiAnalysis.improvements.map((improvement, idx) => (
-                    <li key={idx} className="text-sm text-gray-300 flex items-start space-x-2">
-                      <span className="text-yellow-500 mt-0.5">→</span>
-                      <span>{improvement}</span>
-                    </li>
-                  ))}
-                </ul>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Comments & Suggestions
+                </label>
+                <textarea
+                  value={userComment}
+                  onChange={(e) => setUserComment(e.target.value)}
+                  placeholder="What worked well? What could be improved? Any specific suggestions?"
+                  rows={4}
+                  className="w-full px-4 py-3 rounded-xl bg-bg-raised/50 text-text-primary placeholder-text-secondary border border-border focus:ring-2 focus:ring-ibm-blue-glow outline-none"
+                />
               </div>
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-blue-500/30">
+
+              {/* Submit Button */}
+              <button
+                onClick={handleSubmitFeedback}
+                className="w-full btn-primary flex items-center justify-center space-x-2"
+              >
+                <Send className="w-4 h-4" />
+                <span>Submit Feedback & Train Model</span>
+              </button>
+
+              <p className="text-xs text-text-secondary text-center">
+                Your feedback helps the AI learn what makes a great personalized email
+              </p>
+            </div>
+          </div>
+
+          {/* AI Analysis (Reference) */}
+          {selectedEmail.aiAnalysis && (
+            <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-6">
+              <h3 className="text-sm font-semibold text-gray-300 mb-3 flex items-center space-x-2">
+                <span className="text-blue-400">ℹ️</span>
+                <span>AI Initial Analysis (Reference Only)</span>
+              </h3>
+              <div className="space-y-3 text-xs text-gray-400">
                 <div>
-                  <h4 className="text-xs font-semibold text-gray-300 mb-1">Tone:</h4>
-                  <p className="text-sm text-gray-300">{selectedEmail.aiAnalysis.tone}</p>
+                  <span className="font-medium">Strengths:</span> {selectedEmail.aiAnalysis.strengths.join(', ')}
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-gray-300 mb-1">Readability:</h4>
-                  <p className="text-sm text-gray-300">{selectedEmail.aiAnalysis.readability}</p>
+                  <span className="font-medium">Improvements:</span> {selectedEmail.aiAnalysis.improvements.join(', ')}
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     );
