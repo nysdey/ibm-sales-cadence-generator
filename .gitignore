@@ -9,6 +9,11 @@ backend/node_modules/
 .env.*.local
 backend/.env
 
+# API Keys and Secrets
+apikey.json
+*.key
+*.pem
+
 # Build outputs
 dist/
 build/

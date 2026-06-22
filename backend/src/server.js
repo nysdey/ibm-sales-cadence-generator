@@ -5,11 +5,13 @@ import rateLimit from 'express-rate-limit';
 import config, { validateConfig } from './config/config.js';
 import cadenceRoutes from './routes/cadence.js';
 import trainingRoutes from './routes/training.js';
+import feedbackRoutes from './routes/feedback.js';
+import databaseRoutes from './routes/database.js';
 
 // Validate configuration before starting
 if (!validateConfig()) {
   console.error('\n❌ Server startup failed due to configuration errors.');
-  console.error('Please create a .env file based on .env.example and configure Azure OpenAI settings.\n');
+  console.error('Please create a .env file based on .env.example and configure Watsonx.ai settings.\n');
   process.exit(1);
 }
 
@@ -56,6 +58,8 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/api/cadence', cadenceRoutes);
 app.use('/api/training', trainingRoutes);
+app.use('/api/feedback', feedbackRoutes);
+app.use('/api/database', databaseRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -84,16 +88,25 @@ app.listen(PORT, () => {
   console.log(`📡 Server running on: http://localhost:${PORT}`);
   console.log(`🌍 Environment: ${config.nodeEnv}`);
   console.log(`🔐 CORS enabled for: ${config.corsOrigin}`);
-  console.log(`🤖 Azure OpenAI: ${config.azureOpenAI.endpoint ? '✓ Configured' : '✗ Not configured'}`);
+  console.log(`🤖 Watsonx.ai: ${config.watsonx.endpoint ? '✓ Configured' : '✗ Not configured'}`);
   console.log('='.repeat(60));
   console.log('\n📋 Available endpoints:');
-  console.log('  GET  /health                    - Health check');
-  console.log('  POST /api/cadence/generate      - Generate cadences');
-  console.log('  GET  /api/cadence/test          - Test Azure OpenAI connection');
-  console.log('  GET  /api/training/examples     - Get training examples');
-  console.log('  POST /api/training/examples     - Add training example');
-  console.log('  PUT  /api/training/examples/:id - Update training example');
-  console.log('  DELETE /api/training/examples/:id - Delete training example');
+  console.log('  GET  /health                         - Health check');
+  console.log('  POST /api/cadence/generate           - Generate cadences');
+  console.log('  GET  /api/cadence/test               - Test Watsonx.ai connection');
+  console.log('  GET  /api/training/examples          - Get training examples');
+  console.log('  POST /api/training/examples          - Add training example');
+  console.log('  PUT  /api/training/examples/:id      - Update training example');
+  console.log('  DELETE /api/training/examples/:id    - Delete training example');
+  console.log('  GET  /api/feedback/emails            - Get generated emails');
+  console.log('  POST /api/feedback/emails            - Save generated email');
+  console.log('  PUT  /api/feedback/emails/:id/rating - Rate email');
+  console.log('  POST /api/feedback/emails/:id/comment - Add comment');
+  console.log('  DELETE /api/feedback/emails/:id      - Delete email');
+  console.log('  GET  /api/database/:type             - Get database');
+  console.log('  PUT  /api/database/:type             - Update database');
+  console.log('  POST /api/database/training/example  - Add training example');
+  console.log('  POST /api/database/intelligence/company - Add company intel');
   console.log('\n✨ Ready to generate personalized cadences!\n');
 });
 

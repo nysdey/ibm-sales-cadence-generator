@@ -1,8 +1,64 @@
-import { useState } from 'react';
-import { Copy, Check, Mail, Phone, Linkedin } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Copy, Check, Mail, Phone, Linkedin, Save } from 'lucide-react';
+import axios from 'axios';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
 const CadenceDisplay = ({ cadences, prospectName, companyName }) => {
   const [copiedId, setCopiedId] = useState(null);
+  const [savedEmails, setSavedEmails] = useState(new Set());
+
+  // Auto-save emails when component mounts
+  useEffect(() => {
+    saveEmailsToDatabase();
+  }, []);
+
+  const saveEmailsToDatabase = async () => {
+    try {
+      // Save each email step to the database
+      for (const cadence of cadences) {
+        for (const step of cadence.steps) {
+          if (step.channel.toLowerCase() === 'email') {
+            const emailContent = step.subject
+              ? `Subject: ${step.subject}\n\n${step.body}`
+              : step.body;
+            
+            await axios.post(`${API_BASE_URL}/api/feedback/emails`, {
+              prospectName,
+              companyName,
+              cadenceType: cadence.name,
+              emailContent
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error saving emails:', error);
+    }
+  };
+
+  const saveIndividualEmail = async (cadenceName, step) => {
+    const emailKey = `${cadenceName}-${step.day}`;
+    if (savedEmails.has(emailKey)) return;
+
+    try {
+      const emailContent = step.subject
+        ? `Subject: ${step.subject}\n\n${step.body}`
+        : step.body;
+      
+      await axios.post(`${API_BASE_URL}/api/feedback/emails`, {
+        prospectName,
+        companyName,
+        cadenceType: cadenceName,
+        emailContent
+      });
+
+      setSavedEmails(prev => new Set([...prev, emailKey]));
+    } catch (error) {
+      console.error('Error saving email:', error);
+      alert('Failed to save email for feedback');
+    }
+  };
 
   const copyToClipboard = async (text, id) => {
     try {
@@ -117,20 +173,37 @@ const CadenceDisplay = ({ cadences, prospectName, companyName }) => {
                       <span>{step.channel}</span>
                     </span>
                   </div>
-                  <button
-                    onClick={() => copyToClipboard(
-                      step.subject ? `Subject: ${step.subject}\n\n${step.body}` : step.body,
-                      `step-${cadenceIndex}-${stepIndex}`
+                  <div className="flex space-x-2">
+                    {step.channel.toLowerCase() === 'email' && (
+                      <button
+                        onClick={() => saveIndividualEmail(cadence.name, step)}
+                        className={`text-gray-400 hover:text-gray-600 transition-colors ${
+                          savedEmails.has(`${cadence.name}-${step.day}`) ? 'text-green-600' : ''
+                        }`}
+                        title="Save for feedback"
+                      >
+                        {savedEmails.has(`${cadence.name}-${step.day}`) ? (
+                          <Check className="w-4 h-4" />
+                        ) : (
+                          <Save className="w-4 h-4" />
+                        )}
+                      </button>
                     )}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                    title="Copy this step"
-                  >
-                    {copiedId === `step-${cadenceIndex}-${stepIndex}` ? (
-                      <Check className="w-4 h-4 text-green-600" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </button>
+                    <button
+                      onClick={() => copyToClipboard(
+                        step.subject ? `Subject: ${step.subject}\n\n${step.body}` : step.body,
+                        `step-${cadenceIndex}-${stepIndex}`
+                      )}
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                      title="Copy this step"
+                    >
+                      {copiedId === `step-${cadenceIndex}-${stepIndex}` ? (
+                        <Check className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <Copy className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 {step.subject && (

@@ -1,5 +1,5 @@
 import express from 'express';
-import azureOpenAI from '../services/azureOpenAI.js';
+import watsonxAI from '../services/watsonxAI.js';
 import promptBuilder from '../services/promptBuilder.js';
 
 const router = express.Router();
@@ -40,8 +40,8 @@ router.post('/generate', async (req, res) => {
       cadenceTypes
     );
 
-    // Generate cadences using Azure OpenAI
-    const response = await azureOpenAI.generateCadences(systemPrompt, userPrompt);
+    // Generate cadences using Watsonx.ai
+    const response = await watsonxAI.generateCadences(systemPrompt, userPrompt);
 
     // Parse JSON response
     let cadences;
@@ -82,21 +82,21 @@ router.post('/generate', async (req, res) => {
 
 /**
  * GET /api/cadence/test
- * Test Azure OpenAI connection
+ * Test Watsonx.ai connection
  */
 router.get('/test', async (req, res) => {
   try {
-    const isConnected = await azureOpenAI.testConnection();
+    const isConnected = await watsonxAI.testConnection();
     
     if (isConnected) {
       res.json({
         status: 'success',
-        message: 'Azure OpenAI connection successful'
+        message: 'Watsonx.ai connection successful'
       });
     } else {
       res.status(500).json({
         status: 'error',
-        message: 'Azure OpenAI connection failed'
+        message: 'Watsonx.ai connection failed'
       });
     }
   } catch (error) {
