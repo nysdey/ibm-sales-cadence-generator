@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { AlertCircle, Loader2, Plus, Upload, Search, Filter, X, Mail, Phone, Linkedin, ChevronRight, ArrowLeft, Edit2, Copy, Check } from 'lucide-react';
-import { generateCadences } from '../../services/api';
+import { AlertCircle, Loader2, Plus, Upload, Search, Filter, X, Mail, Phone, Linkedin, ChevronRight, ArrowLeft, Edit2, Copy, Check, Save } from 'lucide-react';
+import { generateCadences, saveGeneratedEmail } from '../../services/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
@@ -193,6 +193,8 @@ const CadenceLibrary = () => {
   const [generatingEmail, setGeneratingEmail] = useState(false);
   const [generatedEmail, setGeneratedEmail] = useState(null);
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [savingEmail, setSavingEmail] = useState(false);
+  const [emailSaved, setEmailSaved] = useState(false);
   
   const [filters, setFilters] = useState({
     region: 'all',
@@ -258,10 +260,10 @@ const CadenceLibrary = () => {
 
   const getChannelColor = (channel) => {
     switch (channel.toLowerCase()) {
-      case 'email': return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'call': return 'bg-green-50 text-green-700 border-green-200';
-      case 'linkedin': return 'bg-purple-50 text-purple-700 border-purple-200';
-      default: return 'bg-gray-50 text-gray-700 border-gray-200';
+      case 'email': return 'bg-blue-500/10 text-blue-300 border-blue-500/30';
+      case 'call': return 'bg-green-500/10 text-green-300 border-green-500/30';
+      case 'linkedin': return 'bg-purple-500/10 text-purple-300 border-purple-500/30';
+      default: return 'bg-white/5 text-gray-300 border-border';
     }
   };
 
@@ -276,15 +278,39 @@ const CadenceLibrary = () => {
 
   const handleGenerateEmail = async () => {
     setGeneratingEmail(true);
+    setEmailSaved(false);
     try {
-      // Simulate API call - replace with actual API integration
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Use the actual AI generation API
+      const result = await generateCadences({
+        prospectName: personalizationData.prospectName,
+        companyName: personalizationData.companyName,
+        cadenceTypes: [selectedCadence.campaign.toLowerCase().replace(/\s+/g, '_')]
+      });
       
-      // Generate personalized email
+      // Get the first email from the generated cadence
+      if (result.cadences && result.cadences.length > 0) {
+        const firstCadence = result.cadences[0];
+        const emailStep = firstCadence.steps.find(step => step.channel === 'Email');
+        
+        if (emailStep) {
+          setGeneratedEmail({
+            subject: emailStep.subject,
+            body: emailStep.body,
+            cadenceType: selectedCadence.campaign,
+            stepDay: selectedStep.day
+          });
+        } else {
+          throw new Error('No email step found in generated cadence');
+        }
+      } else {
+        throw new Error('No cadences generated');
+      }
+    } catch (error) {
+      console.error('Error generating email:', error);
+      // Fallback to template-based generation if AI fails
       let personalizedSubject = selectedStep.subject || '';
       let personalizedBody = selectedStep.body || '';
       
-      // Replace placeholders
       const firstName = personalizationData.prospectName.split(' ')[0];
       personalizedSubject = personalizedSubject.replace(/\{\{first_name\}\}/g, firstName);
       personalizedBody = personalizedBody
@@ -293,19 +319,42 @@ const CadenceLibrary = () => {
         .replace(/\{\{industry\}\}/g, personalizationData.industry || 'your industry')
         .replace(/\{\{sender_name\}\}/g, 'Your Name');
       
-      // Add additional context if provided
       if (personalizationData.additionalContext) {
         personalizedBody += `\n\nP.S. ${personalizationData.additionalContext}`;
       }
       
       setGeneratedEmail({
         subject: personalizedSubject,
-        body: personalizedBody
+        body: personalizedBody,
+        cadenceType: selectedCadence.campaign,
+        stepDay: selectedStep.day
       });
-    } catch (error) {
-      console.error('Error generating email:', error);
     } finally {
       setGeneratingEmail(false);
+    }
+  };
+
+  const handleSaveEmail = async () => {
+    setSavingEmail(true);
+    try {
+      await saveGeneratedEmail({
+        subject: generatedEmail.subject,
+        body: generatedEmail.body,
+        prospectName: personalizationData.prospectName,
+        companyName: personalizationData.companyName,
+        cadenceType: generatedEmail.cadenceType,
+        industry: personalizationData.industry,
+        stepDay: generatedEmail.stepDay,
+        cadenceName: selectedCadence.name
+      });
+      
+      setEmailSaved(true);
+      setTimeout(() => setEmailSaved(false), 3000);
+    } catch (error) {
+      console.error('Error saving email:', error);
+      alert('Failed to save email. Please try again.');
+    } finally {
+      setSavingEmail(false);
     }
   };
 
@@ -326,8 +375,8 @@ const CadenceLibrary = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900">Cadences</h2>
-            <p className="text-sm text-gray-600 mt-1">
+            <h2 className="text-2xl font-semibold text-gray-100">Cadences</h2>
+            <p className="text-sm text-gray-500 mt-1">
               Manage and personalize your sales cadences
             </p>
           </div>
@@ -344,27 +393,27 @@ const CadenceLibrary = () => {
         </div>
 
         {/* Search and Filter */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="bg-bg-surface rounded-2xl border border-border p-4">
           <div className="flex items-center space-x-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
               <input
                 type="text"
                 placeholder="Search cadences..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input pl-10"
+                className="search-input pl-11"
               />
             </div>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`btn-secondary flex items-center space-x-2 ${showFilters ? 'bg-blue-50 border-ibm-blue text-ibm-blue' : ''}`}
+              className={`btn-secondary flex items-center space-x-2 ${showFilters ? 'bg-blue-500/10 border-ibm-blue-light text-ibm-blue-light' : ''}`}
             >
               <Filter className="w-4 h-4" />
               <span>Filters</span>
             </button>
             {(searchTerm || Object.values(filters).some(f => f !== 'all')) && (
-              <button onClick={resetFilters} className="text-sm text-gray-600 hover:text-gray-900">
+              <button onClick={resetFilters} className="text-sm text-gray-500 hover:text-gray-100">
                 Clear
               </button>
             )}
@@ -372,57 +421,57 @@ const CadenceLibrary = () => {
 
           {/* Filter Panel */}
           {showFilters && (
-            <div className="mt-4 pt-4 border-t border-gray-200 grid grid-cols-5 gap-4">
+            <div className="mt-4 pt-4 border-t border-border grid grid-cols-5 gap-4">
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Region</label>
+                <label className="block text-xs font-medium text-gray-300 mb-1">Region</label>
                 <select
                   value={filters.region}
                   onChange={(e) => handleFilterChange('region', e.target.value)}
-                  className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2"
+                  className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-bg-raised text-gray-100 focus:ring-2 focus:ring-ibm-blue-light focus:border-ibm-blue-light outline-none"
                 >
                   <option value="all">All</option>
                   {filterOptions.regions.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Segment</label>
+                <label className="block text-xs font-medium text-gray-300 mb-1">Segment</label>
                 <select
                   value={filters.segment}
                   onChange={(e) => handleFilterChange('segment', e.target.value)}
-                  className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2"
+                  className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-bg-raised text-gray-100 focus:ring-2 focus:ring-ibm-blue-light focus:border-ibm-blue-light outline-none"
                 >
                   <option value="all">All</option>
                   {filterOptions.segments.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Persona</label>
+                <label className="block text-xs font-medium text-gray-300 mb-1">Persona</label>
                 <select
                   value={filters.persona}
                   onChange={(e) => handleFilterChange('persona', e.target.value)}
-                  className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2"
+                  className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-bg-raised text-gray-100 focus:ring-2 focus:ring-ibm-blue-light focus:border-ibm-blue-light outline-none"
                 >
                   <option value="all">All</option>
                   {filterOptions.personas.map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Type</label>
+                <label className="block text-xs font-medium text-gray-300 mb-1">Type</label>
                 <select
                   value={filters.type}
                   onChange={(e) => handleFilterChange('type', e.target.value)}
-                  className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2"
+                  className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-bg-raised text-gray-100 focus:ring-2 focus:ring-ibm-blue-light focus:border-ibm-blue-light outline-none"
                 >
                   <option value="all">All</option>
                   {filterOptions.types.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Campaign</label>
+                <label className="block text-xs font-medium text-gray-300 mb-1">Campaign</label>
                 <select
                   value={filters.campaign}
                   onChange={(e) => handleFilterChange('campaign', e.target.value)}
-                  className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2"
+                  className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-bg-raised text-gray-100 focus:ring-2 focus:ring-ibm-blue-light focus:border-ibm-blue-light outline-none"
                 >
                   <option value="all">All</option>
                   {filterOptions.campaigns.map(c => <option key={c} value={c}>{c}</option>)}
@@ -433,10 +482,10 @@ const CadenceLibrary = () => {
         </div>
 
         {/* Cadence List */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-bg-surface rounded-2xl border border-border overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-white/10">
+              <thead className="bg-white/5">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Cadence
@@ -462,48 +511,48 @@ const CadenceLibrary = () => {
                   <th className="px-6 py-3"></th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-bg-surface divide-y divide-white/10">
                 {filteredCadences.map((cadence) => (
                   <tr 
                     key={cadence.id} 
-                    className="hover:bg-gray-50 cursor-pointer transition-colors"
+                    className="hover:bg-white/5 cursor-pointer transition-colors"
                     onClick={() => setSelectedCadence(cadence)}
                   >
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">{cadence.name}</div>
+                      <div className="text-sm font-medium text-gray-100">{cadence.name}</div>
                       <div className="text-xs text-gray-500 mt-1 flex items-center space-x-2">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-500/30">
                           {cadence.persona}
                         </span>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-500/10 text-green-300 border border-green-500/30">
                           {cadence.campaign}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{cadence.steps?.length || 0}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{cadence.people_added.toLocaleString()}</td>
+                    <td className="px-6 py-4 text-sm text-gray-100">{cadence.steps?.length || 0}</td>
+                    <td className="px-6 py-4 text-sm text-gray-100">{cadence.people_added.toLocaleString()}</td>
                     <td className="px-6 py-4">
-                      <span className={`text-sm font-medium ${cadence.success_rate > 0.5 ? 'text-green-600' : 'text-gray-900'}`}>
+                      <span className={`text-sm font-medium ${cadence.success_rate > 0.5 ? 'text-green-400' : 'text-gray-100'}`}>
                         {cadence.success_rate.toFixed(2)}%
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`text-sm font-medium ${cadence.open_rate > 5 ? 'text-green-600' : 'text-gray-900'}`}>
+                      <span className={`text-sm font-medium ${cadence.open_rate > 5 ? 'text-green-400' : 'text-gray-100'}`}>
                         {cadence.open_rate.toFixed(2)}%
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`text-sm font-medium ${cadence.reply_rate > 1 ? 'text-green-600' : 'text-gray-900'}`}>
+                      <span className={`text-sm font-medium ${cadence.reply_rate > 1 ? 'text-green-400' : 'text-gray-100'}`}>
                         {cadence.reply_rate.toFixed(2)}%
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`text-sm font-medium ${cadence.meeting_rate > 1 ? 'text-green-600' : 'text-gray-900'}`}>
+                      <span className={`text-sm font-medium ${cadence.meeting_rate > 1 ? 'text-green-400' : 'text-gray-100'}`}>
                         {cadence.meeting_rate.toFixed(2)}%
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <ChevronRight className="w-5 h-5 text-gray-400" />
+                      <ChevronRight className="w-5 h-5 text-gray-500" />
                     </td>
                   </tr>
                 ))}
@@ -527,20 +576,20 @@ const CadenceLibrary = () => {
       {/* Back Button */}
       <button
         onClick={() => setSelectedCadence(null)}
-        className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
+        className="flex items-center space-x-2 text-gray-500 hover:text-gray-100 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         <span className="text-sm font-medium">Back to Cadences</span>
       </button>
 
       {/* Cadence Header */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-bg-surface rounded-2xl border border-border p-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+            <h2 className="text-2xl font-semibold text-gray-100 mb-2">
               {selectedCadence.name}
             </h2>
-            <div className="flex items-center space-x-4 text-sm text-gray-600">
+            <div className="flex items-center space-x-4 text-sm text-gray-500">
               <span>{selectedCadence.steps?.length || 0} steps</span>
               <span>•</span>
               <span>{selectedCadence.duration} days</span>
@@ -548,32 +597,32 @@ const CadenceLibrary = () => {
               <span>{selectedCadence.people_added.toLocaleString()} people added</span>
             </div>
             <div className="mt-4 flex items-center space-x-2">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-500/10 text-blue-300 border border-blue-500/30">
                 {selectedCadence.persona}
               </span>
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-50 text-green-700 border border-green-200">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-500/10 text-green-300 border border-green-500/30">
                 {selectedCadence.campaign}
               </span>
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-50 text-purple-700 border border-purple-200">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-500/10 text-purple-300 border border-purple-500/30">
                 {selectedCadence.type}
               </span>
             </div>
           </div>
           <div className="grid grid-cols-4 gap-6 text-center">
             <div>
-              <div className="text-2xl font-semibold text-gray-900">{selectedCadence.open_rate.toFixed(1)}%</div>
+              <div className="text-2xl font-semibold text-gray-100">{selectedCadence.open_rate.toFixed(1)}%</div>
               <div className="text-xs text-gray-500 mt-1">Open Rate</div>
             </div>
             <div>
-              <div className="text-2xl font-semibold text-gray-900">{selectedCadence.click_rate.toFixed(1)}%</div>
+              <div className="text-2xl font-semibold text-gray-100">{selectedCadence.click_rate.toFixed(1)}%</div>
               <div className="text-xs text-gray-500 mt-1">Click Rate</div>
             </div>
             <div>
-              <div className="text-2xl font-semibold text-gray-900">{selectedCadence.reply_rate.toFixed(1)}%</div>
+              <div className="text-2xl font-semibold text-gray-100">{selectedCadence.reply_rate.toFixed(1)}%</div>
               <div className="text-xs text-gray-500 mt-1">Reply Rate</div>
             </div>
             <div>
-              <div className="text-2xl font-semibold text-green-600">{selectedCadence.meeting_rate.toFixed(1)}%</div>
+              <div className="text-2xl font-semibold text-green-400">{selectedCadence.meeting_rate.toFixed(1)}%</div>
               <div className="text-xs text-gray-500 mt-1">Meeting Rate</div>
             </div>
           </div>
@@ -581,21 +630,21 @@ const CadenceLibrary = () => {
       </div>
 
       {/* Steps */}
-      <div className="bg-white rounded-lg border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Cadence Steps</h3>
-          <p className="text-sm text-gray-600 mt-1">Click on an email step to personalize it</p>
+      <div className="bg-bg-surface rounded-2xl border border-border">
+        <div className="px-6 py-4 border-b border-border">
+          <h3 className="text-lg font-semibold text-gray-100">Cadence Steps</h3>
+          <p className="text-sm text-gray-500 mt-1">Click on an email step to personalize it</p>
         </div>
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-white/10">
           {selectedCadence.steps?.map((step, index) => (
             <div
               key={index}
               onClick={() => handleStepClick(step)}
-              className={`px-6 py-4 ${step.channel.toLowerCase() === 'email' ? 'hover:bg-gray-50 cursor-pointer' : ''} transition-colors`}
+              className={`px-6 py-4 ${step.channel.toLowerCase() === 'email' ? 'hover:bg-white/5 cursor-pointer' : ''} transition-colors`}
             >
               <div className="flex items-start space-x-4">
                 <div className="flex-shrink-0">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-sm font-semibold text-gray-700">
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-sm font-semibold text-gray-300">
                     {step.day}
                   </div>
                 </div>
@@ -613,11 +662,11 @@ const CadenceLibrary = () => {
                     )}
                   </div>
                   {step.subject && (
-                    <div className="text-sm font-medium text-gray-900 mb-1">
+                    <div className="text-sm font-medium text-gray-100 mb-1">
                       {step.subject}
                     </div>
                   )}
-                  <div className="text-sm text-gray-600 line-clamp-2">
+                  <div className="text-sm text-gray-500 line-clamp-2">
                     {step.body}
                   </div>
                   {step.stats && (
@@ -641,12 +690,12 @@ const CadenceLibrary = () => {
       {/* Personalization Modal */}
       {showPersonalizeModal && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Personalize Email</h3>
+          <div className="bg-bg-surface rounded-xl shadow-elevated max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-bg-surface border-b border-border px-6 py-4 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-100">Personalize Email</h3>
               <button
                 onClick={() => setShowPersonalizeModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-500 hover:text-white"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -655,25 +704,25 @@ const CadenceLibrary = () => {
             <div className="p-6 space-y-6">
               {/* Original Template */}
               <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Original Template</h4>
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-gray-300 mb-2">Original Template</h4>
+                <div className="bg-white/5 border border-border rounded-lg p-4">
                   {selectedStep?.subject && (
                     <div className="mb-3">
                       <div className="text-xs text-gray-500 mb-1">Subject:</div>
-                      <div className="text-sm font-medium text-gray-900">{selectedStep.subject}</div>
+                      <div className="text-sm font-medium text-gray-100">{selectedStep.subject}</div>
                     </div>
                   )}
                   <div className="text-xs text-gray-500 mb-1">Body:</div>
-                  <div className="text-sm text-gray-700 whitespace-pre-wrap">{selectedStep?.body}</div>
+                  <div className="text-sm text-gray-300 whitespace-pre-wrap">{selectedStep?.body}</div>
                 </div>
               </div>
 
               {/* Personalization Form */}
               <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-3">Enter Prospect Details</h4>
+                <h4 className="text-sm font-medium text-gray-300 mb-3">Enter Prospect Details</h4>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
                       Prospect Name <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -685,7 +734,7 @@ const CadenceLibrary = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
                       Company Name <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -697,7 +746,7 @@ const CadenceLibrary = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
                       Industry
                     </label>
                     <input
@@ -709,7 +758,7 @@ const CadenceLibrary = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-1">
                       Additional Context
                     </label>
                     <textarea
@@ -727,7 +776,7 @@ const CadenceLibrary = () => {
               {generatedEmail && (
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-sm font-medium text-gray-700">Personalized Email</h4>
+                    <h4 className="text-sm font-medium text-gray-300">Personalized Email</h4>
                     <button
                       onClick={() => copyToClipboard(`Subject: ${generatedEmail.subject}\n\n${generatedEmail.body}`)}
                       className="btn-secondary flex items-center space-x-2 text-sm py-1.5 px-3"
@@ -745,21 +794,21 @@ const CadenceLibrary = () => {
                       )}
                     </button>
                   </div>
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
                     {generatedEmail.subject && (
                       <div className="mb-3">
-                        <div className="text-xs text-green-700 mb-1">Subject:</div>
-                        <div className="text-sm font-medium text-gray-900">{generatedEmail.subject}</div>
+                        <div className="text-xs text-green-300 mb-1">Subject:</div>
+                        <div className="text-sm font-medium text-gray-100">{generatedEmail.subject}</div>
                       </div>
                     )}
-                    <div className="text-xs text-green-700 mb-1">Body:</div>
-                    <div className="text-sm text-gray-900 whitespace-pre-wrap">{generatedEmail.body}</div>
+                    <div className="text-xs text-green-300 mb-1">Body:</div>
+                    <div className="text-sm text-gray-100 whitespace-pre-wrap">{generatedEmail.body}</div>
                   </div>
                 </div>
               )}
 
               {/* Actions */}
-              <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+              <div className="flex justify-between items-center pt-4 border-t border-border">
                 <button
                   onClick={() => setShowPersonalizeModal(false)}
                   className="btn-secondary"
@@ -770,13 +819,26 @@ const CadenceLibrary = () => {
                   {generatedEmail && (
                     <>
                       <button
-                        onClick={() => {
-                          // Save to database
-                          alert('Email saved to database!');
-                        }}
+                        onClick={handleSaveEmail}
+                        disabled={savingEmail || emailSaved}
                         className="btn-secondary flex items-center space-x-2"
                       >
-                        <span>Save to Database</span>
+                        {savingEmail ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>Saving...</span>
+                          </>
+                        ) : emailSaved ? (
+                          <>
+                            <Check className="w-4 h-4" />
+                            <span>Saved!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4" />
+                            <span>Save to Database</span>
+                          </>
+                        )}
                       </button>
                       <button
                         onClick={handleGenerateEmail}
@@ -825,5 +887,3 @@ const CadenceLibrary = () => {
 };
 
 export default CadenceLibrary;
-
-// Made with Bob

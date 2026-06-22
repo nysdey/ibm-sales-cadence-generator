@@ -86,13 +86,13 @@ const CadenceDisplay = ({ cadences, prospectName, companyName }) => {
   const getChannelColor = (channel) => {
     switch (channel.toLowerCase()) {
       case 'email':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-500/10 text-blue-300 border border-blue-500/30';
       case 'call':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-500/10 text-green-300 border border-green-500/30';
       case 'linkedin':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-500/10 text-purple-300 border border-purple-500/30';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-white/5 text-gray-300 border border-border';
     }
   };
 
@@ -114,11 +114,11 @@ const CadenceDisplay = ({ cadences, prospectName, companyName }) => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+      <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
         <div className="flex items-center space-x-2">
-          <Check className="w-5 h-5 text-green-600" />
-          <p className="text-green-800 font-medium">
-            Generated 3 personalized cadences for {prospectName} at {companyName}
+          <Check className="w-5 h-5 text-green-400" />
+          <p className="text-green-200 font-medium">
+            Generated {cadences.length} personalized cadence{cadences.length !== 1 ? 's' : ''} for {prospectName} at {companyName}
           </p>
         </div>
       </div>
@@ -126,13 +126,13 @@ const CadenceDisplay = ({ cadences, prospectName, companyName }) => {
       {cadences.map((cadence, cadenceIndex) => (
         <div key={cadenceIndex} className="card">
           {/* Cadence Header */}
-          <div className="border-b border-gray-200 pb-4 mb-4">
+          <div className="border-b border-border pb-4 mb-4">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                <h3 className="text-xl font-bold text-text-primary mb-2">
                   {cadence.name}
                 </h3>
-                <div className="space-y-1 text-sm text-gray-600">
+                <div className="space-y-1 text-sm text-text-secondary">
                   <p><strong>Target:</strong> {cadence.targetPersona}</p>
                   <p><strong>Value Prop:</strong> {cadence.valueProposition}</p>
                   {cadence.triggerEvents && cadence.triggerEvents.length > 0 && (
@@ -162,13 +162,13 @@ const CadenceDisplay = ({ cadences, prospectName, companyName }) => {
           {/* Cadence Steps */}
           <div className="space-y-4">
             {cadence.steps.map((step, stepIndex) => (
-              <div key={stepIndex} className="border border-gray-200 rounded-lg p-4 hover:border-ibm-blue transition-colors">
+              <div key={stepIndex} className="border border-border rounded-lg p-4 hover:border-ibm-blue transition-colors">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center space-x-3">
-                    <span className="text-sm font-semibold text-gray-500">
+                    <span className="text-sm font-semibold text-text-tertiary">
                       Day {step.day}
                     </span>
-                    <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${getChannelColor(step.channel)}`}>
+                    <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-md text-xs font-medium ${getChannelColor(step.channel)}`}>
                       {getChannelIcon(step.channel)}
                       <span>{step.channel}</span>
                     </span>
@@ -177,8 +177,8 @@ const CadenceDisplay = ({ cadences, prospectName, companyName }) => {
                     {step.channel.toLowerCase() === 'email' && (
                       <button
                         onClick={() => saveIndividualEmail(cadence.name, step)}
-                        className={`text-gray-400 hover:text-gray-600 transition-colors ${
-                          savedEmails.has(`${cadence.name}-${step.day}`) ? 'text-green-600' : ''
+                        className={`text-text-tertiary hover:text-text-primary transition-colors ${
+                          savedEmails.has(`${cadence.name}-${step.day}`) ? 'text-green-400' : ''
                         }`}
                         title="Save for feedback"
                       >
@@ -194,11 +194,11 @@ const CadenceDisplay = ({ cadences, prospectName, companyName }) => {
                         step.subject ? `Subject: ${step.subject}\n\n${step.body}` : step.body,
                         `step-${cadenceIndex}-${stepIndex}`
                       )}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                      className="text-text-tertiary hover:text-text-primary transition-colors"
                       title="Copy this step"
                     >
                       {copiedId === `step-${cadenceIndex}-${stepIndex}` ? (
-                        <Check className="w-4 h-4 text-green-600" />
+                        <Check className="w-4 h-4 text-green-400" />
                       ) : (
                         <Copy className="w-4 h-4" />
                       )}
@@ -208,29 +208,29 @@ const CadenceDisplay = ({ cadences, prospectName, companyName }) => {
 
                 {step.subject && (
                   <div className="mb-2">
-                    <p className="text-xs font-medium text-gray-500 mb-1">Subject:</p>
-                    <p className="text-sm font-semibold text-gray-900">{step.subject}</p>
+                    <p className="text-xs font-medium text-text-tertiary mb-1">Subject:</p>
+                    <p className="text-sm font-semibold text-text-primary">{step.subject}</p>
                   </div>
                 )}
 
                 <div>
                   {step.channel.toLowerCase() === 'email' && (
-                    <p className="text-xs font-medium text-gray-500 mb-1">Email Body:</p>
+                    <p className="text-xs font-medium text-text-tertiary mb-1">Email Body:</p>
                   )}
                   {step.channel.toLowerCase() === 'call' && (
-                    <p className="text-xs font-medium text-gray-500 mb-1">Call Script:</p>
+                    <p className="text-xs font-medium text-text-tertiary mb-1">Call Script:</p>
                   )}
                   {step.channel.toLowerCase() === 'linkedin' && (
-                    <p className="text-xs font-medium text-gray-500 mb-1">LinkedIn Message:</p>
+                    <p className="text-xs font-medium text-text-tertiary mb-1">LinkedIn Message:</p>
                   )}
-                  <div className="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded border border-gray-200">
+                  <div className="text-sm text-text-secondary whitespace-pre-wrap bg-bg-raised p-3 rounded border border-border">
                     {step.body}
                   </div>
                 </div>
 
                 {step.cta && (
-                  <div className="mt-2 pt-2 border-t border-gray-200">
-                    <p className="text-xs font-medium text-gray-500">CTA:</p>
+                  <div className="mt-2 pt-2 border-t border-border">
+                    <p className="text-xs font-medium text-text-tertiary">CTA:</p>
                     <p className="text-sm text-ibm-blue font-medium">{step.cta}</p>
                   </div>
                 )}
@@ -240,18 +240,18 @@ const CadenceDisplay = ({ cadences, prospectName, companyName }) => {
 
           {/* Cadence Footer */}
           {cadence.differentiation && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <p className="text-xs font-medium text-gray-500 mb-1">Differentiation:</p>
-              <p className="text-sm text-gray-700">{cadence.differentiation}</p>
+            <div className="mt-4 pt-4 border-t border-border">
+              <p className="text-xs font-medium text-text-tertiary mb-1">Differentiation:</p>
+              <p className="text-sm text-text-secondary">{cadence.differentiation}</p>
             </div>
           )}
         </div>
       ))}
 
       {/* Export Options */}
-      <div className="card bg-gray-50">
-        <h4 className="font-semibold text-gray-900 mb-2">Next Steps</h4>
-        <ul className="text-sm text-gray-700 space-y-1">
+      <div className="card bg-bg-raised">
+        <h4 className="font-semibold text-text-primary mb-2">Next Steps</h4>
+        <ul className="text-sm text-text-secondary space-y-1">
           <li>• Copy individual steps or entire cadences using the copy buttons above</li>
           <li>• Paste into Salesloft cadence builder</li>
           <li>• Adjust timing and channels based on your sales process</li>

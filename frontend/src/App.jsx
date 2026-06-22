@@ -13,28 +13,28 @@ function App() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200">
+    <div className="min-h-screen bg-bg-base">
+      <header className="bg-bg-surface border-b border-border">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              {/* IBM Logo */}
+              {/* IBM Logo - Increased size */}
               <img
                 src="/ibm-blue-bee.png"
                 alt="IBM"
-                className="h-10 w-auto"
+                className="h-16 w-auto"
               />
-              <div className="border-l border-gray-300 pl-4">
-                <h1 className="text-2xl font-semibold text-gray-900">
+              <div className="border-l border-border pl-4">
+                <h1 className="text-2xl font-semibold text-text-primary">
                   Sales Cadence Generator
                 </h1>
-                <p className="text-sm text-gray-600 mt-0.5">
+                <p className="text-sm text-text-secondary mt-0.5">
                   AI-Powered Outreach Personalization for Infrastructure Sellers
                 </p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-500">Powered by Watsonx.ai</span>
+              <span className="text-sm text-text-tertiary">Powered by Watsonx.ai</span>
             </div>
           </div>
         </div>
@@ -49,7 +49,7 @@ function App() {
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === tab.id
                     ? 'border-ibm-blue text-ibm-blue'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border'
                 }`}
               >
                 {tab.label}
@@ -65,9 +65,9 @@ function App() {
         {activeTab === 'database' && <DatabaseManager />}
       </main>
 
-      <footer className="bg-white border-t border-gray-200 mt-12">
+      <footer className="bg-bg-surface border-t border-border mt-12">
         <div className="max-w-7xl mx-auto px-6 py-6">
-          <p className="text-center text-sm text-gray-500">
+          <p className="text-center text-sm text-text-tertiary">
             IBM Infrastructure Sales Team • Powered by Watsonx.ai
           </p>
         </div>

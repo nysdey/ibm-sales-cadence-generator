@@ -95,7 +95,7 @@ const CadenceGenerator = () => {
       <div className="card">
         <div className="flex items-center space-x-2 mb-6">
           <Sparkles className="w-6 h-6 text-ibm-blue" />
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-text-primary">
             Generate Personalized Cadences
           </h2>
         </div>
@@ -103,7 +103,7 @@ const CadenceGenerator = () => {
         <form onSubmit={handleGenerate} className="space-y-4">
           {/* Prospect Name */}
           <div>
-            <label htmlFor="prospectName" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="prospectName" className="block text-sm font-medium text-text-secondary mb-2">
               Prospect Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -116,7 +116,7 @@ const CadenceGenerator = () => {
               disabled={loading}
             />
             {errors.prospectName && (
-              <div className="mt-2 flex items-start space-x-2 text-red-600 text-sm">
+              <div className="mt-2 flex items-start space-x-2 text-red-400 text-sm">
                 <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                 <span>{errors.prospectName}</span>
               </div>
@@ -125,7 +125,7 @@ const CadenceGenerator = () => {
 
           {/* Company Name */}
           <div>
-            <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="companyName" className="block text-sm font-medium text-text-secondary mb-2">
               Company Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -138,7 +138,7 @@ const CadenceGenerator = () => {
               disabled={loading}
             />
             {errors.companyName && (
-              <div className="mt-2 flex items-start space-x-2 text-red-600 text-sm">
+              <div className="mt-2 flex items-start space-x-2 text-red-400 text-sm">
                 <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                 <span>{errors.companyName}</span>
               </div>
@@ -147,7 +147,7 @@ const CadenceGenerator = () => {
 
           {/* Cadence Type Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className="block text-sm font-medium text-text-secondary mb-3">
               Select Cadence Types <span className="text-red-500">*</span>
             </label>
             <div className="space-y-2">
@@ -156,8 +156,8 @@ const CadenceGenerator = () => {
                   key={option.value}
                   className={`flex items-start p-3 border rounded-lg cursor-pointer transition-colors ${
                     selectedCadences.includes(option.value)
-                      ? 'border-ibm-blue bg-blue-50'
-                      : 'border-gray-300 hover:border-gray-400'
+                      ? 'border-ibm-blue bg-ibm-blue/10'
+                      : 'border-border hover:border-ibm-blue-light'
                   } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <input
@@ -165,17 +165,17 @@ const CadenceGenerator = () => {
                     checked={selectedCadences.includes(option.value)}
                     onChange={() => handleCadenceToggle(option.value)}
                     disabled={loading}
-                    className="mt-1 h-4 w-4 text-ibm-blue border-gray-300 rounded focus:ring-ibm-blue"
+                    className="mt-1 h-4 w-4 text-ibm-blue border-border rounded focus:ring-ibm-blue"
                   />
                   <div className="ml-3">
-                    <div className="text-sm font-medium text-gray-900">{option.label}</div>
-                    <div className="text-xs text-gray-500 mt-0.5">{option.product}</div>
+                    <div className="text-sm font-medium text-text-primary">{option.label}</div>
+                    <div className="text-xs text-text-tertiary mt-0.5">{option.product}</div>
                   </div>
                 </label>
               ))}
             </div>
             {errors.cadences && (
-              <div className="mt-2 flex items-start space-x-2 text-red-600 text-sm">
+              <div className="mt-2 flex items-start space-x-2 text-red-400 text-sm">
                 <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                 <span>{errors.cadences}</span>
               </div>
@@ -183,10 +183,10 @@ const CadenceGenerator = () => {
           </div>
 
           {/* Important Notice */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
             <div className="flex items-start space-x-3">
-              <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-blue-800">
+              <AlertCircle className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+              <div className="text-sm text-blue-200">
                 <p className="font-semibold mb-1">Important:</p>
                 <p>
                   Please provide <strong>real prospect and company names</strong>.
@@ -199,10 +199,10 @@ const CadenceGenerator = () => {
 
           {/* API Error */}
           {apiError && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
               <div className="flex items-start space-x-3">
-                <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-red-800">
+                <AlertCircle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-red-200">
                   <p className="font-semibold mb-1">Error:</p>
                   <p>{apiError}</p>
                 </div>

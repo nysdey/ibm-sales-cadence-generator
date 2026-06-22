@@ -143,6 +143,74 @@ router.delete('/examples/:id', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/training/generated-emails
+ * Save a generated email
+ */
+const GENERATED_EMAILS_FILE = path.join(__dirname, '../../../data/generated_emails.json');
+
+router.post('/generated-emails', async (req, res) => {
+  try {
+    const emailData = req.body;
+
+    // Validate required fields
+    if (!emailData.subject || !emailData.body || !emailData.prospectName || !emailData.companyName) {
+      return res.status(400).json({
+        error: 'Email must have subject, body, prospectName, and companyName'
+      });
+    }
+
+    // Read current data or create new structure
+    let generatedEmails = { emails: [] };
+    try {
+      const data = await fs.readFile(GENERATED_EMAILS_FILE, 'utf-8');
+      generatedEmails = JSON.parse(data);
+    } catch (error) {
+      // File doesn't exist, will create new one
+      console.log('Creating new generated_emails.json file');
+    }
+
+    // Generate ID and add metadata
+    const id = `email_${Date.now()}`;
+    const newEmail = {
+      id,
+      ...emailData,
+      generatedAt: new Date().toISOString(),
+      feedback: null
+    };
+
+    // Add to emails array
+    generatedEmails.emails.push(newEmail);
+    generatedEmails.last_updated = new Date().toISOString();
+
+    // Save
+    await fs.writeFile(GENERATED_EMAILS_FILE, JSON.stringify(generatedEmails, null, 2));
+
+    res.status(201).json(newEmail);
+  } catch (error) {
+    console.error('Error saving generated email:', error);
+    res.status(500).json({
+      error: 'Failed to save generated email'
+    });
+  }
+});
+
+/**
+ * GET /api/training/generated-emails
+ * Get all generated emails
+ */
+router.get('/generated-emails', async (req, res) => {
+  try {
+    const data = await fs.readFile(GENERATED_EMAILS_FILE, 'utf-8');
+    const generatedEmails = JSON.parse(data);
+    res.json(generatedEmails);
+  } catch (error) {
+    console.error('Error reading generated emails:', error);
+    // Return empty structure if file doesn't exist
+    res.json({ emails: [], last_updated: new Date().toISOString() });
+  }
+});
+
 export default router;
 
 // Made with Bob

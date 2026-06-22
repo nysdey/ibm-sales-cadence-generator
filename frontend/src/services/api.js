@@ -112,6 +112,33 @@ export const deleteTrainingExample = async (id) => {
   }
 };
 
+/**
+ * Save a generated email
+ * @param {Object} emailData - Email data to save
+ * @returns {Promise} - Saved email
+ */
+export const saveGeneratedEmail = async (emailData) => {
+  try {
+    const response = await api.post('/training/generated-emails', emailData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Get all generated emails
+ * @returns {Promise} - Generated emails
+ */
+export const getGeneratedEmails = async () => {
+  try {
+    const response = await api.get('/training/generated-emails');
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export default api;
 
 // Made with Bob
