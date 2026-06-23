@@ -153,10 +153,22 @@ class PromptBuilder {
     // Add additional context section if provided
     let additionalContextSection = '';
     if (additionalContext) {
-      additionalContextSection = `\n## ADDITIONAL CONTEXT TO INTEGRATE NATURALLY:
+      additionalContextSection = `\n## CRITICAL PERSONALIZATION CONTEXT:
 ${additionalContext}
 
-IMPORTANT: Weave this context naturally into the email body. Do NOT add it as a P.S. or separate section. Instead, integrate it into the main narrative where it makes sense contextually.\n`;
+INTEGRATION REQUIREMENTS:
+1. This context MUST be woven naturally into the email opening or body
+2. DO NOT add as a P.S., footnote, or separate section
+3. Use this context to demonstrate research and relevance
+4. Make it feel like you've done your homework on ${companyName}
+5. Connect this context directly to the value proposition
+
+Example of good integration:
+"I noticed [context detail] - this is exactly why [our solution] could help [company] achieve [specific outcome]."
+
+Example of bad integration:
+"[Generic pitch]... P.S. I saw that [context]"
+\n`;
     }
     
     // Build examples section

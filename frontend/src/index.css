@@ -6,12 +6,12 @@
 
 :root {
   font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  line-height: 1.6;
+  line-height: 1.5;
   font-weight: 400;
 
   color-scheme: dark;
-  color: #ffffff;
-  background-color: #0a0a0a;
+  color: #f4f4f4;
+  background-color: #161616;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -23,8 +23,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #0a0a0a;
-  color: #ffffff;
+  background-color: #161616;
+  color: #f4f4f4;
 }
 
 #root {
@@ -34,23 +34,27 @@ body {
 
 @layer components {
   .btn-primary {
-    @apply bg-gradient-to-r from-ibm-blue to-ibm-blue-light hover:shadow-glow text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105;
+    @apply bg-gradient-to-br from-blue-700 to-blue-900 hover:from-blue-800 hover:to-blue-950 text-white font-medium py-2 px-4 text-sm transition-all duration-200 shadow-lg shadow-blue-900/30;
   }
   
   .btn-secondary {
-    @apply bg-bg-raised/50 backdrop-blur-sm hover:bg-bg-elevated text-text-primary font-medium py-2.5 px-5 rounded-xl transition-all duration-300;
+    @apply bg-bg-elevated hover:bg-bg-raised text-text-primary font-normal py-1.5 px-3 text-sm border border-border transition-all duration-200;
+  }
+  
+  .btn-purple {
+    @apply bg-gradient-to-br from-purple-700 to-purple-900 hover:from-purple-800 hover:to-purple-950 text-white font-medium py-2 px-4 text-sm transition-all duration-200 shadow-lg shadow-purple-900/30;
   }
   
   .input-field {
-    @apply w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-ibm-blue-glow outline-none transition-all duration-200 bg-bg-raised/50 backdrop-blur-sm text-text-primary placeholder-text-secondary;
+    @apply w-full px-3 py-2 text-sm focus:ring-2 focus:ring-ibm-blue outline-none transition-all duration-200 bg-bg-surface text-text-primary placeholder-text-tertiary border border-border;
   }
   
   .search-input {
-    @apply w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-ibm-blue-glow outline-none transition-all duration-200 bg-bg-raised/50 backdrop-blur-sm text-text-primary placeholder-text-secondary;
+    @apply w-full px-3 py-2 text-sm focus:ring-2 focus:ring-ibm-blue outline-none transition-all duration-200 bg-bg-surface text-text-primary placeholder-text-tertiary border border-border;
   }
   
   .card {
-    @apply bg-bg-surface backdrop-blur-md rounded-2xl shadow-soft p-6;
+    @apply bg-bg-surface border border-border p-5;
   }
 }
 

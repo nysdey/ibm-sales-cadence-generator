@@ -1,250 +1,315 @@
 {
-  "version": "2.0",
-  "last_updated": "2026-06-19",
-  "description": "Cadence structure templates for IBM infrastructure sales outreach",
-  "products": {
-    "ibm_fusion": {
-      "name": "IBM Fusion",
-      "description": "Hybrid cloud infrastructure platform",
-      "key_value_props": [
-        "40-60% lower TCO than VMware",
-        "Zero licensing surprises",
-        "Enterprise-grade reliability",
-        "Seamless hybrid cloud"
-      ]
-    },
-    "ibm_powervs": {
-      "name": "IBM PowerVS",
-      "description": "Cloud-based Power Systems infrastructure",
-      "key_value_props": [
-        "AIX/IBM i workload flexibility",
-        "Cloud economics for Power",
-        "Rapid deployment (hours vs months)",
-        "Hybrid Power infrastructure"
-      ]
-    },
-    "ibm_flashsystems": {
-      "name": "IBM FlashSystems",
-      "description": "High-performance enterprise storage",
-      "key_value_props": [
-        "Sub-millisecond latency",
-        "Cyber resilience built-in",
-        "Up to 5:1 data reduction",
-        "AI-powered management"
-      ]
-    }
-  },
-  "templates": [
+  "cadences": [
     {
-      "name": "Virtualization - VMware Migration",
-      "product": "ibm_fusion",
-      "category": "virtualization",
-      "target_persona": ["VP Infrastructure", "CIO", "Director IT Operations", "Head of Cloud"],
-      "duration_weeks": 4,
-      "total_touches": 10,
-      "value_proposition": "40-60% lower TCO than VMware, zero licensing surprises, enterprise-grade reliability",
-      "key_triggers": [
-        "Broadcom VMware acquisition",
-        "VMware license renewal",
-        "Budget pressure",
-        "Cloud migration initiatives"
-      ],
-      "differentiation": "vs VMware: Lower cost, predictable pricing; vs Nutanix: Better hybrid cloud; vs DIY: Enterprise support",
-      "typical_structure": [
-        {"day": 1, "channel": "Email", "focus": "Pain point + trigger event"},
-        {"day": 3, "channel": "LinkedIn", "focus": "Social proof"},
-        {"day": 5, "channel": "Call", "focus": "ROI discussion"},
-        {"day": 7, "channel": "Email", "focus": "Case study"},
-        {"day": 10, "channel": "Email", "focus": "Competitive insight"},
-        {"day": 14, "channel": "Call", "focus": "Technical deep dive offer"},
-        {"day": 17, "channel": "LinkedIn", "focus": "Industry trend"},
-        {"day": 21, "channel": "Email", "focus": "Assessment offer"},
-        {"day": 24, "channel": "Call", "focus": "Executive briefing"},
-        {"day": 28, "channel": "Email", "focus": "Final value summary"}
+      "id": "4080797",
+      "name": "US|Select|Infrastructure|Outbound|Client-Intro",
+      "market": "Select",
+      "portfolio": "Infrastructure",
+      "recipients": "IT Leaders",
+      "tags": ["Outbound", "Client-Intro", "US"],
+      "totalSteps": 10,
+      "daysActive": 10,
+      "stats": {
+        "sent": 5479,
+        "delivered": 3248,
+        "opened": 4057,
+        "clicked": 4070,
+        "bounceRate": 0.60,
+        "openRate": 6.50,
+        "clickRate": 28.70,
+        "replyRate": 0.80,
+        "meetingRate": 0.90
+      },
+      "steps": [
+        {
+          "day": 1,
+          "channel": "Email",
+          "subject": "Quick introduction - IBM Infrastructure Solutions",
+          "body": "Hi {{prospect_name}},\n\nI hope this email finds you well. I'm reaching out because {{company_name}} is on our radar as a leader in {{industry}}.\n\nMany infrastructure leaders are currently evaluating their VMware strategy given recent licensing changes. I'd love to share how IBM Fusion has helped similar organizations reduce costs by 50% while improving performance.\n\nWould you be open to a brief 15-minute conversation?\n\nBest regards",
+          "cta": "Schedule a 15-minute call"
+        },
+        {
+          "day": 3,
+          "channel": "LinkedIn",
+          "subject": "Connection request",
+          "body": "Hi {{prospect_name}}, I'd like to connect to share insights on infrastructure modernization trends in {{industry}}.",
+          "cta": "Connect on LinkedIn"
+        },
+        {
+          "day": 5,
+          "channel": "Email",
+          "subject": "Following up: {{company_name}} infrastructure strategy",
+          "body": "Hi {{prospect_name}},\n\nI wanted to follow up on my previous email about infrastructure modernization.\n\nI recently worked with a {{industry}} company similar to {{company_name}} that achieved:\n• 50% reduction in infrastructure costs\n• 40% faster deployment times\n• Zero downtime during migration\n\nWould you have 15 minutes this week to discuss your infrastructure priorities?\n\nBest regards",
+          "cta": "Book a call"
+        }
       ]
     },
     {
-      "name": "Application Modernization - Container Platform",
-      "product": "ibm_fusion",
-      "category": "application_modernization",
-      "target_persona": ["CTO", "VP Engineering", "VP Platform", "Head of DevOps"],
-      "duration_weeks": 3,
-      "total_touches": 9,
-      "value_proposition": "40% faster deployments, consistent dev experience, built-in security",
-      "key_triggers": [
-        "Kubernetes complexity",
-        "Multi-cloud strategy",
-        "Developer productivity issues",
-        "Platform engineering initiatives"
-      ],
-      "differentiation": "vs DIY K8s: Managed complexity; vs Cloud-native: Hybrid flexibility; vs Legacy: Modern architecture",
-      "typical_structure": [
-        {"day": 1, "channel": "Email", "focus": "Developer velocity challenge"},
-        {"day": 3, "channel": "Email", "focus": "Platform engineering trend"},
-        {"day": 6, "channel": "LinkedIn", "focus": "Technical insight"},
-        {"day": 9, "channel": "Call", "focus": "Architecture discussion"},
-        {"day": 12, "channel": "Email", "focus": "Customer success story"},
-        {"day": 15, "channel": "Email", "focus": "Workshop offer"},
-        {"day": 18, "channel": "Call", "focus": "Technical demo"},
-        {"day": 21, "channel": "LinkedIn", "focus": "Industry benchmark"},
-        {"day": 24, "channel": "Email", "focus": "POC proposal"}
+      "id": "4087855",
+      "name": "US|Select|Infrastructure|Head of IT|Outbound|Fusion|FY26",
+      "market": "Select",
+      "portfolio": "Infrastructure",
+      "recipients": "Head of IT",
+      "tags": ["Outbound", "Fusion", "FY26", "US"],
+      "totalSteps": 16,
+      "daysActive": 20,
+      "stats": {
+        "sent": 279,
+        "delivered": 207,
+        "opened": 356,
+        "clicked": 488,
+        "bounceRate": 0.00,
+        "openRate": 0.80,
+        "clickRate": 13.50,
+        "replyRate": 3.90,
+        "meetingRate": 6.10
+      },
+      "steps": [
+        {
+          "day": 1,
+          "channel": "Email",
+          "subject": "{{company_name}}: VMware alternative assessment",
+          "body": "Hi {{prospect_name}},\n\nGiven the recent VMware licensing changes, many IT leaders are evaluating alternatives.\n\nIBM Fusion offers:\n• 50% lower TCO vs. VMware\n• Native OpenShift integration\n• Enterprise-grade reliability (99.99% uptime)\n\nWould you be interested in seeing how this applies to {{company_name}}?\n\nBest regards",
+          "cta": "Schedule demo"
+        },
+        {
+          "day": 3,
+          "channel": "Call",
+          "subject": "Discovery call",
+          "body": "Attempt to reach {{prospect_name}} to discuss infrastructure priorities",
+          "cta": "Connect by phone"
+        },
+        {
+          "day": 7,
+          "channel": "Email",
+          "subject": "Case study: {{industry}} infrastructure transformation",
+          "body": "Hi {{prospect_name}},\n\nI wanted to share a recent case study from a {{industry}} company that migrated from VMware to IBM Fusion:\n\n• Completed migration in 4 months\n• 50% cost reduction\n• Improved application performance by 35%\n• Zero downtime\n\nWould you like to see the full case study?\n\nBest regards",
+          "cta": "Download case study"
+        }
       ]
     },
     {
-      "name": "Generative AI - Infrastructure Readiness",
-      "product": "ibm_fusion",
-      "category": "generative_ai",
-      "target_persona": ["CIO", "Chief AI Officer", "VP Data", "Head of AI/ML"],
-      "duration_weeks": 3,
-      "total_touches": 8,
-      "value_proposition": "Secure AI workload isolation, 60% lower AI infrastructure costs, rapid deployment",
-      "key_triggers": [
-        "GenAI pilot projects",
-        "AI strategy development",
-        "Data security concerns",
-        "Infrastructure cost pressure"
-      ],
-      "differentiation": "vs Cloud AI: Cost control; vs On-prem only: Flexibility; vs DIY: Time to value",
-      "typical_structure": [
-        {"day": 1, "channel": "Email", "focus": "AI infrastructure challenge"},
-        {"day": 4, "channel": "Email", "focus": "Security + compliance"},
-        {"day": 7, "channel": "LinkedIn", "focus": "AI industry insight"},
-        {"day": 10, "channel": "Call", "focus": "AI readiness assessment"},
-        {"day": 14, "channel": "Email", "focus": "Reference architecture"},
-        {"day": 17, "channel": "Email", "focus": "ROI model"},
-        {"day": 20, "channel": "Call", "focus": "Executive briefing"},
-        {"day": 24, "channel": "Email", "focus": "Pilot program offer"}
+      "id": "4089024",
+      "name": "US | Select | Infrastructure Leaders | Industrial | FlashSystems | Outbound | FY26",
+      "market": "Select",
+      "portfolio": "Infrastructure",
+      "recipients": "Infrastructure Leaders",
+      "tags": ["Industrial", "FlashSystems", "Outbound", "FY26", "US"],
+      "totalSteps": 16,
+      "daysActive": 20,
+      "stats": {
+        "sent": 1317,
+        "delivered": 392,
+        "opened": 758,
+        "clicked": 1562,
+        "bounceRate": 0.30,
+        "openRate": 5.20,
+        "clickRate": 26.40,
+        "replyRate": 0.50,
+        "meetingRate": 0.80
+      },
+      "steps": [
+        {
+          "day": 1,
+          "channel": "Email",
+          "subject": "{{company_name}}: Storage modernization for industrial operations",
+          "body": "Hi {{prospect_name}},\n\nIndustrial companies are facing unique storage challenges with IoT data, manufacturing systems, and supply chain visibility.\n\nIBM FlashSystem provides:\n• Sub-millisecond latency for real-time operations\n• Cyber vault for ransomware protection\n• 70% reduction in storage footprint\n\nWould you be open to discussing {{company_name}}'s storage strategy?\n\nBest regards",
+          "cta": "Schedule consultation"
+        },
+        {
+          "day": 4,
+          "channel": "LinkedIn",
+          "subject": "InMail: Storage modernization insights",
+          "body": "Hi {{prospect_name}}, I'd like to share insights on how industrial leaders are modernizing storage infrastructure for Industry 4.0 initiatives.",
+          "cta": "Connect"
+        },
+        {
+          "day": 8,
+          "channel": "Email",
+          "subject": "FlashSystem ROI calculator for {{company_name}}",
+          "body": "Hi {{prospect_name}},\n\nI've prepared a customized ROI analysis for {{company_name}} based on typical industrial storage profiles:\n\n• Estimated 60% cost reduction\n• 3x performance improvement\n• 50% lower power/cooling costs\n\nWould you like to review the detailed analysis?\n\nBest regards",
+          "cta": "View ROI analysis"
+        }
       ]
     },
     {
-      "name": "Power Systems Modernization - Cloud Migration",
-      "product": "ibm_powervs",
-      "category": "power_modernization",
-      "target_persona": ["CIO", "VP Infrastructure", "Director AIX/IBM i", "Head of Mainframe"],
-      "duration_weeks": 4,
-      "total_touches": 10,
-      "value_proposition": "Cloud flexibility for AIX/IBM i, 50% faster deployment, pay-as-you-go economics",
-      "key_triggers": [
-        "Power hardware refresh cycles",
-        "Data center consolidation",
-        "DR/BC modernization",
-        "Cost optimization initiatives",
-        "Hybrid cloud strategy"
-      ],
-      "differentiation": "vs On-prem Power: Cloud economics; vs x86 migration: Keep proven workloads; vs Public cloud: Power-optimized",
-      "typical_structure": [
-        {"day": 1, "channel": "Email", "focus": "Power infrastructure challenge"},
-        {"day": 3, "channel": "Email", "focus": "Cloud economics for Power"},
-        {"day": 6, "channel": "LinkedIn", "focus": "AIX/IBM i modernization"},
-        {"day": 9, "channel": "Call", "focus": "Workload assessment"},
-        {"day": 12, "channel": "Email", "focus": "Customer migration story"},
-        {"day": 15, "channel": "Email", "focus": "DR/BC benefits"},
-        {"day": 18, "channel": "Call", "focus": "Technical architecture"},
-        {"day": 21, "channel": "LinkedIn", "focus": "Industry trend"},
-        {"day": 24, "channel": "Email", "focus": "Assessment offer"},
-        {"day": 28, "channel": "Email", "focus": "Migration roadmap"}
+      "id": "4098761",
+      "name": "US | Select | Infrastructure | IT Leaders & Architects | Follow-up Flash Launch for BTSS | FY26",
+      "market": "Select",
+      "portfolio": "Infrastructure",
+      "recipients": "IT Leaders & Architects",
+      "tags": ["Flash Launch", "BTSS", "FY26", "US"],
+      "totalSteps": 11,
+      "daysActive": 10,
+      "stats": {
+        "sent": 1739,
+        "delivered": 418,
+        "opened": 923,
+        "clicked": 1071,
+        "bounceRate": 0.20,
+        "openRate": 5.30,
+        "clickRate": 37.60,
+        "replyRate": 1.30,
+        "meetingRate": 0.30
+      },
+      "steps": [
+        {
+          "day": 1,
+          "channel": "Email",
+          "subject": "New FlashSystem capabilities for {{company_name}}",
+          "body": "Hi {{prospect_name}},\n\nI wanted to follow up on the recent FlashSystem launch and share how the new capabilities can benefit {{company_name}}:\n\n• Enhanced cyber resilience features\n• AI-powered storage management\n• 99.9999% availability guarantee\n\nWould you be interested in a technical deep-dive?\n\nBest regards",
+          "cta": "Schedule technical session"
+        },
+        {
+          "day": 3,
+          "channel": "Email",
+          "subject": "FlashSystem technical resources for {{company_name}}",
+          "body": "Hi {{prospect_name}},\n\nI've compiled technical resources specific to {{industry}} use cases:\n\n• Architecture diagrams\n• Performance benchmarks\n• Integration guides\n• Customer references\n\nWould you like access to these materials?\n\nBest regards",
+          "cta": "Access resources"
+        }
       ]
     },
     {
-      "name": "Storage Modernization - Performance & Resilience",
-      "product": "ibm_flashsystems",
-      "category": "storage_modernization",
-      "target_persona": ["VP Infrastructure", "Director Storage", "CIO", "Head of Data Center"],
-      "duration_weeks": 3,
-      "total_touches": 9,
-      "value_proposition": "10x performance improvement, cyber resilience, 5:1 data reduction, AI-powered management",
-      "key_triggers": [
-        "Storage refresh cycles",
-        "Performance bottlenecks",
-        "Ransomware concerns",
-        "Capacity constraints",
-        "Cost optimization"
-      ],
-      "differentiation": "vs Legacy storage: Modern performance; vs Pure/NetApp: Better cyber resilience; vs Cloud: Lower TCO",
-      "typical_structure": [
-        {"day": 1, "channel": "Email", "focus": "Storage performance challenge"},
-        {"day": 4, "channel": "Email", "focus": "Cyber resilience"},
-        {"day": 7, "channel": "LinkedIn", "focus": "Storage modernization"},
-        {"day": 10, "channel": "Call", "focus": "Performance assessment"},
-        {"day": 13, "channel": "Email", "focus": "ROI case study"},
-        {"day": 16, "channel": "Email", "focus": "Data reduction benefits"},
-        {"day": 19, "channel": "Call", "focus": "Technical demo"},
-        {"day": 22, "channel": "LinkedIn", "focus": "Industry benchmark"},
-        {"day": 25, "channel": "Email", "focus": "POC proposal"}
+      "id": "4101520",
+      "name": "US | Select | Infrastructure Leaders | Fusion VMWare Takeout | Outbound Nurture | FY26",
+      "market": "Select",
+      "portfolio": "Infrastructure",
+      "recipients": "Infrastructure Leaders",
+      "tags": ["Fusion", "VMware Takeout", "Outbound Nurture", "FY26", "US"],
+      "totalSteps": 13,
+      "daysActive": 20,
+      "stats": {
+        "sent": 959,
+        "delivered": 577,
+        "opened": 620,
+        "clicked": 1095,
+        "bounceRate": 0.00,
+        "openRate": 3.60,
+        "clickRate": 16.80,
+        "replyRate": 0.80,
+        "meetingRate": 0.50
+      },
+      "steps": [
+        {
+          "day": 1,
+          "channel": "Email",
+          "subject": "VMware licensing impact on {{company_name}}",
+          "body": "Hi {{prospect_name}},\n\nThe Broadcom acquisition of VMware has created significant licensing changes. Many organizations are seeing 3-5x cost increases.\n\nIBM Fusion offers a proven migration path:\n• 50% lower TCO\n• Seamless migration tools\n• Enterprise support\n\nWould you like to discuss {{company_name}}'s VMware strategy?\n\nBest regards",
+          "cta": "Schedule strategy session"
+        },
+        {
+          "day": 5,
+          "channel": "Email",
+          "subject": "VMware migration success stories",
+          "body": "Hi {{prospect_name}},\n\nI wanted to share recent VMware to Fusion migrations in {{industry}}:\n\n• Company A: 60% cost reduction, 6-month migration\n• Company B: Zero downtime, improved performance\n• Company C: Simplified operations, better security\n\nWould you like to hear more details?\n\nBest regards",
+          "cta": "Request case studies"
+        }
       ]
     },
     {
-      "name": "Whitespace - New Client Introduction",
-      "product": "multi_product",
-      "category": "whitespace",
-      "target_persona": ["CIO", "CTO", "VP Infrastructure", "Head of IT"],
-      "duration_weeks": 4,
-      "total_touches": 10,
-      "value_proposition": "Comprehensive infrastructure modernization, hybrid cloud flexibility, cost optimization",
-      "key_triggers": [
-        "Digital transformation initiatives",
-        "Infrastructure refresh cycles",
-        "Budget pressure",
-        "Cloud strategy development",
-        "Technology consolidation"
-      ],
-      "differentiation": "Comprehensive IBM infrastructure portfolio, proven enterprise scale, hybrid cloud expertise",
-      "typical_structure": [
-        {"day": 1, "channel": "Email", "focus": "Introduction + value hypothesis"},
-        {"day": 3, "channel": "LinkedIn", "focus": "Thought leadership"},
-        {"day": 6, "channel": "Email", "focus": "Industry-specific insight"},
-        {"day": 9, "channel": "Call", "focus": "Discovery conversation"},
-        {"day": 12, "channel": "Email", "focus": "Relevant case study"},
-        {"day": 15, "channel": "Email", "focus": "Multi-product value"},
-        {"day": 18, "channel": "LinkedIn", "focus": "Executive content"},
-        {"day": 21, "channel": "Call", "focus": "Strategic discussion"},
-        {"day": 24, "channel": "Email", "focus": "Assessment offer"},
-        {"day": 28, "channel": "Email", "focus": "Executive briefing invite"}
+      "id": "4073424",
+      "name": "US|Select|Infrastructure|IT Leaders|ClientIntro|US|FY26",
+      "market": "Select",
+      "portfolio": "Infrastructure",
+      "recipients": "IT Leaders",
+      "tags": ["Client Intro", "US", "FY26"],
+      "totalSteps": 10,
+      "daysActive": 15,
+      "stats": {
+        "sent": 2677,
+        "delivered": 1625,
+        "opened": 1640,
+        "clicked": 1541,
+        "bounceRate": 0.50,
+        "openRate": 3.60,
+        "clickRate": 23.00,
+        "replyRate": 0.10,
+        "meetingRate": 0.30
+      },
+      "steps": [
+        {
+          "day": 1,
+          "channel": "Email",
+          "subject": "Introduction: IBM Infrastructure solutions for {{company_name}}",
+          "body": "Hi {{prospect_name}},\n\nI'm reaching out to introduce IBM's infrastructure portfolio and how we're helping {{industry}} leaders modernize their IT infrastructure.\n\nOur solutions include:\n• Hybrid cloud platforms (IBM Fusion)\n• Enterprise storage (FlashSystem)\n• Power Systems cloud (PowerVS)\n\nWould you be open to a brief introduction call?\n\nBest regards",
+          "cta": "Schedule intro call"
+        }
       ]
     },
     {
-      "name": "Multi-Product - Infrastructure Transformation",
-      "product": "multi_product",
-      "category": "infrastructure_transformation",
-      "target_persona": ["CIO", "CTO", "VP Infrastructure"],
-      "duration_weeks": 4,
-      "total_touches": 11,
-      "value_proposition": "End-to-end infrastructure modernization: compute, storage, and Power workloads",
-      "key_triggers": [
-        "Data center consolidation",
-        "Infrastructure refresh",
-        "Hybrid cloud strategy",
-        "Cost optimization",
-        "Technology standardization"
-      ],
-      "differentiation": "Integrated IBM portfolio, single vendor relationship, comprehensive support",
-      "typical_structure": [
-        {"day": 1, "channel": "Email", "focus": "Infrastructure challenge"},
-        {"day": 3, "channel": "Email", "focus": "Multi-product value"},
-        {"day": 6, "channel": "LinkedIn", "focus": "Transformation insight"},
-        {"day": 9, "channel": "Call", "focus": "Strategic discussion"},
-        {"day": 12, "channel": "Email", "focus": "Fusion + FlashSystems"},
-        {"day": 15, "channel": "Email", "focus": "PowerVS integration"},
-        {"day": 18, "channel": "Call", "focus": "Architecture review"},
-        {"day": 21, "channel": "LinkedIn", "focus": "Customer success"},
-        {"day": 24, "channel": "Email", "focus": "Comprehensive assessment"},
-        {"day": 27, "channel": "Call", "focus": "Executive alignment"},
-        {"day": 30, "channel": "Email", "focus": "Roadmap proposal"}
+      "id": "4092641",
+      "name": "US|Select|Infrastructure|Outbound|IBM i DR|PowerVS",
+      "market": "Select",
+      "portfolio": "Infrastructure",
+      "recipients": "IBM i Administrators",
+      "tags": ["Outbound", "IBM i", "DR", "PowerVS", "US"],
+      "totalSteps": 15,
+      "daysActive": 27,
+      "stats": {
+        "sent": 369,
+        "delivered": 50,
+        "opened": 65,
+        "clicked": 137,
+        "bounceRate": 0.00,
+        "openRate": 7.30,
+        "clickRate": 16.80,
+        "replyRate": 0.00,
+        "meetingRate": 0.20
+      },
+      "steps": [
+        {
+          "day": 1,
+          "channel": "Email",
+          "subject": "IBM i disaster recovery in the cloud",
+          "body": "Hi {{prospect_name}},\n\nMany IBM i shops are moving disaster recovery to the cloud for better RPO/RTO and lower costs.\n\nIBM PowerVS offers:\n• Native IBM i support\n• Sub-hour recovery times\n• 60% lower DR costs\n• No re-platforming required\n\nWould you like to discuss {{company_name}}'s IBM i DR strategy?\n\nBest regards",
+          "cta": "Schedule DR assessment"
+        },
+        {
+          "day": 7,
+          "channel": "Email",
+          "subject": "IBM i cloud migration case study",
+          "body": "Hi {{prospect_name}},\n\nI wanted to share a recent IBM i to PowerVS migration:\n\n• 200+ IBM i LPARs migrated\n• 40% cost reduction\n• Improved DR capabilities\n• Maintained compliance\n\nWould you like the detailed case study?\n\nBest regards",
+          "cta": "Download case study"
+        }
+      ]
+    },
+    {
+      "id": "4141902",
+      "name": "US | Select | Infrastructure | IT Leaders & Architects | Flash Availability | US | FY26",
+      "market": "Select",
+      "portfolio": "Infrastructure",
+      "recipients": "IT Leaders & Architects",
+      "tags": ["Flash Availability", "US", "FY26"],
+      "totalSteps": 9,
+      "daysActive": 10,
+      "stats": {
+        "sent": 7999,
+        "delivered": 3480,
+        "opened": 5075,
+        "clicked": 8054,
+        "bounceRate": 0.10,
+        "openRate": 5.50,
+        "clickRate": 25.60,
+        "replyRate": 0.30,
+        "meetingRate": 0.50
+      },
+      "steps": [
+        {
+          "day": 1,
+          "channel": "Email",
+          "subject": "99.9999% availability for {{company_name}}",
+          "body": "Hi {{prospect_name}},\n\nDowntime costs {{industry}} companies an average of $300K per hour. IBM FlashSystem delivers 99.9999% availability - that's less than 32 seconds of downtime per year.\n\nKey capabilities:\n• Active-active replication\n• Non-disruptive upgrades\n• Cyber vault protection\n\nWould you like to discuss {{company_name}}'s availability requirements?\n\nBest regards",
+          "cta": "Schedule availability assessment"
+        },
+        {
+          "day": 4,
+          "channel": "Email",
+          "subject": "FlashSystem availability architecture",
+          "body": "Hi {{prospect_name}},\n\nI've prepared technical documentation on FlashSystem's availability architecture:\n\n• High availability configurations\n• Disaster recovery options\n• Cyber resilience features\n• Performance under failure scenarios\n\nWould you like to review these materials?\n\nBest regards",
+          "cta": "Access technical docs"
+        }
       ]
     }
   ],
-  "best_practices": {
-    "email_length": "Under 150 words",
-    "subject_lines": "Question format or specific insight (not generic)",
-    "personalization": "Company name in every email, industry-specific challenges",
-    "cta": "Always clear, low-friction (15-min call, not 'demo')",
-    "tone": "Executive-level: concise, insight-driven, outcome-focused",
-    "timing": "Space touches 2-4 days apart, accelerate if engagement",
-    "channels": "Mix Email (60%), Call (25%), LinkedIn (15%)"
-  },
-  "success_metrics": {
-    "target_open_rate": 0.45,
-    "target_reply_rate": 0.12,
-    "target_meeting_rate": 0.08
-  }
+  "last_updated": "2024-01-22T15:00:00.000Z"
 }

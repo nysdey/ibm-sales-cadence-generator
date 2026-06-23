@@ -2,6 +2,7 @@ import { useState } from 'react'
 import CadenceLibrary from './components/generator/CadenceLibrary'
 import GeneratedEmails from './components/training/GeneratedEmails'
 import DatabaseManager from './components/admin/DatabaseManager'
+import UserManager from './components/admin/UserManager'
 
 function App() {
   const [activeTab, setActiveTab] = useState('library')
@@ -9,53 +10,55 @@ function App() {
   const tabs = [
     { id: 'library', label: 'Cadences' },
     { id: 'emails', label: 'Generated Emails' },
-    { id: 'database', label: 'Database' }
+    { id: 'database', label: 'Database' },
+    { id: 'users', label: 'Users' }
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-ombre">
-      <header className="backdrop-blur-md bg-bg-surface sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-8 py-6">
+    <div className="min-h-screen bg-bg-base">
+      {/* Header with thin white border at bottom - non-sticky with more padding */}
+      <header className="bg-bg-base border-b border-border">
+        <div className="max-w-7xl mx-auto px-6 pt-8 pb-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              {/* IBM Logo - Larger and closer */}
+            <div className="flex items-center gap-3">
+              {/* IBM Logo - Proportional to title */}
               <img
                 src="/ibm-blue-bee.png"
                 alt="IBM"
-                className="h-20 w-auto"
-                style={{ filter: 'drop-shadow(0 0 10px rgba(69, 137, 255, 0.5))' }}
+                className="h-12 w-auto"
               />
               <div>
-                <h1 className="text-3xl font-bold text-text-primary tracking-tight">
-                  Sales Cadence Generator
+                <h1 className="text-3xl font-light text-text-primary tracking-tight">
+                  Sales Cadence Builder
                 </h1>
-                <p className="text-sm text-text-secondary mt-1.5">
-                  AI-Powered Outreach Personalization for Infrastructure Sellers
+                <p className="text-sm text-text-secondary mt-0.5 font-light">
+                  AI-Powered Outreach for Infrastructure Sellers
                 </p>
               </div>
             </div>
             <div className="flex items-center">
-              <span className="text-xs text-text-secondary font-medium">Powered by Watsonx.ai</span>
+              <span className="text-base text-text-tertiary font-light">Powered by Watsonx.ai</span>
             </div>
           </div>
         </div>
 
-        {/* Tab Navigation - No borders */}
-        <div className="max-w-7xl mx-auto px-8">
-          <nav className="flex space-x-8">
+        {/* Tab Navigation with thin white border */}
+        <div className="max-w-7xl mx-auto px-6">
+          <nav className="flex space-x-8 border-t border-border pt-2">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
+                data-tab={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-4 px-2 font-medium text-sm transition-all duration-300 relative ${
+                className={`py-3 px-1 font-normal text-base transition-all duration-200 relative ${
                   activeTab === tab.id
-                    ? 'text-ibm-blue-light'
-                    : 'text-text-secondary hover:text-text-primary'
+                    ? 'text-text-primary'
+                    : 'text-text-tertiary hover:text-text-primary'
                 }`}
               >
                 {tab.label}
                 {activeTab === tab.id && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-ibm-blue-glow to-ibm-blue-light shadow-glow"></div>
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-ibm-blue"></div>
                 )}
               </button>
             ))}
@@ -63,16 +66,17 @@ function App() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-8 py-12">
+      <main className="max-w-7xl mx-auto px-6 py-8">
         {activeTab === 'library' && <CadenceLibrary />}
         {activeTab === 'emails' && <GeneratedEmails />}
         {activeTab === 'database' && <DatabaseManager />}
+        {activeTab === 'users' && <UserManager />}
       </main>
 
-      <footer className="backdrop-blur-sm bg-bg-surface/30 mt-20">
-        <div className="max-w-7xl mx-auto px-8 py-8">
-          <p className="text-center text-sm text-text-secondary">
-            IBM Infrastructure Sales Team • Powered by Watsonx.ai
+      <footer className="bg-bg-base border-t border-border mt-16">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <p className="text-center text-sm text-text-tertiary font-light">
+            Built by Sydney Chin & Bob • IBM Infrastructure Sales Team • Powered by Watsonx.ai
           </p>
         </div>
       </footer>

@@ -184,11 +184,52 @@ const CadenceLibrary = () => {
   const [selectedCadence, setSelectedCadence] = useState(null);
   const [selectedStep, setSelectedStep] = useState(null);
   const [showPersonalizeModal, setShowPersonalizeModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [personalizationData, setPersonalizationData] = useState({
     prospectName: '',
+    prospectTitle: '',
     companyName: '',
     industry: '',
+    industryOther: '',
+    companySize: '',
+    location: '',
     additionalContext: ''
+  });
+  
+  // Industry options
+  const INDUSTRIES = [
+    'Financial Services', 'Banking', 'Insurance', 'Healthcare', 'Life Sciences',
+    'Retail', 'Manufacturing', 'Technology', 'Telecommunications', 'Energy & Utilities',
+    'Government', 'Education', 'Transportation', 'Media & Entertainment', 'Other'
+  ];
+  
+  // Company size options
+  const COMPANY_SIZES = [
+    '1-50 employees',
+    '51-200 employees',
+    '201-500 employees',
+    '501-1,000 employees',
+    '1,001-5,000 employees',
+    '5,001-10,000 employees',
+    '10,001+ employees'
+  ];
+  
+  // Location suggestions
+  const LOCATIONS = [
+    'New York, NY', 'San Francisco, CA', 'Chicago, IL', 'Boston, MA', 'Austin, TX',
+    'Seattle, WA', 'Los Angeles, CA', 'Atlanta, GA', 'Dallas, TX', 'Denver, CO',
+    'London, UK', 'Toronto, Canada', 'Sydney, Australia', 'Singapore', 'Tokyo, Japan'
+  ];
+  const [createCadenceData, setCreateCadenceData] = useState({
+    country: 'US',
+    market: 'Select',
+    portfolio: 'Infrastructure',
+    recipients: '',
+    customFields: '',
+    steps: '10',
+    days: '15',
+    description: '',
+    context: ''
   });
   const [generatingEmail, setGeneratingEmail] = useState(false);
   const [generatedEmail, setGeneratedEmail] = useState(null);
@@ -203,6 +244,11 @@ const CadenceLibrary = () => {
     type: 'all',
     campaign: 'all'
   });
+
+  // Country options
+  const COUNTRIES = ['US', 'Canada', 'UK', 'Germany', 'France', 'Japan', 'Australia', 'Brazil', 'India', 'China'];
+  const MARKETS = ['Enterprise', 'Strategic', 'Select Horizon', 'Select Territory'];
+  const PORTFOLIOS = ['Infrastructure', 'Data & AI', 'Automation'];
 
   // Extract unique filter values
   const filterOptions = {
@@ -260,10 +306,10 @@ const CadenceLibrary = () => {
 
   const getChannelColor = (channel) => {
     switch (channel.toLowerCase()) {
-      case 'email': return 'bg-blue-500/10 text-blue-300 border-blue-500/30';
-      case 'call': return 'bg-green-500/10 text-green-300 border-green-500/30';
-      case 'linkedin': return 'bg-purple-500/10 text-purple-300 border-purple-500/30';
-      default: return 'bg-white/5 text-gray-300 border-border';
+      case 'email': return 'bg-ibm-blue/10 text-ibm-blue border border-border';
+      case 'call': return 'bg-gray-80/50 text-gray-30 border border-border';
+      case 'linkedin': return 'bg-ibm-purple/10 text-ibm-purple border border-border';
+      default: return 'bg-bg-raised text-text-secondary border border-border';
     }
   };
 
@@ -281,11 +327,15 @@ const CadenceLibrary = () => {
     setEmailSaved(false);
     try {
       // Build enhanced context for AI generation
+      const finalIndustry = personalizationData.industry === 'Other'
+        ? personalizationData.industryOther
+        : personalizationData.industry;
+      
       const enhancedContext = {
         prospectName: personalizationData.prospectName,
         companyName: personalizationData.companyName,
         cadenceTypes: [selectedCadence.campaign.toLowerCase().replace(/\s+/g, '_')],
-        industry: personalizationData.industry,
+        industry: finalIndustry,
         additionalContext: personalizationData.additionalContext
       };
 
@@ -352,18 +402,23 @@ const CadenceLibrary = () => {
   };
 
   const handleSaveEmail = async () => {
+    if (!generatedEmail) return;
+    
     setSavingEmail(true);
     try {
-      await saveGeneratedEmail({
+      const emailData = {
         subject: generatedEmail.subject,
         body: generatedEmail.body,
         prospectName: personalizationData.prospectName,
         companyName: personalizationData.companyName,
         cadenceType: generatedEmail.cadenceType,
-        industry: personalizationData.industry,
+        industry: personalizationData.industry || '',
         stepDay: generatedEmail.stepDay,
-        cadenceName: selectedCadence.name
-      });
+        cadenceName: selectedCadence.name,
+        additionalContext: personalizationData.additionalContext || ''
+      };
+      
+      await saveGeneratedEmail(emailData);
       
       setEmailSaved(true);
       setTimeout(() => setEmailSaved(false), 3000);
@@ -388,193 +443,195 @@ const CadenceLibrary = () => {
   // List View
   if (!selectedCadence) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-5">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-3xl font-bold text-text-primary">Cadences</h2>
-            <p className="text-sm text-text-secondary mt-2">
+            <h2 className="text-2xl font-light text-text-primary">Cadences</h2>
+            <p className="text-sm text-text-secondary mt-1 font-light">
               Manage and personalize your sales cadences
             </p>
           </div>
-          <div className="flex space-x-3">
-            <button className="bg-gradient-to-r from-purple-600 to-purple-500 hover:shadow-glow text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
-              <Upload className="w-4 h-4" />
-              <span>Import from Salesloft</span>
+          <div className="flex space-x-2">
+            <button className="btn-purple flex items-center space-x-1.5 text-sm">
+              <Upload className="w-3.5 h-3.5" />
+              <span>Import</span>
             </button>
-            <button className="bg-gradient-to-r from-blue-700 to-blue-600 hover:shadow-glow text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
-              <Plus className="w-4 h-4" />
-              <span>Create Cadence</span>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="btn-primary flex items-center space-x-1.5 text-sm"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Create</span>
             </button>
           </div>
         </div>
 
-        {/* Search and Filter */}
-        <div className="card">
-          <div className="flex items-center space-x-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-text-secondary" />
-              <input
-                type="text"
-                placeholder="Search cadences..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-3 py-2 pl-9 text-sm rounded-xl focus:ring-2 focus:ring-ibm-blue-glow outline-none transition-all duration-200 bg-bg-raised/50 backdrop-blur-sm text-text-primary placeholder-text-secondary"
-              />
-            </div>
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`bg-bg-raised/50 backdrop-blur-sm hover:bg-bg-elevated text-text-primary font-medium py-2 px-4 text-sm rounded-xl transition-all duration-300 flex items-center space-x-2 ${showFilters ? 'bg-ibm-blue/20 text-ibm-blue-light' : ''}`}
-            >
-              <Filter className="w-3.5 h-3.5" />
-              <span>Filters</span>
-            </button>
-            {(searchTerm || Object.values(filters).some(f => f !== 'all')) && (
-              <button onClick={resetFilters} className="text-sm text-text-secondary hover:text-text-primary transition-colors">
-                Clear
-              </button>
-            )}
+        {/* Search Bar - Consistent style */}
+        <div className="flex items-center space-x-3">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-text-tertiary" />
+            <input
+              type="text"
+              placeholder="Search cadences..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-3 py-2 pl-10 text-sm bg-bg-surface text-text-primary placeholder-text-tertiary border border-border focus:ring-2 focus:ring-ibm-blue outline-none"
+            />
           </div>
-  
-          {/* Filter Panel */}
-          {showFilters && (
-            <div className="mt-6 pt-6 grid grid-cols-5 gap-4" style={{borderTop: '1px solid rgba(168, 179, 207, 0.1)'}}>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`px-3 py-2 text-sm font-normal border transition-all ${showFilters ? 'bg-ibm-blue/10 text-ibm-blue border-ibm-blue' : 'bg-bg-surface text-text-primary border-border hover:bg-bg-raised'}`}
+          >
+            <Filter className="w-4 h-4 inline mr-1.5" />
+            Filters
+          </button>
+          {(searchTerm || Object.values(filters).some(f => f !== 'all')) && (
+            <button onClick={resetFilters} className="text-sm text-text-tertiary hover:text-text-primary transition-colors font-light">
+              Clear
+            </button>
+          )}
+        </div>
+
+        {/* Filter Panel */}
+        {showFilters && (
+          <div className="card">
+            <div className="grid grid-cols-5 gap-3">
               <div>
-                <label className="block text-xs font-medium text-text-secondary mb-2">Region</label>
+                <label className="block text-xs font-medium text-text-secondary mb-1.5">Region</label>
                 <select
                   value={filters.region}
                   onChange={(e) => handleFilterChange('region', e.target.value)}
-                  className="w-full text-sm rounded-xl px-3 py-2 bg-bg-raised/50 backdrop-blur-sm text-text-primary focus:ring-2 focus:ring-ibm-blue-glow outline-none"
+                  className="input-field"
                 >
                   <option value="all">All</option>
                   {filterOptions.regions.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-text-secondary mb-2">Segment</label>
+                <label className="block text-xs font-medium text-text-secondary mb-1.5">Segment</label>
                 <select
                   value={filters.segment}
                   onChange={(e) => handleFilterChange('segment', e.target.value)}
-                  className="w-full text-sm rounded-xl px-3 py-2 bg-bg-raised/50 backdrop-blur-sm text-text-primary focus:ring-2 focus:ring-ibm-blue-glow outline-none"
+                  className="input-field"
                 >
                   <option value="all">All</option>
                   {filterOptions.segments.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-text-secondary mb-2">Persona</label>
+                <label className="block text-xs font-medium text-text-secondary mb-1.5">Persona</label>
                 <select
                   value={filters.persona}
                   onChange={(e) => handleFilterChange('persona', e.target.value)}
-                  className="w-full text-sm rounded-xl px-3 py-2 bg-bg-raised/50 backdrop-blur-sm text-text-primary focus:ring-2 focus:ring-ibm-blue-glow outline-none"
+                  className="input-field"
                 >
                   <option value="all">All</option>
                   {filterOptions.personas.map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-text-secondary mb-2">Type</label>
+                <label className="block text-xs font-medium text-text-secondary mb-1.5">Type</label>
                 <select
                   value={filters.type}
                   onChange={(e) => handleFilterChange('type', e.target.value)}
-                  className="w-full text-sm rounded-xl px-3 py-2 bg-bg-raised/50 backdrop-blur-sm text-text-primary focus:ring-2 focus:ring-ibm-blue-glow outline-none"
+                  className="input-field"
                 >
                   <option value="all">All</option>
                   {filterOptions.types.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-text-secondary mb-2">Campaign</label>
+                <label className="block text-xs font-medium text-text-secondary mb-1.5">Campaign</label>
                 <select
                   value={filters.campaign}
                   onChange={(e) => handleFilterChange('campaign', e.target.value)}
-                  className="w-full text-sm rounded-xl px-3 py-2 bg-bg-raised/50 backdrop-blur-sm text-text-primary focus:ring-2 focus:ring-ibm-blue-glow outline-none"
+                  className="input-field"
                 >
                   <option value="all">All</option>
                   {filterOptions.campaigns.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Cadence List */}
         <div className="card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full">
               <thead>
-                <tr style={{borderBottom: '1px solid rgba(168, 179, 207, 0.1)'}}>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                <tr className="border-b border-border">
+                  <th className="px-3 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
                     Cadence Name
                   </th>
-                  <th className="px-2 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
                     Steps
                   </th>
-                  <th className="px-2 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
                     Days
                   </th>
-                  <th className="px-2 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
                     Total People
                   </th>
-                  <th className="px-2 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
                     Active People
                   </th>
-                  <th className="px-2 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
                     Calls Logged
                   </th>
-                  <th className="px-2 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
                     Emails Delivered
                   </th>
-                  <th className="px-2 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
                     Reply Rate
                   </th>
-                  <th className="px-2 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
                     Click Rate
                   </th>
-                  <th className="px-2 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
                     Open Rate
                   </th>
-                  <th className="px-2 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
                     Meeting Ratio
                   </th>
-                  <th className="px-2 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
                     Opp Ratio
                   </th>
-                  <th className="px-2 py-3"></th>
+                  <th className="px-2 py-2.5"></th>
                 </tr>
               </thead>
               <tbody>
                 {filteredCadences.map((cadence) => (
                   <tr
                     key={cadence.id}
-                    className="hover:bg-bg-raised/30 cursor-pointer transition-all duration-200"
+                    className="hover:bg-bg-raised cursor-pointer transition-all duration-150 border-b border-border"
                     onClick={() => setSelectedCadence(cadence)}
-                    style={{borderBottom: '1px solid rgba(168, 179, 207, 0.05)'}}
                   >
-                    <td className="px-3 py-3">
-                      <div className="text-sm font-medium text-text-primary">{cadence.name}</div>
+                    <td className="px-3 py-2.5">
+                      <div className="text-sm font-light text-text-primary">{cadence.name}</div>
                       <div className="text-xs text-text-secondary mt-1 flex items-center space-x-2">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-ibm-blue/10 text-ibm-blue-light">
+                        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-ibm-blue/10 text-ibm-blue border border-border">
                           {cadence.persona}
                         </span>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-500/10 text-green-400">
+                        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-ibm-purple/10 text-ibm-purple border border-border">
                           {cadence.campaign}
                         </span>
                       </div>
                     </td>
-                    <td className="px-2 py-3 text-sm text-text-primary">{cadence.steps?.length || 0}</td>
-                    <td className="px-2 py-3 text-sm text-text-primary">{cadence.duration}</td>
-                    <td className="px-2 py-3 text-sm text-text-primary">{cadence.people_added.toLocaleString()}</td>
-                    <td className="px-2 py-3 text-sm text-text-primary">{cadence.people_started.toLocaleString()}</td>
-                    <td className="px-2 py-3 text-sm text-text-primary">{cadence.people_finished.toLocaleString()}</td>
-                    <td className="px-2 py-3 text-sm text-text-primary">{cadence.bounced.toLocaleString()}</td>
-                    <td className="px-2 py-3 text-sm text-text-primary">{cadence.reply_rate.toFixed(2)}%</td>
-                    <td className="px-2 py-3 text-sm text-text-primary">{cadence.click_rate.toFixed(2)}%</td>
-                    <td className="px-2 py-3 text-sm text-text-primary">{cadence.open_rate.toFixed(2)}%</td>
-                    <td className="px-2 py-3 text-sm text-text-primary">{cadence.meeting_rate.toFixed(2)}%</td>
-                    <td className="px-2 py-3 text-sm text-text-primary">{cadence.success_rate.toFixed(2)}%</td>
-                    <td className="px-2 py-3 text-right">
-                      <ChevronRight className="w-4 h-4 text-text-secondary" />
+                    <td className="px-2 py-2.5 text-sm font-light text-text-primary">{cadence.steps?.length || 0}</td>
+                    <td className="px-2 py-2.5 text-sm font-light text-text-primary">{cadence.duration}</td>
+                    <td className="px-2 py-2.5 text-sm font-light text-text-primary">{cadence.people_added.toLocaleString()}</td>
+                    <td className="px-2 py-2.5 text-sm font-light text-text-primary">{cadence.people_started.toLocaleString()}</td>
+                    <td className="px-2 py-2.5 text-sm font-light text-text-primary">{cadence.people_finished.toLocaleString()}</td>
+                    <td className="px-2 py-2.5 text-sm font-light text-text-primary">{cadence.bounced.toLocaleString()}</td>
+                    <td className={`px-2 py-2.5 text-sm font-light ${cadence.reply_rate > 5 ? 'text-ibm-blue' : 'text-text-primary'}`}>{cadence.reply_rate.toFixed(2)}%</td>
+                    <td className={`px-2 py-2.5 text-sm font-light ${cadence.click_rate > 5 ? 'text-ibm-blue' : 'text-text-primary'}`}>{cadence.click_rate.toFixed(2)}%</td>
+                    <td className={`px-2 py-2.5 text-sm font-light ${cadence.open_rate > 5 ? 'text-ibm-blue' : 'text-text-primary'}`}>{cadence.open_rate.toFixed(2)}%</td>
+                    <td className={`px-2 py-2.5 text-sm font-light ${cadence.meeting_rate > 5 ? 'text-ibm-blue' : 'text-text-primary'}`}>{cadence.meeting_rate.toFixed(2)}%</td>
+                    <td className={`px-2 py-2.5 text-sm font-light ${cadence.success_rate > 5 ? 'text-ibm-blue' : 'text-text-primary'}`}>{cadence.success_rate.toFixed(2)}%</td>
+                    <td className="px-2 py-2.5 text-right">
+                      <ChevronRight className="w-4 h-4 text-text-tertiary" />
                     </td>
                   </tr>
                 ))}
@@ -584,7 +641,7 @@ const CadenceLibrary = () => {
 
           {filteredCadences.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-500">No cadences found</p>
+              <p className="text-text-tertiary">No cadences found</p>
             </div>
           )}
         </div>
@@ -594,112 +651,140 @@ const CadenceLibrary = () => {
 
   // Detail View
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Back Button */}
       <button
         onClick={() => setSelectedCadence(null)}
-        className="flex items-center space-x-2 text-gray-500 hover:text-gray-100 transition-colors"
+        className="flex items-center space-x-2 text-text-tertiary hover:text-text-primary transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         <span className="text-sm font-medium">Back to Cadences</span>
       </button>
 
       {/* Cadence Header */}
-      <div className="bg-bg-surface rounded-2xl border border-border p-6">
+      <div className="card">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <h2 className="text-2xl font-semibold text-gray-100 mb-2">
+            <h2 className="text-xl font-light text-text-primary mb-2">
               {selectedCadence.name}
             </h2>
-            <div className="flex items-center space-x-4 text-sm text-gray-500">
+            <div className="flex items-center space-x-4 text-sm text-text-tertiary">
               <span>{selectedCadence.steps?.length || 0} steps</span>
               <span>•</span>
               <span>{selectedCadence.duration} days</span>
               <span>•</span>
               <span>{selectedCadence.people_added.toLocaleString()} people added</span>
             </div>
-            <div className="mt-4 flex items-center space-x-2">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-500/10 text-blue-300 border border-blue-500/30">
+            <div className="mt-3 flex items-center space-x-2">
+              <span className="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-ibm-blue/10 text-ibm-blue border border-border">
                 {selectedCadence.persona}
               </span>
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-500/10 text-green-300 border border-green-500/30">
+              <span className="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-ibm-purple/10 text-ibm-purple border border-border">
                 {selectedCadence.campaign}
               </span>
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-500/10 text-purple-300 border border-purple-500/30">
+              <span className="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-gray-80/50 text-gray-30 border border-border">
                 {selectedCadence.type}
               </span>
             </div>
           </div>
-          <div className="grid grid-cols-4 gap-6 text-center">
-            <div>
-              <div className="text-2xl font-semibold text-gray-100">{selectedCadence.open_rate.toFixed(1)}%</div>
-              <div className="text-xs text-gray-500 mt-1">Open Rate</div>
+          <div className="flex items-center space-x-6">
+            <div className="grid grid-cols-4 gap-6 text-center">
+              <div>
+                <div className={`text-xl font-light ${selectedCadence.open_rate > 5 ? 'text-ibm-blue' : 'text-text-primary'}`}>{selectedCadence.open_rate.toFixed(1)}%</div>
+                <div className="text-xs text-text-tertiary mt-1">Open Rate</div>
+              </div>
+              <div>
+                <div className={`text-xl font-light ${selectedCadence.click_rate > 5 ? 'text-ibm-blue' : 'text-text-primary'}`}>{selectedCadence.click_rate.toFixed(1)}%</div>
+                <div className="text-xs text-text-tertiary mt-1">Click Rate</div>
+              </div>
+              <div>
+                <div className={`text-xl font-light ${selectedCadence.reply_rate > 5 ? 'text-ibm-blue' : 'text-text-primary'}`}>{selectedCadence.reply_rate.toFixed(1)}%</div>
+                <div className="text-xs text-text-tertiary mt-1">Reply Rate</div>
+              </div>
+              <div>
+                <div className={`text-xl font-light ${selectedCadence.meeting_rate > 5 ? 'text-ibm-blue' : 'text-text-primary'}`}>{selectedCadence.meeting_rate.toFixed(1)}%</div>
+                <div className="text-xs text-text-tertiary mt-1">Meeting Rate</div>
+              </div>
             </div>
-            <div>
-              <div className="text-2xl font-semibold text-gray-100">{selectedCadence.click_rate.toFixed(1)}%</div>
-              <div className="text-xs text-gray-500 mt-1">Click Rate</div>
-            </div>
-            <div>
-              <div className="text-2xl font-semibold text-gray-100">{selectedCadence.reply_rate.toFixed(1)}%</div>
-              <div className="text-xs text-gray-500 mt-1">Reply Rate</div>
-            </div>
-            <div>
-              <div className="text-2xl font-semibold text-green-400">{selectedCadence.meeting_rate.toFixed(1)}%</div>
-              <div className="text-xs text-gray-500 mt-1">Meeting Rate</div>
-            </div>
+            <button
+              onClick={() => {
+                const emailsTab = document.querySelector('[data-tab="emails"]');
+                if (emailsTab) emailsTab.click();
+              }}
+              className="btn-secondary flex items-center space-x-2 text-sm whitespace-nowrap"
+            >
+              <Mail className="w-4 h-4" />
+              <span>View All Emails Generated in This Cadence</span>
+            </button>
           </div>
         </div>
       </div>
 
       {/* Steps */}
-      <div className="bg-bg-surface rounded-2xl border border-border">
-        <div className="px-6 py-4 border-b border-border">
-          <h3 className="text-lg font-semibold text-gray-100">Cadence Steps</h3>
-          <p className="text-sm text-gray-500 mt-1">Click on an email step to personalize it</p>
+      <div className="card">
+        <div className="pb-4 border-b border-border mb-4">
+          <h3 className="text-lg font-light text-text-primary">Cadence Steps</h3>
+          <p className="text-sm text-text-secondary mt-1">Click on an email step to personalize it</p>
         </div>
-        <div className="divide-y divide-white/10">
+        <div className="space-y-3">
           {selectedCadence.steps?.map((step, index) => (
             <div
               key={index}
               onClick={() => handleStepClick(step)}
-              className={`px-6 py-4 ${step.channel.toLowerCase() === 'email' ? 'hover:bg-white/5 cursor-pointer' : ''} transition-colors`}
+              className={`p-4 border border-border ${step.channel.toLowerCase() === 'email' ? 'hover:bg-bg-raised cursor-pointer' : ''} transition-colors`}
             >
               <div className="flex items-start space-x-4">
                 <div className="flex-shrink-0">
-                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-sm font-semibold text-gray-300">
-                    {step.day}
+                  <div className="bg-bg-raised flex flex-col items-center justify-center px-3 py-2 border border-border">
+                    <div className="text-sm text-text-primary font-light">Step {index + 1}</div>
+                    <div className="text-sm text-text-primary font-light">Day {step.day}</div>
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-3 mb-2">
-                    <span className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${getChannelColor(step.channel)}`}>
+                    <span className={`inline-flex items-center space-x-1.5 px-2 py-0.5 text-xs font-medium ${getChannelColor(step.channel)}`}>
                       {getChannelIcon(step.channel)}
                       <span>{step.channel}</span>
                     </span>
                     {step.channel.toLowerCase() === 'email' && (
-                      <span className="text-xs text-gray-500 flex items-center space-x-1">
+                      <span className="text-xs text-text-tertiary flex items-center space-x-1">
                         <Edit2 className="w-3 h-3" />
                         <span>Click to personalize</span>
                       </span>
                     )}
                   </div>
                   {step.subject && (
-                    <div className="text-sm font-medium text-gray-100 mb-1">
+                    <div className="text-sm font-light text-text-primary mb-1">
                       {step.subject}
                     </div>
                   )}
-                  <div className="text-sm text-gray-500 line-clamp-2">
+                  <div className="text-sm text-text-secondary line-clamp-2">
                     {step.body}
                   </div>
                   {step.stats && (
-                    <div className="mt-3 flex items-center space-x-6 text-xs text-gray-500">
-                      {step.stats.sent && <span>Sent: {step.stats.sent.toLocaleString()}</span>}
-                      {step.stats.opened && <span>Opened: {step.stats.opened.toLocaleString()}</span>}
-                      {step.stats.clicked && <span>Clicked: {step.stats.clicked.toLocaleString()}</span>}
-                      {step.stats.replied && <span>Replied: {step.stats.replied.toLocaleString()}</span>}
-                      {step.stats.attempted && <span>Attempted: {step.stats.attempted.toLocaleString()}</span>}
-                      {step.stats.connected && <span>Connected: {step.stats.connected.toLocaleString()}</span>}
-                      {step.stats.meetings && <span>Meetings: {step.stats.meetings.toLocaleString()}</span>}
+                    <div className="mt-3 flex items-center justify-between">
+                      <div className="flex items-center space-x-6 text-xs text-text-tertiary">
+                        {step.stats.sent && <span>Sent: {step.stats.sent.toLocaleString()}</span>}
+                        {step.stats.opened && <span>Opened: {step.stats.opened.toLocaleString()}</span>}
+                        {step.stats.clicked && <span>Clicked: {step.stats.clicked.toLocaleString()}</span>}
+                        {step.stats.replied && <span>Replied: {step.stats.replied.toLocaleString()}</span>}
+                        {step.stats.attempted && <span>Attempted: {step.stats.attempted.toLocaleString()}</span>}
+                        {step.stats.connected && <span>Connected: {step.stats.connected.toLocaleString()}</span>}
+                        {step.stats.meetings && <span>Meetings: {step.stats.meetings.toLocaleString()}</span>}
+                      </div>
+                      {step.channel.toLowerCase() === 'email' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const emailsTab = document.querySelector('[data-tab="emails"]');
+                            if (emailsTab) emailsTab.click();
+                          }}
+                          className="btn-secondary flex items-center space-x-1.5 text-xs py-1 px-2"
+                        >
+                          <Mail className="w-3 h-3" />
+                          <span>View All Emails Generated at This Step</span>
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -711,86 +796,143 @@ const CadenceLibrary = () => {
 
       {/* Personalization Modal */}
       {showPersonalizeModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-85 flex items-center justify-center z-50 p-4">
-          <div className="bg-bg-surface rounded-xl shadow-elevated border-2 border-border max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-bg-surface border-b-2 border-border px-6 py-4 flex items-center justify-between">
-              <h3 className="text-xl font-semibold text-gray-100">Personalize Email</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
+          <div className="bg-bg-surface border border-border max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-bg-surface border-b border-border px-5 py-4 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-text-primary">Personalize Email</h3>
               <button
                 onClick={() => setShowPersonalizeModal(false)}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="text-text-tertiary hover:text-text-primary transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="p-5 space-y-5">
               {/* Original Template */}
               <div>
-                <h4 className="text-base font-semibold text-gray-200 mb-3">Original Template</h4>
-                <div className="bg-white/5 border-2 border-border rounded-lg p-4">
+                <h4 className="text-sm font-medium text-text-primary mb-2">Original Template</h4>
+                <div className="bg-bg-surface border border-border p-4">
                   {selectedStep?.subject && (
                     <div className="mb-3">
-                      <div className="text-xs text-gray-400 mb-1 font-medium">Subject:</div>
-                      <div className="text-sm text-gray-100">{selectedStep.subject}</div>
+                      <div className="text-xs text-text-tertiary mb-1 font-medium">Subject:</div>
+                      <div className="text-sm text-text-primary">{selectedStep.subject}</div>
                     </div>
                   )}
-                  <div className="text-xs text-gray-400 mb-1 font-medium">Body:</div>
-                  <div className="text-sm text-gray-200 whitespace-pre-wrap leading-relaxed">{selectedStep?.body}</div>
+                  <div className="text-xs text-text-tertiary mb-1 font-medium">Body:</div>
+                  <div className="text-sm text-text-primary whitespace-pre-wrap leading-relaxed">{selectedStep?.body}</div>
                 </div>
               </div>
 
               {/* Personalization Form */}
               <div>
-                <h4 className="text-base font-semibold text-gray-200 mb-3">Enter Prospect Details</h4>
-                <div className="space-y-4">
+                <h4 className="text-sm font-medium text-text-primary mb-3">Enter Prospect Details</h4>
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
-                      Prospect Name <span className="text-red-500">*</span>
+                    <label className="block text-xs font-medium text-text-secondary mb-1">
+                      Prospect Name <span className="text-red-400">*</span>
                     </label>
                     <input
                       type="text"
                       value={personalizationData.prospectName}
                       onChange={(e) => setPersonalizationData({...personalizationData, prospectName: e.target.value})}
-                      placeholder="e.g., John Smith"
+                      placeholder="e.g., Sarah Chen"
                       className="input-field"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
-                      Company Name <span className="text-red-500">*</span>
+                    <label className="block text-xs font-medium text-text-secondary mb-1">
+                      Prospect Title
+                    </label>
+                    <input
+                      type="text"
+                      value={personalizationData.prospectTitle}
+                      onChange={(e) => setPersonalizationData({...personalizationData, prospectTitle: e.target.value})}
+                      placeholder="e.g., VP of IT"
+                      className="input-field"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-text-secondary mb-1">
+                      Company Name <span className="text-red-400">*</span>
                     </label>
                     <input
                       type="text"
                       value={personalizationData.companyName}
                       onChange={(e) => setPersonalizationData({...personalizationData, companyName: e.target.value})}
-                      placeholder="e.g., Acme Corporation"
+                      placeholder="e.g., Goldman Sachs"
                       className="input-field"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
+                    <label className="block text-xs font-medium text-text-secondary mb-1">
                       Industry
+                    </label>
+                    <select
+                      value={personalizationData.industry}
+                      onChange={(e) => setPersonalizationData({...personalizationData, industry: e.target.value, industryOther: ''})}
+                      className="input-field"
+                    >
+                      <option value="">Select industry...</option>
+                      {INDUSTRIES.map(ind => (
+                        <option key={ind} value={ind}>{ind}</option>
+                      ))}
+                    </select>
+                    {personalizationData.industry === 'Other' && (
+                      <input
+                        type="text"
+                        value={personalizationData.industryOther}
+                        onChange={(e) => setPersonalizationData({...personalizationData, industryOther: e.target.value})}
+                        placeholder="Specify industry..."
+                        className="input-field mt-2"
+                      />
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-text-secondary mb-1">
+                      Company Size
+                    </label>
+                    <select
+                      value={personalizationData.companySize}
+                      onChange={(e) => setPersonalizationData({...personalizationData, companySize: e.target.value})}
+                      className="input-field"
+                    >
+                      <option value="">Select company size...</option>
+                      {COMPANY_SIZES.map(size => (
+                        <option key={size} value={size}>{size}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-text-secondary mb-1">
+                      Location
                     </label>
                     <input
                       type="text"
-                      value={personalizationData.industry}
-                      onChange={(e) => setPersonalizationData({...personalizationData, industry: e.target.value})}
-                      placeholder="e.g., Financial Services"
+                      list="locations"
+                      value={personalizationData.location}
+                      onChange={(e) => setPersonalizationData({...personalizationData, location: e.target.value})}
+                      placeholder="e.g., New York, NY"
                       className="input-field"
                     />
+                    <datalist id="locations">
+                      {LOCATIONS.map(loc => (
+                        <option key={loc} value={loc} />
+                      ))}
+                    </datalist>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
-                      Additional Context
-                    </label>
-                    <textarea
-                      value={personalizationData.additionalContext}
-                      onChange={(e) => setPersonalizationData({...personalizationData, additionalContext: e.target.value})}
-                      placeholder="Any additional context or personalization..."
-                      rows={3}
-                      className="input-field"
-                    />
-                  </div>
+                </div>
+                <div className="mt-3">
+                  <label className="block text-xs font-medium text-text-secondary mb-1">
+                    Additional Context
+                  </label>
+                  <textarea
+                    value={personalizationData.additionalContext}
+                    onChange={(e) => setPersonalizationData({...personalizationData, additionalContext: e.target.value})}
+                    placeholder="Any additional context or personalization..."
+                    rows={3}
+                    className="input-field"
+                  />
                 </div>
               </div>
 
@@ -798,7 +940,7 @@ const CadenceLibrary = () => {
               {generatedEmail && (
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-base font-semibold text-gray-200">Personalized Email</h4>
+                    <h4 className="text-sm font-medium text-text-primary">Personalized Email</h4>
                     <button
                       onClick={() => copyToClipboard(`Subject: ${generatedEmail.subject}\n\n${generatedEmail.body}`)}
                       className="btn-secondary flex items-center space-x-2 text-sm py-1.5 px-3"
@@ -816,15 +958,15 @@ const CadenceLibrary = () => {
                       )}
                     </button>
                   </div>
-                  <div className="bg-green-500/10 border-2 border-green-500/40 rounded-lg p-5">
+                  <div className="bg-bg-surface border border-border p-4">
                     {generatedEmail.subject && (
                       <div className="mb-3">
-                        <div className="text-xs text-green-300 mb-1 font-medium">Subject:</div>
-                        <div className="text-sm text-gray-100">{generatedEmail.subject}</div>
+                        <div className="text-xs text-text-tertiary mb-1 font-medium">Subject:</div>
+                        <div className="text-sm text-text-primary">{generatedEmail.subject}</div>
                       </div>
                     )}
-                    <div className="text-xs text-green-300 mb-1 font-medium">Body:</div>
-                    <div className="text-sm text-gray-100 whitespace-pre-wrap leading-relaxed">{generatedEmail.body}</div>
+                    <div className="text-xs text-text-tertiary mb-1 font-medium">Body:</div>
+                    <div className="text-sm text-text-primary whitespace-pre-wrap leading-relaxed">{generatedEmail.body}</div>
                   </div>
                 </div>
               )}
@@ -874,6 +1016,7 @@ const CadenceLibrary = () => {
                           </>
                         ) : (
                           <>
+                            <RefreshCw className="w-4 h-4" />
                             <span>Regenerate</span>
                           </>
                         )}
@@ -899,6 +1042,180 @@ const CadenceLibrary = () => {
                     </button>
                   )}
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Cadence Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
+          <div className="bg-bg-surface border border-border max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-bg-surface border-b border-border px-5 py-4 flex items-center justify-between">
+              <h3 className="text-lg font-light text-text-primary">Create New Cadence</h3>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="text-text-tertiary hover:text-text-primary transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-normal text-text-secondary mb-1.5">
+                    Country <span className="text-ibm-blue">*</span>
+                  </label>
+                  <select
+                    value={createCadenceData.country}
+                    onChange={(e) => setCreateCadenceData({...createCadenceData, country: e.target.value})}
+                    className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                  >
+                    {COUNTRIES.map(country => (
+                      <option key={country} value={country}>{country}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-normal text-text-secondary mb-1.5">
+                    Market <span className="text-ibm-blue">*</span>
+                  </label>
+                  <select
+                    value={createCadenceData.market}
+                    onChange={(e) => setCreateCadenceData({...createCadenceData, market: e.target.value})}
+                    className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                  >
+                    {MARKETS.map(market => (
+                      <option key={market} value={market}>{market}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-normal text-text-secondary mb-1.5">
+                    Portfolio <span className="text-ibm-blue">*</span>
+                  </label>
+                  <select
+                    value={createCadenceData.portfolio}
+                    onChange={(e) => setCreateCadenceData({...createCadenceData, portfolio: e.target.value})}
+                    className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                  >
+                    {PORTFOLIOS.map(portfolio => (
+                      <option key={portfolio} value={portfolio}>{portfolio}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-normal text-text-secondary mb-1.5">
+                  Recipients <span className="text-ibm-blue">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={createCadenceData.recipients}
+                  onChange={(e) => setCreateCadenceData({...createCadenceData, recipients: e.target.value})}
+                  placeholder="e.g., Head of IT, CTO, VP Infrastructure"
+                  className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary placeholder-text-tertiary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-normal text-text-secondary mb-1.5">
+                  Custom Fields (separated by |)
+                </label>
+                <input
+                  type="text"
+                  value={createCadenceData.customFields}
+                  onChange={(e) => setCreateCadenceData({...createCadenceData, customFields: e.target.value})}
+                  placeholder="e.g., Outbound|Fusion|FY26"
+                  className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary placeholder-text-tertiary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                />
+                <p className="text-xs text-text-tertiary mt-1 font-light">
+                  Example: Outbound|Fusion|FY26 will create: {createCadenceData.country}|{createCadenceData.market}|{createCadenceData.portfolio}|{createCadenceData.recipients}|Outbound|Fusion|FY26
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-normal text-text-secondary mb-1.5">
+                    Number of Steps
+                  </label>
+                  <input
+                    type="number"
+                    value={createCadenceData.steps}
+                    onChange={(e) => setCreateCadenceData({...createCadenceData, steps: e.target.value})}
+                    min="1"
+                    max="20"
+                    className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-normal text-text-secondary mb-1.5">
+                    Duration (Days)
+                  </label>
+                  <input
+                    type="number"
+                    value={createCadenceData.days}
+                    onChange={(e) => setCreateCadenceData({...createCadenceData, days: e.target.value})}
+                    min="1"
+                    max="60"
+                    className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-normal text-text-secondary mb-1.5">
+                  Description & Context
+                </label>
+                <textarea
+                  value={createCadenceData.description}
+                  onChange={(e) => setCreateCadenceData({...createCadenceData, description: e.target.value})}
+                  placeholder="Describe the purpose and context of this cadence..."
+                  rows={3}
+                  className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary placeholder-text-tertiary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-normal text-text-secondary mb-1.5">
+                  Technical Knowledge & Context
+                </label>
+                <textarea
+                  value={createCadenceData.context}
+                  onChange={(e) => setCreateCadenceData({...createCadenceData, context: e.target.value})}
+                  placeholder="What products/functionality are being sold? What technical knowledge is needed?"
+                  rows={3}
+                  className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary placeholder-text-tertiary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                />
+              </div>
+
+              <div className="bg-bg-elevated border border-border p-4">
+                <h4 className="text-sm font-normal text-text-primary mb-2">Preview Cadence Name:</h4>
+                <p className="text-sm text-ibm-blue font-light">
+                  {createCadenceData.country}|{createCadenceData.market}|{createCadenceData.portfolio}|{createCadenceData.recipients}{createCadenceData.customFields ? `|${createCadenceData.customFields}` : ''}
+                </p>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4 border-t border-border">
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className="px-4 py-2 text-sm font-normal text-text-primary bg-bg-elevated border border-border hover:bg-bg-raised transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    alert('Cadence creation functionality will generate AI-powered cadence steps based on your inputs. This will be integrated with the backend API.');
+                    setShowCreateModal(false);
+                  }}
+                  disabled={!createCadenceData.recipients}
+                  className="px-4 py-2 text-sm font-normal text-white bg-ibm-blue hover:bg-ibm-blue/90 border border-ibm-blue transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Create Cadence
+                </button>
               </div>
             </div>
           </div>

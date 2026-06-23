@@ -1,37 +1,31 @@
-# IBM Infrastructure Cadence Generator
+# IBM Sales Cadence Builder
 
-AI-powered personalized sales cadence generator for IBM infrastructure solutions, designed to create highly targeted outbound sequences for enterprise B2B sales.
+AI-powered sales cadence management platform for IBM infrastructure solutions, designed to help sellers create, personalize, and manage highly targeted outbound sequences for enterprise B2B sales.
 
 ## 🎯 Overview
 
-This application generates personalized Salesloft cadences tailored to specific prospects and their companies across IBM's infrastructure portfolio: **IBM Fusion**, **IBM PowerVS**, and **IBM FlashSystems**. It uses Azure OpenAI to create executive-level, industry-specific outreach that eliminates generic templates and placeholders.
+This application helps IBM sellers manage and personalize sales cadences using AI-powered email generation. Built with Watsonx.ai, it enables sellers to create contextual, personalized outreach for prospects across IBM's infrastructure portfolio: **IBM Fusion**, **IBM PowerVS**, and **IBM FlashSystems**.
 
 ## ✨ Key Features
 
-- **AI-Powered Personalization**: Generates cadences using Azure OpenAI GPT-4
+### Cadence Management
+- **Browse Cadences**: View and analyze existing sales cadences with performance metrics
+- **Personalize Steps**: AI-powered personalization for each cadence step
+- **Performance Analytics**: Track open rates, click rates, reply rates, and meeting conversions
+- **Context-Aware**: Save cadence-specific context for better personalization
+
+### AI-Powered Email Generation
+- **Watsonx.ai Integration**: Leverages IBM's Watsonx.ai for intelligent email generation
 - **Multi-Product Support**: IBM Fusion, IBM PowerVS, and IBM FlashSystems
-- **Flexible Cadence Types**: Choose from 7 different cadence scenarios
-- **Industry Intelligence**: Automatically infers industry and applies relevant context
-- **Training System**: Learn from your best examples to improve output quality
-- **Validation**: Prevents placeholder usage and ensures real prospect data
-- **Professional UI**: Clean, IBM-branded interface built with React and Tailwind CSS
+- **Contextual Personalization**: Uses prospect, company, industry, and additional context
+- **Real-time Generation**: Generate and regenerate emails on-demand
+- **Quality Tracking**: Review and provide feedback on generated emails
 
-## 🎯 Supported Products & Cadence Types
-
-### IBM Fusion (Hybrid Cloud Infrastructure)
-- **Virtualization Focus**: VMware cost pressure, hybrid flexibility, infrastructure optimization
-- **Application Modernization**: Containers, OpenShift, platform engineering, developer velocity
-- **Generative AI**: Data readiness, AI infrastructure, secure scaling of AI workloads
-
-### IBM PowerVS (Cloud-based Power Systems)
-- **Power Systems Modernization**: AIX/IBM i workload migration, cloud flexibility, cost optimization
-
-### IBM FlashSystems (Enterprise Storage)
-- **Storage Modernization**: Performance, data management, cyber resilience, cost efficiency
-
-### Multi-Product Scenarios
-- **Whitespace/New Client Introduction**: Discovery-focused outreach for new accounts
-- **Infrastructure Transformation**: End-to-end modernization across compute, storage, and Power workloads
+### Knowledge Base
+- **Company Intelligence**: Store and manage company profiles with tech stacks and pain points
+- **Industry Insights**: Track industry trends, pain points, and IBM solutions
+- **Use Cases Library**: Product-specific use cases for PowerVS, FlashSystems, and Fusion
+- **Training Data**: Manage good and bad examples to improve AI output
 
 ## 🏗️ Architecture
 
@@ -51,12 +45,12 @@ This application generates personalized Salesloft cadences tailored to specific 
          ├──────────┐
          │          │
 ┌────────▼──────┐  │
-│ Azure OpenAI  │  │
-│   GPT-4 API   │  │
+│  Watsonx.ai   │  │
+│  IBM AI API   │  │
 └───────────────┘  │
                    │
          ┌─────────▼─────────┐
-         │  Training Data    │
+         │  Knowledge Base   │
          │  JSON Files       │
          └───────────────────┘
 ```
@@ -65,8 +59,8 @@ This application generates personalized Salesloft cadences tailored to specific 
 
 - **Node.js**: v18 or higher
 - **npm**: v9 or higher
-- **Azure OpenAI**: API key and endpoint (see setup guide)
-- **IBM Account**: For accessing Azure OpenAI through IBM's Microsoft agreement
+- **Watsonx.ai**: API key and project ID (IBM internal)
+- **IBM Account**: For accessing Watsonx.ai through IBM's AI platform
 
 ## 🚀 Quick Start
 
@@ -74,29 +68,28 @@ This application generates personalized Salesloft cadences tailored to specific 
 
 ```bash
 # Clone the repository
-cd salesloft-data
+cd sales-cadence-builder
 
 # Install all dependencies
 npm run install:all
 ```
 
-### 2. Configure Azure OpenAI
+### 2. Configure Watsonx.ai
 
 ```bash
 # Copy environment template
 cd backend
 cp .env.example .env
 
-# Edit .env with your Azure OpenAI credentials
+# Edit .env with your Watsonx.ai credentials
 nano .env
 ```
 
 Required environment variables:
 ```env
-AZURE_OPENAI_API_KEY=your_key_here
-AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
-AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4
-AZURE_OPENAI_API_VERSION=2024-02-15-preview
+WATSONX_API_KEY=your_api_key_here
+WATSONX_PROJECT_ID=your_project_id_here
+WATSONX_URL=https://us-south.ml.cloud.ibm.com
 ```
 
 ### 3. Start Development Servers
@@ -116,56 +109,55 @@ Open your browser to: **http://localhost:3000**
 
 ## 📖 Usage
 
-### Generating Cadences
+### Managing Cadences
 
-1. Enter a **real prospect name** (e.g., "Sarah Chen")
-2. Enter a **real company name** (e.g., "Goldman Sachs")
-3. **Select one or more cadence types** based on your sales strategy:
-   - Choose product-specific cadences (Fusion, PowerVS, FlashSystems)
-   - Select whitespace intro for new client outreach
-   - Pick infrastructure transformation for comprehensive deals
-4. Click **"Generate Cadences"**
-5. Review the personalized cadences
-6. Copy individual emails or entire cadences
-7. Paste into Salesloft
+1. Navigate to the **Cadences** tab
+2. Browse existing cadences with performance metrics
+3. Click on a cadence to view detailed steps
+4. Click on email steps to personalize with AI
 
-### Cadence Selection Guide
+### Personalizing Emails
 
-**For VMware Migration Opportunities**: Select "Virtualization (IBM Fusion)"
+1. Click on an email step in a cadence
+2. Enter prospect details:
+   - Prospect Name (required)
+   - Company Name (required)
+   - Industry (optional)
+   - Additional Context (optional)
+3. Click **"Generate Personalized Email"**
+4. Review the AI-generated email
+5. **Save** to database or **Regenerate** for alternatives
+6. **Copy** to clipboard for use in Salesloft
 
-**For Application Modernization**: Select "Application Modernization (IBM Fusion)"
+### Reviewing Generated Emails
 
-**For AI Infrastructure**: Select "Generative AI (IBM Fusion)"
+1. Navigate to the **Generated Emails** tab
+2. View all AI-generated emails organized by cadence and step
+3. Filter by grade, feedback, or search terms
+4. Click on an email to provide detailed feedback
+5. Rate emails on multiple criteria to improve AI learning
 
-**For Power Systems Customers**: Select "Power Systems Modernization (IBM PowerVS)"
+### Managing Knowledge Base
 
-**For Storage Refresh**: Select "Storage Modernization (IBM FlashSystems)"
-
-**For New Accounts (Whitespace)**: Select "Whitespace/New Client Introduction"
-
-**For Large Infrastructure Deals**: Select "Infrastructure Transformation (Multi-Product)"
-
-**Pro Tip**: You can select multiple cadence types to generate different approaches for the same prospect!
-
-### Important Rules
-
-❌ **DO NOT USE**:
-- Placeholders like `{{Name}}`, `{{Company}}`, `TBD`
-- Generic examples like "Acme Corp", "John Doe"
-- Test data or sample names
-
-✅ **DO USE**:
-- Real prospect names from your target accounts
-- Actual company names you're prospecting
-- Specific, identifiable organizations
+1. Navigate to the **Database** tab
+2. Browse tabs:
+   - **Companies**: Manage company profiles and intelligence
+   - **Industries**: Track industry trends and IBM solutions
+   - **Use Cases**: Product-specific use cases and migration paths
+   - **Training Data**: Good and bad examples for AI learning
+3. Add, edit, or delete records as needed
+4. Export data for backup or analysis
 
 ## 📁 Project Structure
 
 ```
-salesloft-cadence-generator/
+sales-cadence-builder/
 ├── frontend/                 # React application
 │   ├── src/
 │   │   ├── components/      # React components
+│   │   │   ├── generator/   # Cadence management
+│   │   │   ├── training/    # Generated emails
+│   │   │   └── admin/       # Database management
 │   │   ├── services/        # API and validation
 │   │   └── App.jsx          # Main app
 │   └── package.json
@@ -173,45 +165,55 @@ salesloft-cadence-generator/
 │   ├── src/
 │   │   ├── routes/          # API endpoints
 │   │   ├── services/        # Business logic
+│   │   │   ├── watsonxAI.js # Watsonx.ai integration
+│   │   │   └── promptBuilder.js # Prompt engineering
 │   │   ├── config/          # Configuration
 │   │   └── server.js        # Entry point
 │   └── package.json
-├── data/                     # Training data
+├── data/                     # Knowledge base
 │   ├── training_examples.json
 │   ├── cadence_templates.json
 │   ├── company_intelligence.json
+│   ├── generated_emails.json
 │   └── prompt_templates.json
 └── docs/                     # Documentation
     ├── SETUP.md
-    ├── TRAINING_GUIDE.md
-    ├── DEPLOYMENT.md
     └── CHROME_EXTENSION_PLAN.md
 ```
 
-## 🎓 Training the System
+## 🎓 Training the AI
 
-The system learns from examples in `data/training_examples.json`. To add your own:
+The system learns from examples in `data/training_examples.json` and user feedback:
 
-1. Copy an empty template from the file
-2. Fill in with your best-performing emails
-3. Include prospect name, company, industry, and full email text
-4. Save the file - the system will use it immediately
+### Adding Training Examples
+1. Navigate to Database > Training Data
+2. Review good and bad examples
+3. Add new examples with clear labels
+4. System uses these for prompt engineering
 
-See [TRAINING_GUIDE.md](docs/TRAINING_GUIDE.md) for detailed instructions.
+### Providing Feedback
+1. Review generated emails in the Generated Emails tab
+2. Click on an email to provide detailed feedback
+3. Rate on multiple criteria (personalization, relevance, clarity, etc.)
+4. Add comments and suggestions
+5. Feedback helps improve future generations
 
 ## 🔧 API Endpoints
 
 ### Cadence Generation
-- `POST /api/cadence/generate` - Generate cadences
-  - Body: `{ prospectName, companyName, cadenceTypes: [] }`
-  - cadenceTypes: Optional array of cadence type strings
-- `GET /api/cadence/test` - Test Azure OpenAI connection
+- `POST /api/cadence/generate` - Generate personalized emails
+  - Body: `{ prospectName, companyName, cadenceTypes, industry, additionalContext }`
+- `GET /api/cadence/test` - Test Watsonx.ai connection
 
 ### Training Data
-- `GET /api/training/examples` - Get all examples
+- `GET /api/training/examples` - Get all training examples
 - `POST /api/training/examples` - Add new example
 - `PUT /api/training/examples/:id` - Update example
 - `DELETE /api/training/examples/:id` - Delete example
+
+### Generated Emails
+- `POST /api/training/generated-emails` - Save generated email
+- `GET /api/training/generated-emails` - Get all generated emails
 
 ## 🚢 Deployment
 
@@ -230,26 +232,35 @@ cd ../backend
 vercel
 ```
 
-See [DEPLOYMENT.md](docs/DEPLOYMENT.md) for detailed deployment instructions.
+See [SETUP.md](docs/SETUP.md) for detailed deployment instructions.
 
 ## 🔮 Future Roadmap
 
-### Phase 2: Training Management (1 week)
-- Web UI for managing training examples
-- Import/export functionality
-- Quality scoring system
+### Phase 2: Enhanced Cadence Management (Current)
+- ✅ AI-powered email personalization
+- ✅ Knowledge base management
+- ✅ Feedback and learning system
+- 🔄 Cadence creation with dropdowns
+- 🔄 Edit and publish cadences
+- 🔄 Context management per cadence
 
 ### Phase 3: Multi-User & Roles (1-2 weeks)
 - Authentication (Auth0/Clerk)
-- Role-based access (Owner/Admin/Seller)
+- Role-based access (Admin/Seller)
 - User management dashboard
 - PostgreSQL database
 
-### Phase 4: Chrome Extension (2-3 weeks)
-- Direct Salesloft integration
+### Phase 4: Salesloft Integration (2-3 weeks)
+- Direct Salesloft API integration
 - Auto-populate cadence steps
-- Context extraction from Salesloft pages
-- One-click generation
+- Sync performance metrics
+- One-click publishing
+
+### Phase 5: Chrome Extension (2-3 weeks)
+- Salesloft page integration
+- Context extraction from pages
+- In-page email generation
+- Quick personalization
 
 See [CHROME_EXTENSION_PLAN.md](docs/CHROME_EXTENSION_PLAN.md) for technical details.
 
@@ -269,6 +280,7 @@ npm test
 ### Code Style
 - ESLint for JavaScript
 - Prettier for formatting
+- IBM Carbon design principles
 - Follow existing patterns
 
 ### Environment Variables
@@ -278,10 +290,10 @@ npm test
 
 ## 🐛 Troubleshooting
 
-### "Azure OpenAI API error"
+### "Watsonx.ai API error"
 - Check your API key in `.env`
-- Verify endpoint URL is correct
-- Ensure deployment name matches your Azure resource
+- Verify project ID is correct
+- Ensure you have access to Watsonx.ai
 
 ### "Failed to load training data"
 - Ensure `data/` directory exists
@@ -293,6 +305,11 @@ npm test
 - Check CORS settings in `backend/src/server.js`
 - Clear browser cache
 
+### Email generation fails
+- Check Watsonx.ai connection with `/api/cadence/test`
+- Verify prompt templates in `data/prompt_templates.json`
+- Review backend logs for detailed errors
+
 ## 📄 License
 
 UNLICENSED - Internal IBM use only
@@ -302,22 +319,23 @@ UNLICENSED - Internal IBM use only
 For questions or issues:
 1. Check documentation in `docs/`
 2. Review training examples in `data/`
-3. Contact the IBM Fusion sales team
+3. Contact the IBM Infrastructure sales enablement team
 
 ## 🙏 Acknowledgments
 
-Built for IBM Fusion sales team to accelerate personalized outreach and improve conversion rates through AI-powered cadence generation.
+Built for IBM Infrastructure sales team to accelerate personalized outreach and improve conversion rates through AI-powered cadence management and email generation.
 
 ---
 
-**Version**: 2.0.0 (Multi-Product Support)
-**Last Updated**: June 19, 2026
+**Version**: 3.0.0 (AI-Powered Platform)
+**Last Updated**: June 23, 2026
 
-## 🆕 What's New in v2.0
+## 🆕 What's New in v3.0
 
-- ✅ **Multi-Product Support**: IBM Fusion, PowerVS, and FlashSystems
-- ✅ **7 Cadence Types**: Flexible cadence selection for different scenarios
-- ✅ **Whitespace Cadences**: New client introduction sequences
-- ✅ **Product-Specific Intelligence**: Tailored messaging for each product line
-- ✅ **Enhanced Industry Context**: Product fit recommendations by industry
-- ✅ **Flexible Generation**: Select 1 or more cadence types per generation
+- ✅ **Watsonx.ai Integration**: Powered by IBM's enterprise AI platform
+- ✅ **Cadence Management**: Browse, analyze, and personalize existing cadences
+- ✅ **AI Email Generation**: Context-aware personalization for each step
+- ✅ **Knowledge Base**: Comprehensive company, industry, and product intelligence
+- ✅ **Feedback System**: Rate and improve AI output quality
+- ✅ **Use Cases Library**: Product-specific scenarios for PowerVS, FlashSystems, Fusion
+- ✅ **Training Data Management**: Curate examples to improve AI performance

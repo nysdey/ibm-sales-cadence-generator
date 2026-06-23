@@ -1,171 +1,89 @@
 import { useState, useEffect } from 'react';
-import { ThumbsUp, ThumbsDown, Star, Mail, Calendar, User, Building2, MessageSquare, Filter, Search, Loader2, Send } from 'lucide-react';
+import { Mail, Calendar, User, Building2, Search, ChevronDown, ChevronRight, Copy, Check, ArrowLeft, TrendingUp, BarChart3 } from 'lucide-react';
 import { getGeneratedEmails } from '../../services/api';
 
-// Sample generated emails with grades
-const SAMPLE_EMAILS = [
+// Mock generated emails data
+const MOCK_EMAILS = [
   {
     id: 1,
+    subject: 'Goldman Sachs + IBM Fusion: 50% VMware Cost Reduction',
+    body: 'Hi Sarah,\n\nGiven the recent VMware licensing changes, I wanted to reach out about how IBM Fusion can help Goldman Sachs reduce infrastructure costs by 50% while maintaining performance.\n\nWe\'ve helped 3 major financial institutions migrate from VMware with zero downtime. Would you be open to a brief conversation?\n\nBest regards,\nJohn Smith',
     prospectName: 'Sarah Chen',
     companyName: 'Goldman Sachs',
-    cadenceType: 'Client-Intro',
-    subject: 'Quick introduction - IBM Infrastructure Solutions',
-    body: 'Hi Sarah,\n\nI hope this email finds you well. I\'m reaching out from IBM\'s Infrastructure team because I noticed Goldman Sachs is in a growth phase, and I thought you might be interested in learning how we\'re helping similar organizations modernize their infrastructure.\n\nWe\'ve recently helped companies like yours reduce infrastructure costs by 40% while improving performance. Would you be open to a brief conversation?\n\nBest regards,\nJohn Smith',
+    cadenceName: 'US | Select | Infrastructure | Outbound | Fusion',
+    cadenceType: 'Fusion',
+    industry: 'Financial Services',
+    stepDay: 1,
     generatedAt: '2024-01-15T10:30:00Z',
     grade: 'A',
-    gradeScore: 95,
-    feedback: null,
-    aiAnalysis: {
-      strengths: ['Personalized opening', 'Clear value proposition', 'Specific metrics', 'Soft call-to-action'],
-      improvements: ['Could mention specific Goldman Sachs initiatives', 'Add social proof'],
-      tone: 'Professional and consultative',
-      readability: 'Excellent - Grade 8 reading level'
-    }
+    gradeReason: 'Highly personalized, timely context, specific value proposition, social proof'
   },
   {
     id: 2,
-    prospectName: 'Michael Rodriguez',
-    companyName: 'JPMorgan Chase',
-    cadenceType: 'Fusion VMWare',
-    subject: 'VMware Alternative: Reduce Costs by 50%',
-    body: 'Hi Michael,\n\nWith recent changes in VMware licensing, many IT leaders at financial institutions are exploring alternatives. IBM Fusion offers a compelling path forward for JPMorgan Chase.\n\nKey benefits:\n• 52% cost reduction\n• 40% performance improvement\n• Zero downtime migration\n\nWould you like to see how this could work for your team?\n\nBest,\nJohn Smith',
-    generatedAt: '2024-01-15T11:45:00Z',
-    grade: 'A-',
-    gradeScore: 92,
-    feedback: 'positive',
-    aiAnalysis: {
-      strengths: ['Timely topic', 'Bullet points for clarity', 'Specific metrics', 'Industry-specific'],
-      improvements: ['Could be more personalized', 'Add case study link'],
-      tone: 'Direct and value-focused',
-      readability: 'Very good - Grade 9 reading level'
-    }
+    subject: 'Re: IBM Fusion - Follow up',
+    body: 'Hi Sarah,\n\nI wanted to follow up on my previous email about IBM Fusion. I understand you\'re busy, so I\'ll keep this brief.\n\nI\'d love to share a quick case study of how we helped a company in Financial Services reduce their infrastructure spend by 35% while improving application performance by 50%.\n\nWould next Tuesday or Wednesday work for a 15-minute call?\n\nBest,\nJohn Smith',
+    prospectName: 'Sarah Chen',
+    companyName: 'Goldman Sachs',
+    cadenceName: 'US | Select | Infrastructure | Outbound | Fusion',
+    cadenceType: 'Fusion',
+    industry: 'Financial Services',
+    stepDay: 3,
+    generatedAt: '2024-01-15T10:32:00Z',
+    grade: 'B+',
+    gradeReason: 'Good follow-up, specific metrics, clear CTA'
   },
   {
     id: 3,
-    prospectName: 'Jennifer Park',
-    companyName: 'Morgan Stanley',
-    cadenceType: 'Flash Availability',
-    subject: 'IBM FlashSystem - 10x Faster Storage',
-    body: 'Hi Jennifer,\n\nI wanted to reach out about IBM FlashSystem - our latest storage innovation that\'s delivering unprecedented performance for enterprise applications at Morgan Stanley.\n\nKey benefits:\n• 10x faster than traditional storage\n• 99.9999% availability\n• AI-powered optimization\n\nInterested in a demo?\n\nBest,\nJohn Smith',
-    generatedAt: '2024-01-14T14:20:00Z',
-    grade: 'B+',
-    gradeScore: 87,
-    feedback: null,
-    aiAnalysis: {
-      strengths: ['Clear product focus', 'Strong technical specs', 'Simple CTA'],
-      improvements: ['Too product-focused, needs more personalization', 'Missing context about Morgan Stanley\'s needs', 'Could add social proof'],
-      tone: 'Technical and direct',
-      readability: 'Good - Grade 10 reading level'
-    }
+    subject: 'Mayo Clinic: Epic on IBM PowerVS - 40% Cost Reduction',
+    body: 'Hi Dr. Johnson,\n\nI noticed Mayo Clinic\'s recent announcement about EHR optimization. For your Epic workloads, IBM PowerVS offers:\n\n• Cloud flexibility without re-platforming\n• 40% lower TCO vs. on-prem\n• HIPAA-compliant infrastructure\n\nWould you be interested in a brief discussion about your Epic strategy?\n\nBest regards,\nJane Doe',
+    prospectName: 'Dr. Michael Johnson',
+    companyName: 'Mayo Clinic',
+    cadenceName: 'US | Select | Infrastructure | Power Modernization',
+    cadenceType: 'Power Systems Modernization',
+    industry: 'Healthcare',
+    stepDay: 1,
+    generatedAt: '2024-01-16T09:15:00Z',
+    grade: 'A-',
+    gradeReason: 'Research-based, industry-specific, compliance focus, clear benefits'
   },
   {
     id: 4,
-    prospectName: 'David Thompson',
-    companyName: 'Bank of America',
-    cadenceType: 'Client-Intro',
-    subject: 'Infrastructure Modernization for Bank of America',
-    body: 'Hi David,\n\nI noticed Bank of America recently announced expansion plans. As you scale, infrastructure becomes critical.\n\nIBM has helped similar financial institutions:\n• Reduce costs by 35-45%\n• Improve application performance by 50%\n• Achieve 99.99% uptime\n\nI\'d love to share how we can support your growth. Are you available for a 15-minute call next week?\n\nBest regards,\nJohn Smith',
-    generatedAt: '2024-01-14T09:15:00Z',
-    grade: 'A',
-    gradeScore: 94,
-    feedback: 'positive',
-    aiAnalysis: {
-      strengths: ['Personalized with company news', 'Relevant timing', 'Specific metrics', 'Clear CTA with timeframe'],
-      improvements: ['Could mention specific expansion details'],
-      tone: 'Professional and timely',
-      readability: 'Excellent - Grade 8 reading level'
-    }
+    subject: 'IBM FlashSystem - Storage Performance Breakthrough',
+    body: 'Hi David,\n\nI wanted to reach out about IBM FlashSystem - our latest storage innovation that\'s delivering unprecedented performance for enterprise applications.\n\nKey benefits:\n• 10x faster than traditional storage\n• 99.9999% availability\n• AI-powered optimization\n\nWould you be interested in a demo?\n\nBest,\nMike Wilson',
+    prospectName: 'David Martinez',
+    companyName: 'JPMorgan Chase',
+    cadenceName: 'US | Select | Infrastructure | Flash Availability',
+    cadenceType: 'Storage Modernization',
+    industry: 'Banking',
+    stepDay: 1,
+    generatedAt: '2024-01-17T14:20:00Z',
+    grade: 'B',
+    gradeReason: 'Clear value prop, specific benefits, but could be more personalized'
   },
   {
     id: 5,
-    prospectName: 'Lisa Wang',
-    companyName: 'Citigroup',
-    cadenceType: 'Follow-up',
-    subject: 'Re: Infrastructure Discussion',
-    body: 'Hi Lisa,\n\nFollowing up on my previous email about infrastructure modernization for Citigroup.\n\nI wanted to share a quick case study: A Fortune 500 financial services company reduced their infrastructure spend by 40% while improving performance.\n\nWould next Tuesday or Wednesday work for a brief call?\n\nBest,\nJohn Smith',
-    generatedAt: '2024-01-13T16:30:00Z',
-    grade: 'B',
-    gradeScore: 83,
-    feedback: 'negative',
-    aiAnalysis: {
-      strengths: ['Clear follow-up', 'Includes case study', 'Specific meeting options'],
-      improvements: ['Generic case study without details', 'Doesn\'t reference previous conversation', 'Could be more personalized to Citigroup'],
-      tone: 'Professional but generic',
-      readability: 'Good - Grade 9 reading level'
-    }
-  },
-  {
-    id: 6,
-    prospectName: 'Robert Martinez',
-    companyName: 'Wells Fargo',
-    cadenceType: 'Fusion VMWare',
-    subject: 'Wells Fargo + IBM Fusion: Perfect Timing',
-    body: 'Hi Robert,\n\nGiven the recent VMware licensing changes and Wells Fargo\'s focus on cost optimization, I thought this might be timely.\n\nIBM Fusion offers:\n• 50% reduction in virtualization costs\n• Seamless migration from VMware\n• Enhanced security and compliance\n\nWe\'ve helped 3 major banks make this transition successfully. Would you like to learn more?\n\nBest regards,\nJohn Smith',
-    generatedAt: '2024-01-13T11:00:00Z',
+    subject: 'FlashSystem ROI Calculator for JPMorgan',
+    body: 'Hi David,\n\nI wanted to share our FlashSystem ROI calculator with you. Based on typical deployments in Banking, organizations see:\n\n• 60% reduction in storage costs\n• 5x improvement in application performance\n• ROI in under 12 months\n\nWould you like me to run a custom analysis for JPMorgan Chase?\n\nBest,\nMike Wilson',
+    prospectName: 'David Martinez',
+    companyName: 'JPMorgan Chase',
+    cadenceName: 'US | Select | Infrastructure | Flash Availability',
+    cadenceType: 'Storage Modernization',
+    industry: 'Banking',
+    stepDay: 5,
+    generatedAt: '2024-01-17T14:25:00Z',
     grade: 'A-',
-    gradeScore: 90,
-    feedback: 'positive',
-    aiAnalysis: {
-      strengths: ['Timely and relevant', 'Company-specific context', 'Social proof with bank examples', 'Clear benefits'],
-      improvements: ['Could name the 3 banks (if allowed)', 'Add specific timeline'],
-      tone: 'Consultative and timely',
-      readability: 'Very good - Grade 8 reading level'
-    }
-  },
-  {
-    id: 7,
-    prospectName: 'Amanda Foster',
-    companyName: 'Charles Schwab',
-    cadenceType: 'Client-Intro',
-    subject: 'IBM Infrastructure Solutions',
-    body: 'Hi Amanda,\n\nI\'m reaching out from IBM about our infrastructure solutions.\n\nWe help companies improve their IT infrastructure. Would you be interested in learning more?\n\nThanks,\nJohn Smith',
-    generatedAt: '2024-01-12T15:45:00Z',
-    grade: 'C',
-    gradeScore: 72,
-    feedback: 'negative',
-    aiAnalysis: {
-      strengths: ['Brief and to the point'],
-      improvements: ['Too generic', 'No personalization', 'No specific value proposition', 'Weak CTA', 'Missing company context', 'No metrics or proof points'],
-      tone: 'Generic and impersonal',
-      readability: 'Too simple - Grade 6 reading level'
-    }
-  },
-  {
-    id: 8,
-    prospectName: 'Kevin O\'Brien',
-    companyName: 'TD Bank',
-    cadenceType: 'Flash Availability',
-    subject: 'Solving TD Bank\'s Storage Performance Challenges',
-    body: 'Hi Kevin,\n\nI understand TD Bank is experiencing rapid data growth. Storage performance becomes critical as you scale.\n\nIBM FlashSystem has helped similar banks:\n• Handle 3x data growth without performance degradation\n• Reduce storage costs by 60%\n• Achieve sub-millisecond latency\n\nOne of your peers at a major Canadian bank saw ROI in 8 months. Would you like to see their results?\n\nBest regards,\nJohn Smith',
-    generatedAt: '2024-01-12T10:20:00Z',
-    grade: 'A',
-    gradeScore: 96,
-    feedback: 'positive',
-    aiAnalysis: {
-      strengths: ['Identifies specific pain point', 'Relevant metrics', 'Geographic social proof (Canadian bank)', 'Specific ROI timeframe', 'Strong CTA'],
-      improvements: ['Could mention specific TD Bank initiatives if known'],
-      tone: 'Consultative and solution-focused',
-      readability: 'Excellent - Grade 9 reading level'
-    }
+    gradeReason: 'Specific ROI metrics, industry-focused, actionable CTA'
   }
 ];
 
 const GeneratedEmails = () => {
-  const [emails, setEmails] = useState(SAMPLE_EMAILS);
-  const [selectedEmail, setSelectedEmail] = useState(null);
-  const [filterGrade, setFilterGrade] = useState('all');
-  const [filterFeedback, setFilterFeedback] = useState('all');
+  const [emails, setEmails] = useState(MOCK_EMAILS);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [userComment, setUserComment] = useState('');
-  const [userScores, setUserScores] = useState({
-    personalization: 0,
-    relevance: 0,
-    clarity: 0,
-    callToAction: 0,
-    overall: 0
-  });
+  const [expandedCadences, setExpandedCadences] = useState({});
+  const [expandedSteps, setExpandedSteps] = useState({});
+  const [selectedEmail, setSelectedEmail] = useState(null);
+  const [copiedId, setCopiedId] = useState(null);
 
   // Load emails from database on mount
   useEffect(() => {
@@ -173,276 +91,189 @@ const GeneratedEmails = () => {
       try {
         const data = await getGeneratedEmails();
         if (data.emails && data.emails.length > 0) {
-          // Merge with sample emails, prioritizing database emails
-          const dbEmails = data.emails.map(email => ({
-            ...email,
-            grade: email.grade || 'B',
-            gradeScore: email.gradeScore || 85,
-            aiAnalysis: email.aiAnalysis || {
-              strengths: ['Personalized content'],
-              improvements: ['Could add more details'],
-              tone: 'Professional',
-              readability: 'Good'
-            }
-          }));
-          setEmails([...dbEmails, ...SAMPLE_EMAILS]);
+          // Merge with mock data
+          setEmails([...MOCK_EMAILS, ...data.emails]);
         }
       } catch (error) {
         console.error('Error loading emails:', error);
-        // Keep sample emails if loading fails
-      } finally {
-        setLoading(false);
       }
     };
     
     loadEmails();
   }, []);
 
-  const filteredEmails = emails.filter(email => {
-    const matchesSearch = searchTerm === '' || 
-      email.prospectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      email.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      email.subject.toLowerCase().includes(searchTerm.toLowerCase());
+  // Group emails by cadence and step
+  const groupedEmails = emails.reduce((acc, email) => {
+    const cadenceName = email.cadenceName || 'Unknown Cadence';
+    const stepDay = email.stepDay || 0;
     
-    const matchesGrade = filterGrade === 'all' || email.grade.startsWith(filterGrade);
-    const matchesFeedback = filterFeedback === 'all' || 
-      (filterFeedback === 'positive' && email.feedback === 'positive') ||
-      (filterFeedback === 'negative' && email.feedback === 'negative') ||
-      (filterFeedback === 'none' && email.feedback === null);
-    
-    return matchesSearch && matchesGrade && matchesFeedback;
-  });
+    if (!acc[cadenceName]) {
+      acc[cadenceName] = {};
+    }
+    if (!acc[cadenceName][stepDay]) {
+      acc[cadenceName][stepDay] = [];
+    }
+    acc[cadenceName][stepDay].push(email);
+    return acc;
+  }, {});
 
-  const handleFeedback = (emailId, feedbackType) => {
-    setEmails(emails.map(email =>
-      email.id === emailId ? { ...email, feedback: feedbackType } : email
-    ));
+  // Filter emails
+  const filteredGroupedEmails = Object.entries(groupedEmails).reduce((acc, [cadenceName, steps]) => {
+    if (searchTerm) {
+      const matchesCadence = cadenceName.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchingSteps = Object.entries(steps).reduce((stepAcc, [stepDay, stepEmails]) => {
+        const matchingEmails = stepEmails.filter(email =>
+          email.prospectName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          email.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          email.subject?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        if (matchingEmails.length > 0) {
+          stepAcc[stepDay] = matchingEmails;
+        }
+        return stepAcc;
+      }, {});
+      
+      if (matchesCadence || Object.keys(matchingSteps).length > 0) {
+        acc[cadenceName] = matchesCadence ? steps : matchingSteps;
+      }
+    } else {
+      acc[cadenceName] = steps;
+    }
+    return acc;
+  }, {});
+
+  const toggleCadence = (cadenceName) => {
+    setExpandedCadences(prev => ({
+      ...prev,
+      [cadenceName]: !prev[cadenceName]
+    }));
   };
 
-  const handleSubmitFeedback = () => {
-    // Save user feedback and scores
-    const updatedEmail = {
-      ...selectedEmail,
-      userComment,
-      userScores,
-      feedbackSubmittedAt: new Date().toISOString()
-    };
-    
-    setEmails(emails.map(email =>
-      email.id === selectedEmail.id ? updatedEmail : email
-    ));
-    
-    // Reset form
-    setUserComment('');
-    setUserScores({
-      personalization: 0,
-      relevance: 0,
-      clarity: 0,
-      callToAction: 0,
-      overall: 0
-    });
-    
-    alert('Feedback submitted! The model will learn from your input.');
+  const toggleStep = (cadenceName, stepDay) => {
+    const key = `${cadenceName}-${stepDay}`;
+    setExpandedSteps(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
   };
 
-  const ScoreSlider = ({ label, value, onChange }) => (
-    <div className="space-y-2">
-      <div className="flex justify-between items-center">
-        <label className="text-sm font-medium text-gray-300">{label}</label>
-        <span className="text-sm font-semibold text-ibm-blue">{value}/10</span>
-      </div>
-      <input
-        type="range"
-        min="0"
-        max="10"
-        value={value}
-        onChange={(e) => onChange(parseInt(e.target.value))}
-        className="w-full h-2 bg-bg-raised rounded-lg appearance-none cursor-pointer accent-ibm-blue"
-      />
-    </div>
-  );
-
-  const getGradeColor = (grade) => {
-    if (grade.startsWith('A')) return 'text-green-400 bg-green-500/10 border-green-500/30';
-    if (grade.startsWith('B')) return 'text-blue-400 bg-blue-500/10 border-blue-500/30';
-    if (grade.startsWith('C')) return 'text-yellow-400 bg-yellow-500/10 border-yellow-500/30';
-    return 'text-red-400 bg-red-500/10 border-red-500/30';
-  };
-
-  const getGradeLabel = (grade) => {
-    if (grade.startsWith('A')) return 'Excellent';
-    if (grade.startsWith('B')) return 'Good';
-    if (grade.startsWith('C')) return 'Needs Improvement';
-    return 'Poor';
+  const copyToClipboard = async (text, id) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-text-secondary">Loading emails...</div>
+      </div>
+    );
+  }
+
+  // Detail view for selected email
   if (selectedEmail) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-5">
         <button
           onClick={() => setSelectedEmail(null)}
-          className="text-gray-500 hover:text-gray-100 text-sm font-medium"
+          className="flex items-center space-x-2 text-text-tertiary hover:text-text-primary transition-colors"
         >
-          ← Back to All Emails
+          <ArrowLeft className="w-4 h-4" />
+          <span className="text-sm font-medium">Back to All Emails</span>
         </button>
 
-        <div className="bg-bg-surface rounded-xl border border-border p-6">
-          <div className="flex items-start justify-between mb-6">
+        <div className="card">
+          <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
-              <div className="flex items-center space-x-3 mb-2">
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold border ${getGradeColor(selectedEmail.grade)}`}>
-                  Grade: {selectedEmail.grade}
-                </span>
-                <span className="text-sm text-gray-500">{getGradeLabel(selectedEmail.grade)}</span>
-                <span className="text-sm text-gray-500">•</span>
-                <span className="text-sm text-gray-500">Score: {selectedEmail.gradeScore}/100</span>
-              </div>
-              <h2 className="text-2xl font-semibold text-gray-100 mb-4">{selectedEmail.subject}</h2>
-              <div className="flex items-center space-x-6 text-sm text-gray-500">
-                <div className="flex items-center space-x-2">
+              <h2 className="text-xl font-light text-text-primary mb-2">{selectedEmail.subject}</h2>
+              <div className="flex items-center space-x-4 text-sm text-text-tertiary">
+                <div className="flex items-center space-x-1.5">
                   <User className="w-4 h-4" />
                   <span>{selectedEmail.prospectName}</span>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1.5">
                   <Building2 className="w-4 h-4" />
                   <span>{selectedEmail.companyName}</span>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1.5">
                   <Calendar className="w-4 h-4" />
                   <span>{formatDate(selectedEmail.generatedAt)}</span>
                 </div>
               </div>
+              <div className="mt-3 flex items-center space-x-2">
+                <span className="px-2.5 py-1 text-xs font-medium bg-ibm-blue/10 text-ibm-blue border border-border">
+                  {selectedEmail.cadenceName}
+                </span>
+                <span className="px-2.5 py-1 text-xs font-medium bg-gray-80/50 text-gray-30 border border-border">
+                  Day {selectedEmail.stepDay}
+                </span>
+                {selectedEmail.industry && (
+                  <span className="px-2.5 py-1 text-xs font-medium bg-ibm-purple/10 text-ibm-purple border border-border">
+                    {selectedEmail.industry}
+                  </span>
+                )}
+                {selectedEmail.grade && (
+                  <span className={`px-2.5 py-1 text-xs font-medium border ${
+                    ['A', 'A-'].includes(selectedEmail.grade) ? 'bg-green-500/10 text-green-400 border-green-500/30' :
+                    ['B+', 'B'].includes(selectedEmail.grade) ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
+                    'bg-yellow-500/10 text-yellow-400 border-yellow-500/30'
+                  }`}>
+                    Grade: {selectedEmail.grade}
+                  </span>
+                )}
+              </div>
             </div>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => handleFeedback(selectedEmail.id, 'positive')}
-                className={`p-2 rounded-lg border transition-colors ${
-                  selectedEmail.feedback === 'positive'
-                    ? 'bg-green-500/10 border-green-500/60 text-green-400'
-                    : 'border-white/15 text-gray-500 hover:text-green-400 hover:border-green-500/60'
-                }`}
-              >
-                <ThumbsUp className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => handleFeedback(selectedEmail.id, 'negative')}
-                className={`p-2 rounded-lg border transition-colors ${
-                  selectedEmail.feedback === 'negative'
-                    ? 'bg-red-500/10 border-red-500/60 text-red-400'
-                    : 'border-white/15 text-gray-500 hover:text-red-400 hover:border-red-500/60'
-                }`}
-              >
-                <ThumbsDown className="w-5 h-5" />
-              </button>
+            <button
+              onClick={() => copyToClipboard(`Subject: ${selectedEmail.subject}\n\n${selectedEmail.body}`, selectedEmail.id)}
+              className="btn-secondary flex items-center space-x-1.5 text-sm"
+            >
+              {copiedId === selectedEmail.id ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span>Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  <span>Copy</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="bg-bg-surface border border-border p-4">
+            <div className="mb-4">
+              <div className="text-xs text-text-tertiary mb-1.5 font-medium">Subject:</div>
+              <div className="text-sm text-text-primary">{selectedEmail.subject}</div>
+            </div>
+            <div>
+              <div className="text-xs text-text-tertiary mb-1.5 font-medium">Body:</div>
+              <div className="text-sm text-text-primary whitespace-pre-wrap leading-relaxed">{selectedEmail.body}</div>
             </div>
           </div>
 
-          <div className="bg-white/5 border border-border rounded-lg p-6 mb-6">
-            <h3 className="text-sm font-semibold text-gray-300 mb-4">Email Content</h3>
-            <div className="space-y-4">
-              <div>
-                <div className="text-xs text-gray-500 mb-1">Subject:</div>
-                <div className="text-sm font-medium text-gray-100">{selectedEmail.subject}</div>
-              </div>
-              <div>
-                <div className="text-xs text-gray-500 mb-1">Body:</div>
-                <div className="text-sm text-gray-300 whitespace-pre-wrap">{selectedEmail.body}</div>
-              </div>
+          {selectedEmail.additionalContext && (
+            <div className="bg-bg-surface border border-border p-4 mt-4">
+              <div className="text-xs text-text-tertiary mb-1.5 font-medium">Additional Context Used:</div>
+              <div className="text-sm text-text-primary">{selectedEmail.additionalContext}</div>
             </div>
-          </div>
-
-          {/* User Feedback Section */}
-          <div className="bg-bg-elevated border border-border rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center space-x-2">
-              <MessageSquare className="w-5 h-5" />
-              <span>Your Feedback</span>
-            </h3>
-            
-            <div className="space-y-6">
-              {/* Score Criteria */}
-              <div className="space-y-4">
-                <h4 className="text-sm font-medium text-gray-300 mb-3">Rate this email (0-10):</h4>
-                
-                <ScoreSlider
-                  label="Personalization"
-                  value={userScores.personalization}
-                  onChange={(val) => setUserScores({...userScores, personalization: val})}
-                />
-                
-                <ScoreSlider
-                  label="Relevance to Prospect"
-                  value={userScores.relevance}
-                  onChange={(val) => setUserScores({...userScores, relevance: val})}
-                />
-                
-                <ScoreSlider
-                  label="Clarity & Conciseness"
-                  value={userScores.clarity}
-                  onChange={(val) => setUserScores({...userScores, clarity: val})}
-                />
-                
-                <ScoreSlider
-                  label="Call-to-Action Strength"
-                  value={userScores.callToAction}
-                  onChange={(val) => setUserScores({...userScores, callToAction: val})}
-                />
-                
-                <ScoreSlider
-                  label="Overall Quality"
-                  value={userScores.overall}
-                  onChange={(val) => setUserScores({...userScores, overall: val})}
-                />
-              </div>
-
-              {/* Comment Section */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Comments & Suggestions
-                </label>
-                <textarea
-                  value={userComment}
-                  onChange={(e) => setUserComment(e.target.value)}
-                  placeholder="What worked well? What could be improved? Any specific suggestions?"
-                  rows={4}
-                  className="w-full px-4 py-3 rounded-xl bg-bg-raised/50 text-text-primary placeholder-text-secondary border border-border focus:ring-2 focus:ring-ibm-blue-glow outline-none"
-                />
-              </div>
-
-              {/* Submit Button */}
-              <button
-                onClick={handleSubmitFeedback}
-                className="w-full btn-primary flex items-center justify-center space-x-2"
-              >
-                <Send className="w-4 h-4" />
-                <span>Submit Feedback & Train Model</span>
-              </button>
-
-              <p className="text-xs text-text-secondary text-center">
-                Your feedback helps the AI learn what makes a great personalized email
-              </p>
-            </div>
-          </div>
-
-          {/* AI Analysis (Reference) */}
-          {selectedEmail.aiAnalysis && (
-            <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-6">
-              <h3 className="text-sm font-semibold text-gray-300 mb-3 flex items-center space-x-2">
-                <span className="text-blue-400">ℹ️</span>
-                <span>AI Initial Analysis (Reference Only)</span>
-              </h3>
-              <div className="space-y-3 text-xs text-gray-400">
-                <div>
-                  <span className="font-medium">Strengths:</span> {selectedEmail.aiAnalysis.strengths.join(', ')}
-                </div>
-                <div>
-                  <span className="font-medium">Improvements:</span> {selectedEmail.aiAnalysis.improvements.join(', ')}
-                </div>
-              </div>
+          )}
+          
+          {selectedEmail.gradeReason && (
+            <div className="bg-bg-surface border border-border p-4 mt-4">
+              <div className="text-xs text-text-tertiary mb-1.5 font-medium">Quality Assessment:</div>
+              <div className="text-sm text-text-primary">{selectedEmail.gradeReason}</div>
             </div>
           )}
         </div>
@@ -450,145 +281,180 @@ const GeneratedEmails = () => {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-ibm-blue" />
-        <span className="ml-3 text-text-secondary">Loading emails...</span>
-      </div>
-    );
-  }
+  // Calculate analytics
+  const totalEmails = emails.length;
+  const gradeDistribution = emails.reduce((acc, email) => {
+    const grade = email.grade || 'N/A';
+    acc[grade] = (acc[grade] || 0) + 1;
+    return acc;
+  }, {});
+  const avgGrade = emails.filter(e => e.grade).length > 0
+    ? (emails.filter(e => ['A', 'A-', 'B+', 'B'].includes(e.grade)).length / emails.filter(e => e.grade).length * 100).toFixed(0)
+    : 0;
 
+  // List view
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-text-primary">Generated Emails</h2>
-          <p className="text-sm text-text-secondary mt-1">
-            Review AI-generated emails with quality grades and feedback
+          <h2 className="text-2xl font-light text-text-primary">Generated Emails</h2>
+          <p className="text-sm text-text-secondary mt-1 font-light">
+            Review AI-generated emails organized by cadence and step
           </p>
         </div>
-        <div className="flex items-center space-x-4">
-          <div className="text-sm text-text-secondary">
-            <span className="font-semibold">{filteredEmails.length}</span> of {emails.length} emails
+      </div>
+
+      {/* Analytics Cards */}
+      <div className="grid grid-cols-4 gap-4">
+        <div className="card">
+          <div className="flex items-center space-x-3">
+            <Mail className="w-8 h-8 text-ibm-blue" />
+            <div>
+              <div className="text-2xl font-light text-text-primary">{totalEmails}</div>
+              <div className="text-xs text-text-tertiary mt-0.5">Total Emails</div>
+            </div>
+          </div>
+        </div>
+        <div className="card">
+          <div className="flex items-center space-x-3">
+            <TrendingUp className="w-8 h-8 text-ibm-blue" />
+            <div>
+              <div className="text-2xl font-light text-ibm-blue">{avgGrade}%</div>
+              <div className="text-xs text-text-tertiary mt-0.5">Quality Score</div>
+            </div>
+          </div>
+        </div>
+        <div className="card">
+          <div className="flex items-center space-x-3">
+            <BarChart3 className="w-8 h-8 text-ibm-blue" />
+            <div>
+              <div className="text-2xl font-light text-text-primary">{Object.keys(groupedEmails).length}</div>
+              <div className="text-xs text-text-tertiary mt-0.5">Cadences</div>
+            </div>
+          </div>
+        </div>
+        <div className="card">
+          <div className="flex items-center space-x-3">
+            <Building2 className="w-8 h-8 text-ibm-blue" />
+            <div>
+              <div className="text-2xl font-light text-text-primary">{new Set(emails.map(e => e.companyName)).size}</div>
+              <div className="text-xs text-text-tertiary mt-0.5">Companies</div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Search and Filter */}
-      <div className="bg-bg-surface rounded-xl border border-border p-4">
-        <div className="flex items-center space-x-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
-            <input
-              type="text"
-              placeholder="Search by prospect, company, or subject..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input pl-10"
-            />
-          </div>
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={`btn-secondary flex items-center space-x-2 ${showFilters ? 'bg-blue-500/10 border-ibm-blue-light text-ibm-blue-light' : ''}`}
-          >
-            <Filter className="w-4 h-4" />
-            <span>Filters</span>
-          </button>
-        </div>
-
-        {showFilters && (
-          <div className="mt-4 pt-4 border-t border-border grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-gray-300 mb-1">Grade</label>
-              <select
-                value={filterGrade}
-                onChange={(e) => setFilterGrade(e.target.value)}
-                className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-bg-raised text-gray-100 focus:ring-2 focus:ring-ibm-blue-light focus:border-ibm-blue-light outline-none"
-              >
-                <option value="all">All Grades</option>
-                <option value="A">A (Excellent)</option>
-                <option value="B">B (Good)</option>
-                <option value="C">C (Needs Improvement)</option>
-                <option value="D">D (Poor)</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-300 mb-1">Feedback</label>
-              <select
-                value={filterFeedback}
-                onChange={(e) => setFilterFeedback(e.target.value)}
-                className="w-full text-sm border border-border rounded-lg px-3 py-2 bg-bg-raised text-gray-100 focus:ring-2 focus:ring-ibm-blue-light focus:border-ibm-blue-light outline-none"
-              >
-                <option value="all">All Feedback</option>
-                <option value="positive">Positive</option>
-                <option value="negative">Negative</option>
-                <option value="none">No Feedback</option>
-              </select>
-            </div>
-          </div>
-        )}
+      {/* Search - Consistent style */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-text-tertiary" />
+        <input
+          type="text"
+          placeholder="Search by prospect, company, cadence, or subject..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full px-3 py-2 pl-10 text-sm bg-bg-surface text-text-primary placeholder-text-tertiary border border-border focus:ring-2 focus:ring-ibm-blue outline-none"
+        />
       </div>
 
-      {/* Email List */}
-      <div className="grid grid-cols-1 gap-4">
-        {filteredEmails.map((email) => (
-          <div
-            key={email.id}
-            onClick={() => setSelectedEmail(email)}
-            className="bg-bg-surface rounded-xl border border-border p-6 hover:border-ibm-blue-light hover:shadow-elevated transition-all cursor-pointer"
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center space-x-3 mb-2">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getGradeColor(email.grade)}`}>
-                    {email.grade}
-                  </span>
-                  <span className="text-xs text-gray-500">{email.gradeScore}/100</span>
-                  {email.feedback === 'positive' && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-300 border border-green-500/30">
-                      <ThumbsUp className="w-3 h-3 mr-1" />
-                      Positive
-                    </span>
-                  )}
-                  {email.feedback === 'negative' && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-300 border border-red-500/30">
-                      <ThumbsDown className="w-3 h-3 mr-1" />
-                      Negative
-                    </span>
-                  )}
+      {/* Grouped Emails */}
+      <div className="space-y-3">
+        {Object.entries(filteredGroupedEmails).map(([cadenceName, steps]) => (
+          <div key={cadenceName} className="card">
+            {/* Cadence Header */}
+            <button
+              onClick={() => toggleCadence(cadenceName)}
+              className="w-full flex items-center justify-between text-left hover:bg-bg-raised p-3 -m-3 transition-colors"
+            >
+              <div className="flex items-center space-x-3">
+                {expandedCadences[cadenceName] ? (
+                  <ChevronDown className="w-5 h-5 text-text-tertiary" />
+                ) : (
+                  <ChevronRight className="w-5 h-5 text-text-tertiary" />
+                )}
+                <div>
+                  <h3 className="text-base font-light text-text-primary">{cadenceName}</h3>
+                  <p className="text-xs text-text-tertiary mt-0.5">
+                    {Object.keys(steps).length} steps • {Object.values(steps).flat().length} emails
+                  </p>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-100 mb-2">{email.subject}</h3>
-                <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
-                  <div className="flex items-center space-x-1">
-                    <User className="w-4 h-4" />
-                    <span>{email.prospectName}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Building2 className="w-4 h-4" />
-                    <span>{email.companyName}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Calendar className="w-4 h-4" />
-                    <span>{formatDate(email.generatedAt)}</span>
-                  </div>
-                </div>
-                <p className="text-sm text-gray-500 line-clamp-2">{email.body}</p>
               </div>
-              <div className="ml-4 flex flex-col items-end space-y-2">
-                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-500/30">
-                  {email.cadenceType}
-                </span>
+            </button>
+
+            {/* Steps */}
+            {expandedCadences[cadenceName] && (
+              <div className="mt-4 space-y-2 border-t border-border pt-4">
+                {Object.entries(steps)
+                  .sort(([a], [b]) => Number(a) - Number(b))
+                  .map(([stepDay, stepEmails]) => {
+                    const stepKey = `${cadenceName}-${stepDay}`;
+                    return (
+                      <div key={stepKey} className="border border-border">
+                        {/* Step Header */}
+                        <button
+                          onClick={() => toggleStep(cadenceName, stepDay)}
+                          className="w-full flex items-center justify-between text-left hover:bg-bg-raised p-3 transition-colors"
+                        >
+                          <div className="flex items-center space-x-3">
+                            {expandedSteps[stepKey] ? (
+                              <ChevronDown className="w-4 h-4 text-text-tertiary" />
+                            ) : (
+                              <ChevronRight className="w-4 h-4 text-text-tertiary" />
+                            )}
+                            <div className="flex items-center space-x-2">
+                              <span className="px-2 py-0.5 text-xs font-medium bg-gray-80/50 text-gray-30 border border-border">
+                                Day {stepDay}
+                              </span>
+                              <span className="text-sm text-text-secondary">
+                                {stepEmails.length} {stepEmails.length === 1 ? 'email' : 'emails'}
+                              </span>
+                            </div>
+                          </div>
+                        </button>
+
+                        {/* Emails in Step */}
+                        {expandedSteps[stepKey] && (
+                          <div className="border-t border-border">
+                            {stepEmails.map((email) => (
+                              <div
+                                key={email.id}
+                                onClick={() => setSelectedEmail(email)}
+                                className="p-3 hover:bg-bg-raised cursor-pointer transition-colors border-b border-border last:border-b-0"
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="text-sm font-medium text-text-primary mb-1 truncate">
+                                      {email.subject}
+                                    </h4>
+                                    <div className="flex items-center space-x-3 text-xs text-text-tertiary mb-2">
+                                      <span>{email.prospectName}</span>
+                                      <span>•</span>
+                                      <span>{email.companyName}</span>
+                                      <span>•</span>
+                                      <span>{formatDate(email.generatedAt)}</span>
+                                    </div>
+                                    <p className="text-xs text-text-secondary line-clamp-2">
+                                      {email.body}
+                                    </p>
+                                  </div>
+                                  <Mail className="w-4 h-4 text-text-tertiary ml-3 flex-shrink-0" />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
               </div>
-            </div>
+            )}
           </div>
         ))}
       </div>
 
-      {filteredEmails.length === 0 && (
-        <div className="text-center py-12 bg-bg-surface rounded-xl border border-border">
-          <Mail className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-          <p className="text-gray-500">No emails found matching your criteria</p>
+      {Object.keys(filteredGroupedEmails).length === 0 && (
+        <div className="card text-center py-12">
+          <Mail className="w-12 h-12 text-text-tertiary mx-auto mb-4" />
+          <p className="text-text-tertiary">No emails found matching your criteria</p>
         </div>
       )}
     </div>
