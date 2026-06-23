@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, Calendar, User, Building2, Search, ChevronDown, ChevronRight, Copy, Check, ArrowLeft, TrendingUp, BarChart3 } from 'lucide-react';
+import { Mail, Calendar, User, Building2, Search, ChevronDown, ChevronRight, Copy, Check, ArrowLeft, TrendingUp, BarChart3, Star, Send, X } from 'lucide-react';
 import { getGeneratedEmails } from '../../services/api';
 
 // Mock generated emails data
@@ -73,6 +73,76 @@ const MOCK_EMAILS = [
     generatedAt: '2024-01-17T14:25:00Z',
     grade: 'A-',
     gradeReason: 'Specific ROI metrics, industry-focused, actionable CTA'
+  },
+  {
+    id: 6,
+    subject: 'Walmart: Hybrid Cloud Strategy with IBM Power',
+    body: 'Hi Jennifer,\n\nI noticed Walmart\'s recent cloud initiatives. For your mission-critical SAP workloads, IBM Power on Cloud offers:\n\n• Seamless hybrid cloud integration\n• 99.999% uptime SLA\n• 30% better price-performance than x86\n\nWould you be interested in discussing your hybrid cloud roadmap?\n\nBest regards,\nRobert Chen',
+    prospectName: 'Jennifer Williams',
+    companyName: 'Walmart',
+    cadenceName: 'US | Select | Infrastructure | Outbound | Client-Intro',
+    cadenceType: 'Infrastructure Modernization',
+    industry: 'Retail',
+    stepDay: 1,
+    generatedAt: '2024-01-18T11:45:00Z',
+    grade: 'B+',
+    gradeReason: 'Good personalization, specific benefits, but could include more social proof'
+  },
+  {
+    id: 7,
+    subject: 'Re: Hybrid Cloud Follow-up',
+    body: 'Hi Jennifer,\n\nFollowing up on my previous email about IBM Power for your SAP environment. I\'d love to share a case study from Target showing:\n\n• 40% cost reduction\n• Zero downtime migration\n• Improved disaster recovery\n\nDo you have 20 minutes this week?\n\nBest,\nRobert Chen',
+    prospectName: 'Jennifer Williams',
+    companyName: 'Walmart',
+    cadenceName: 'US | Select | Infrastructure | Outbound | Client-Intro',
+    cadenceType: 'Infrastructure Modernization',
+    industry: 'Retail',
+    stepDay: 3,
+    generatedAt: '2024-01-18T11:50:00Z',
+    grade: 'A',
+    gradeReason: 'Excellent follow-up with competitor case study, specific metrics, clear CTA'
+  },
+  {
+    id: 8,
+    subject: 'Boeing: AI-Powered Infrastructure Optimization',
+    body: 'Hi Thomas,\n\nGiven Boeing\'s focus on digital transformation, I wanted to introduce IBM\'s AI-powered infrastructure management:\n\n• Predictive maintenance reducing downtime by 45%\n• Automated optimization saving 25% on infrastructure costs\n• Real-time performance insights\n\nWould you be open to a brief demo?\n\nBest regards,\nLisa Anderson',
+    prospectName: 'Thomas Brown',
+    companyName: 'Boeing',
+    cadenceName: 'US | Enterprise | AI & Automation | CTO | Outbound | watsonx | FY26',
+    cadenceType: 'AI Infrastructure',
+    industry: 'Manufacturing',
+    stepDay: 1,
+    generatedAt: '2024-01-19T09:30:00Z',
+    grade: 'A-',
+    gradeReason: 'Strong value proposition, industry-relevant, specific metrics'
+  },
+  {
+    id: 9,
+    subject: 'Citibank: Storage Modernization ROI',
+    body: 'Hi Amanda,\n\nI wanted to reach out about IBM FlashSystem for Citibank\'s growing data needs:\n\n• 10x faster than traditional storage\n• 60% reduction in storage footprint\n• Built-in cyber resilience\n\nInterested in seeing how this could work for your environment?\n\nBest,\nKevin Park',
+    prospectName: 'Amanda Rodriguez',
+    companyName: 'Citibank',
+    cadenceName: 'US | Select | Infrastructure | Flash Availability',
+    cadenceType: 'Storage Modernization',
+    industry: 'Banking',
+    stepDay: 1,
+    generatedAt: '2024-01-20T13:15:00Z',
+    grade: 'B',
+    gradeReason: 'Clear benefits but lacks personalization and specific use case'
+  },
+  {
+    id: 10,
+    subject: 'Kaiser Permanente: Epic on IBM Cloud',
+    body: 'Hi Dr. Patel,\n\nI noticed Kaiser Permanente\'s commitment to healthcare innovation. For your Epic EHR system, IBM Cloud offers:\n\n• HIPAA-compliant infrastructure\n• 99.99% uptime guarantee\n• 35% lower TCO than on-premises\n• Seamless Epic integration\n\nWould you like to discuss your cloud strategy?\n\nBest regards,\nMaria Garcia',
+    prospectName: 'Dr. Raj Patel',
+    companyName: 'Kaiser Permanente',
+    cadenceName: 'US | Select | Infrastructure | Power Modernization',
+    cadenceType: 'Healthcare Cloud',
+    industry: 'Healthcare',
+    stepDay: 1,
+    generatedAt: '2024-01-21T10:00:00Z',
+    grade: 'A',
+    gradeReason: 'Excellent personalization, compliance focus, specific to Epic, clear value'
   }
 ];
 
@@ -84,6 +154,17 @@ const GeneratedEmails = () => {
   const [expandedSteps, setExpandedSteps] = useState({});
   const [selectedEmail, setSelectedEmail] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [emailToRate, setEmailToRate] = useState(null);
+  const [ratings, setRatings] = useState({
+    relevance: 0,
+    personalization: 0,
+    clarity: 0,
+    callToAction: 0,
+    tone: 0
+  });
+  const [ratingFeedback, setRatingFeedback] = useState('');
+  const [submittingRating, setSubmittingRating] = useState(false);
 
   // Load emails from database on mount
   useEffect(() => {
@@ -299,7 +380,7 @@ const GeneratedEmails = () => {
         <div>
           <h2 className="text-2xl font-light text-text-primary">Generated Emails</h2>
           <p className="text-sm text-text-secondary mt-1 font-light">
-            Review AI-generated emails organized by cadence and step
+            Review and rate AI-generated emails to improve model performance
           </p>
         </div>
       </div>
@@ -319,7 +400,7 @@ const GeneratedEmails = () => {
           <div className="flex items-center space-x-3">
             <TrendingUp className="w-8 h-8 text-ibm-blue" />
             <div>
-              <div className="text-2xl font-light text-ibm-blue">{avgGrade}%</div>
+              <div className="text-2xl font-light text-text-primary">{avgGrade}%</div>
               <div className="text-xs text-text-tertiary mt-0.5">Quality Score</div>
             </div>
           </div>
@@ -367,12 +448,12 @@ const GeneratedEmails = () => {
             >
               <div className="flex items-center space-x-3">
                 {expandedCadences[cadenceName] ? (
-                  <ChevronDown className="w-5 h-5 text-text-tertiary" />
+                  <ChevronDown className="w-5 h-5 text-ibm-blue" />
                 ) : (
-                  <ChevronRight className="w-5 h-5 text-text-tertiary" />
+                  <ChevronRight className="w-5 h-5 text-ibm-blue" />
                 )}
                 <div>
-                  <h3 className="text-base font-light text-text-primary">{cadenceName}</h3>
+                  <h3 className="text-base font-light text-ibm-blue">{cadenceName}</h3>
                   <p className="text-xs text-text-tertiary mt-0.5">
                     {Object.keys(steps).length} steps • {Object.values(steps).flat().length} emails
                   </p>
@@ -396,12 +477,12 @@ const GeneratedEmails = () => {
                         >
                           <div className="flex items-center space-x-3">
                             {expandedSteps[stepKey] ? (
-                              <ChevronDown className="w-4 h-4 text-text-tertiary" />
+                              <ChevronDown className="w-4 h-4 text-ibm-purple" />
                             ) : (
-                              <ChevronRight className="w-4 h-4 text-text-tertiary" />
+                              <ChevronRight className="w-4 h-4 text-ibm-purple" />
                             )}
                             <div className="flex items-center space-x-2">
-                              <span className="px-2 py-0.5 text-xs font-medium bg-gray-80/50 text-gray-30 border border-border">
+                              <span className="px-2 py-0.5 text-xs font-medium bg-ibm-purple/10 text-ibm-purple border border-ibm-purple/30">
                                 Day {stepDay}
                               </span>
                               <span className="text-sm text-text-secondary">
@@ -455,6 +536,107 @@ const GeneratedEmails = () => {
         <div className="card text-center py-12">
           <Mail className="w-12 h-12 text-text-tertiary mx-auto mb-4" />
           <p className="text-text-tertiary">No emails found matching your criteria</p>
+        </div>
+      )}
+
+      {/* Rating Modal */}
+      {showRatingModal && emailToRate && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-bg-surface border border-border max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <h3 className="text-xl font-light text-text-primary">Rate Email Quality</h3>
+                  <p className="text-sm text-text-secondary mt-1 font-light">
+                    Your feedback helps improve AI-generated emails
+                  </p>
+                </div>
+                <button
+                  onClick={closeRatingModal}
+                  className="text-text-tertiary hover:text-text-primary transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Email Preview */}
+              <div className="bg-bg-raised border border-border p-4 mb-6">
+                <div className="text-xs text-text-tertiary mb-2 font-medium">Email Subject:</div>
+                <div className="text-sm text-text-primary font-light">{emailToRate.subject}</div>
+              </div>
+
+              {/* Rating Aspects */}
+              <div className="space-y-1 mb-6">
+                <RatingStars
+                  label="Relevance to Prospect"
+                  value={ratings.relevance}
+                  onChange={(value) => handleRatingChange('relevance', value)}
+                />
+                <RatingStars
+                  label="Personalization Quality"
+                  value={ratings.personalization}
+                  onChange={(value) => handleRatingChange('personalization', value)}
+                />
+                <RatingStars
+                  label="Clarity & Conciseness"
+                  value={ratings.clarity}
+                  onChange={(value) => handleRatingChange('clarity', value)}
+                />
+                <RatingStars
+                  label="Call-to-Action Strength"
+                  value={ratings.callToAction}
+                  onChange={(value) => handleRatingChange('callToAction', value)}
+                />
+                <RatingStars
+                  label="Professional Tone"
+                  value={ratings.tone}
+                  onChange={(value) => handleRatingChange('tone', value)}
+                />
+              </div>
+
+              {/* Feedback Text */}
+              <div className="mb-6">
+                <label className="block text-sm text-text-secondary mb-2 font-light">
+                  Additional Feedback (Optional)
+                </label>
+                <textarea
+                  value={ratingFeedback}
+                  onChange={(e) => setRatingFeedback(e.target.value)}
+                  placeholder="Share specific suggestions for improvement..."
+                  rows={4}
+                  className="w-full px-3 py-2 text-sm bg-bg-base text-text-primary placeholder-text-tertiary border border-border focus:ring-2 focus:ring-ibm-blue outline-none resize-none"
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-end space-x-3">
+                <button
+                  onClick={closeRatingModal}
+                  disabled={submittingRating}
+                  className="btn-secondary text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={submitRating}
+                  disabled={submittingRating || Object.values(ratings).every(r => r === 0)}
+                  className="btn-primary flex items-center space-x-1.5 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {submittingRating ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Submitting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      <span>Submit for Retraining</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

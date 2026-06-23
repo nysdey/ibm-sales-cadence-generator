@@ -183,84 +183,82 @@ const UserManager = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-bg-elevated border border-border p-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-text-tertiary" />
-            <input
-              type="text"
-              placeholder="Search users..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-3 py-2 pl-10 text-sm bg-bg-base text-text-primary placeholder-text-tertiary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
-            />
-          </div>
-          
-          <select
-            value={filterRole}
-            onChange={(e) => setFilterRole(e.target.value)}
-            className="px-3 py-2 text-sm bg-bg-base text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
-          >
-            <option value="all">All Roles</option>
-            {ROLE_OPTIONS.map(role => (
-              <option key={role} value={role}>{role}</option>
-            ))}
-          </select>
-
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-3 py-2 text-sm bg-bg-base text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
-          >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-text-tertiary" />
+          <input
+            type="text"
+            placeholder="Search users..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-3 py-2 pl-10 text-sm bg-bg-surface text-text-primary placeholder-text-tertiary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+          />
         </div>
+        
+        <select
+          value={filterRole}
+          onChange={(e) => setFilterRole(e.target.value)}
+          className="px-3 py-2 text-sm bg-bg-surface text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+        >
+          <option value="all">All Roles</option>
+          {ROLE_OPTIONS.map(role => (
+            <option key={role} value={role}>{role}</option>
+          ))}
+        </select>
+
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="px-3 py-2 text-sm bg-bg-surface text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+        >
+          <option value="all">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
-        <div className="bg-bg-elevated border border-border p-4">
+        <div className="bg-bg-surface border border-border p-4">
           <div className="text-2xl font-light text-text-primary">{users.length}</div>
           <div className="text-xs text-text-tertiary mt-1 font-light">Total Users</div>
         </div>
-        <div className="bg-bg-elevated border border-border p-4">
+        <div className="bg-bg-surface border border-border p-4">
           <div className="text-2xl font-light text-text-primary">{users.filter(u => u.status === 'active').length}</div>
           <div className="text-xs text-text-tertiary mt-1 font-light">Active Users</div>
         </div>
-        <div className="bg-bg-elevated border border-border p-4">
+        <div className="bg-bg-surface border border-border p-4">
           <div className="text-2xl font-light text-text-primary">{users.filter(u => u.role === 'Admin').length}</div>
           <div className="text-xs text-text-tertiary mt-1 font-light">Admins</div>
         </div>
-        <div className="bg-bg-elevated border border-border p-4">
+        <div className="bg-bg-surface border border-border p-4">
           <div className="text-2xl font-light text-text-primary">{users.reduce((sum, u) => sum + u.emailsGenerated, 0)}</div>
           <div className="text-xs text-text-tertiary mt-1 font-light">Total Emails Generated</div>
         </div>
       </div>
 
       {/* Users Table */}
-      <div className="bg-bg-elevated border border-border">
+      <div className="bg-bg-surface border border-border">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-border">
-            <thead className="bg-bg-base">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-normal text-text-tertiary uppercase tracking-wider">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="px-6 py-3 text-left text-sm font-normal text-text-tertiary tracking-wider">
                   User
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-normal text-text-tertiary uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-sm font-normal text-text-tertiary tracking-wider">
                   Role
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-normal text-text-tertiary uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-sm font-normal text-text-tertiary tracking-wider">
                   Team
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-normal text-text-tertiary uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-sm font-normal text-text-tertiary tracking-wider">
                   Activity
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-normal text-text-tertiary uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-sm font-normal text-text-tertiary tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-normal text-text-tertiary uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-sm font-normal text-text-tertiary tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -341,7 +339,7 @@ const UserManager = () => {
                       type="text"
                       value={editingUser.name}
                       onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
-                      className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                      className="w-full px-3 py-2 text-sm bg-bg-surface text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
                     />
                   </div>
                   <div>
@@ -350,7 +348,7 @@ const UserManager = () => {
                       type="email"
                       value={editingUser.email}
                       onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
-                      className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                      className="w-full px-3 py-2 text-sm bg-bg-surface text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
                     />
                   </div>
                 </div>
@@ -361,7 +359,7 @@ const UserManager = () => {
                     <select
                       value={editingUser.role}
                       onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
-                      className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                      className="w-full px-3 py-2 text-sm bg-bg-surface text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
                     >
                       {ROLE_OPTIONS.map(role => (
                         <option key={role} value={role}>{role}</option>
@@ -373,7 +371,7 @@ const UserManager = () => {
                     <select
                       value={editingUser.team}
                       onChange={(e) => setEditingUser({ ...editingUser, team: e.target.value })}
-                      className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                      className="w-full px-3 py-2 text-sm bg-bg-surface text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
                     >
                       {TEAM_OPTIONS.map(team => (
                         <option key={team} value={team}>{team}</option>
@@ -385,7 +383,7 @@ const UserManager = () => {
                     <select
                       value={editingUser.region}
                       onChange={(e) => setEditingUser({ ...editingUser, region: e.target.value })}
-                      className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                      className="w-full px-3 py-2 text-sm bg-bg-surface text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
                     >
                       {REGION_OPTIONS.map(region => (
                         <option key={region} value={region}>{region}</option>
@@ -401,7 +399,7 @@ const UserManager = () => {
                     {PERMISSION_OPTIONS.map(permission => (
                       <label
                         key={permission.id}
-                        className="flex items-start space-x-3 p-3 bg-bg-elevated border border-border hover:bg-bg-raised cursor-pointer transition-colors"
+                        className="flex items-start space-x-3 p-3 bg-bg-surface border border-border hover:bg-bg-raised cursor-pointer transition-colors"
                       >
                         <input
                           type="checkbox"
@@ -424,7 +422,7 @@ const UserManager = () => {
                   <select
                     value={editingUser.status}
                     onChange={(e) => setEditingUser({ ...editingUser, status: e.target.value })}
-                    className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                    className="w-full px-3 py-2 text-sm bg-bg-surface text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
                   >
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
@@ -436,7 +434,7 @@ const UserManager = () => {
               <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-border">
                 <button
                   onClick={() => setEditingUser(null)}
-                  className="px-4 py-2 text-sm font-normal text-text-primary bg-bg-elevated border border-border hover:bg-bg-raised transition-colors"
+                  className="px-4 py-2 text-sm font-normal text-text-primary bg-bg-surface border border-border hover:bg-bg-raised transition-colors"
                 >
                   Cancel
                 </button>
@@ -453,7 +451,7 @@ const UserManager = () => {
       )}
 
       {filteredUsers.length === 0 && (
-        <div className="text-center py-12 bg-bg-elevated border border-border">
+        <div className="text-center py-12 bg-bg-surface border border-border">
           <Users className="w-12 h-12 text-text-tertiary mx-auto mb-4" />
           <p className="text-text-secondary font-light">No users found matching your criteria</p>
         </div>

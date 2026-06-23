@@ -173,6 +173,53 @@ const SAMPLE_CADENCES = [
         stats: { sent: 2890, opened: 159, clicked: 74, replied: 8 }
       }
     ]
+  },
+  {
+    id: '4200001',
+    name: 'US | Enterprise | AI & Automation | CTO | Outbound | watsonx | FY26',
+    region: 'US',
+    segment: 'Enterprise',
+    category: 'AI & Automation',
+    persona: 'CTO',
+    type: 'Outbound',
+    campaign: 'watsonx',
+    fiscal_year: 'FY26',
+    duration: 14,
+    people_added: 0,
+    people_started: 0,
+    people_finished: 0,
+    bounced: 0,
+    success_rate: 0.00,
+    open_rate: 0.00,
+    click_rate: 0.00,
+    reply_rate: 0.00,
+    meeting_rate: 0.00,
+    status: 'draft',
+    steps: [
+      {
+        day: 1,
+        channel: 'Email',
+        subject: 'Transform Your Business with watsonx AI',
+        body: 'Hi {{first_name}},\n\nI wanted to introduce you to watsonx, IBM\'s enterprise AI platform that\'s helping organizations like {{company_name}} accelerate AI adoption.\n\nKey capabilities:\n• Foundation models trained on enterprise data\n• Governance and compliance built-in\n• Deploy anywhere - cloud, on-prem, or hybrid\n\nWould you be interested in a personalized demo?\n\nBest,\n{{sender_name}}',
+        status: 'Draft',
+        stats: { sent: 0, opened: 0, clicked: 0, replied: 0 }
+      },
+      {
+        day: 3,
+        channel: 'LinkedIn',
+        body: 'Hi {{first_name}}, I sent you an email about watsonx and how it can help {{company_name}} scale AI initiatives. Given your role in driving technology strategy, I thought this might be relevant. Would you be open to connecting?',
+        status: 'Draft',
+        stats: { sent: 0, accepted: 0, replied: 0 }
+      },
+      {
+        day: 7,
+        channel: 'Email',
+        subject: 'watsonx Success Story: {{industry}}',
+        body: 'Hi {{first_name}},\n\nI wanted to share a recent success story from a company in {{industry}} that implemented watsonx:\n\n• 70% reduction in AI development time\n• 3x faster model deployment\n• Full compliance with data governance requirements\n\nWould you like to learn how this could work for {{company_name}}?\n\nBest,\n{{sender_name}}',
+        status: 'Draft',
+        stats: { sent: 0, opened: 0, clicked: 0, replied: 0 }
+      }
+    ]
   }
 ];
 
@@ -195,6 +242,18 @@ const CadenceLibrary = () => {
     location: '',
     additionalContext: ''
   });
+
+  // Toggle publish/unpublish status
+  const togglePublishStatus = (cadenceId, e) => {
+    e.stopPropagation(); // Prevent row click
+    setCadences(prevCadences =>
+      prevCadences.map(c =>
+        c.id === cadenceId
+          ? { ...c, status: c.status === 'draft' ? 'published' : 'draft' }
+          : c
+      )
+    );
+  };
   
   // Industry options
   const INDUSTRIES = [
@@ -448,7 +507,7 @@ const CadenceLibrary = () => {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-light text-text-primary">Cadences</h2>
-            <p className="text-sm text-text-secondary mt-1 font-light">
+            <p className="text-base text-text-secondary mt-1 font-light">
               Manage and personalize your sales cadences
             </p>
           </div>
@@ -562,40 +621,40 @@ const CadenceLibrary = () => {
             <table className="min-w-full">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="px-3 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
+                  <th className="px-3 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Cadence Name
                   </th>
-                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
+                  <th className="px-2 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Steps
                   </th>
-                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
+                  <th className="px-2 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Days
                   </th>
-                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
+                  <th className="px-2 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Total People
                   </th>
-                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
+                  <th className="px-2 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Active People
                   </th>
-                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
+                  <th className="px-2 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Calls Logged
                   </th>
-                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
+                  <th className="px-2 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Emails Delivered
                   </th>
-                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
+                  <th className="px-2 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Reply Rate
                   </th>
-                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
+                  <th className="px-2 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Click Rate
                   </th>
-                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
+                  <th className="px-2 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Open Rate
                   </th>
-                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
+                  <th className="px-2 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Meeting Ratio
                   </th>
-                  <th className="px-2 py-2.5 text-left text-xs font-normal text-text-tertiary tracking-wider">
+                  <th className="px-2 py-2.5 text-sm font-normal text-text-tertiary tracking-wider">
                     Opp Ratio
                   </th>
                   <th className="px-2 py-2.5"></th>
@@ -605,11 +664,18 @@ const CadenceLibrary = () => {
                 {filteredCadences.map((cadence) => (
                   <tr
                     key={cadence.id}
-                    className="hover:bg-bg-raised cursor-pointer transition-all duration-150 border-b border-border"
+                    className={`hover:bg-bg-raised cursor-pointer transition-all duration-150 border-b border-border ${cadence.status === 'draft' ? 'bg-text-tertiary/5' : ''}`}
                     onClick={() => setSelectedCadence(cadence)}
                   >
                     <td className="px-3 py-2.5">
-                      <div className="text-sm font-light text-text-primary">{cadence.name}</div>
+                      <div className="flex items-center space-x-2">
+                        <div className="text-sm font-light text-text-primary">{cadence.name}</div>
+                        {cadence.status === 'draft' && (
+                          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-text-tertiary/10 text-text-tertiary border border-text-tertiary/30">
+                            DRAFT
+                          </span>
+                        )}
+                      </div>
                       <div className="text-xs text-text-secondary mt-1 flex items-center space-x-2">
                         <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-ibm-blue/10 text-ibm-blue border border-border">
                           {cadence.persona}
@@ -631,7 +697,25 @@ const CadenceLibrary = () => {
                     <td className={`px-2 py-2.5 text-sm font-light ${cadence.meeting_rate > 5 ? 'text-ibm-blue' : 'text-text-primary'}`}>{cadence.meeting_rate.toFixed(2)}%</td>
                     <td className={`px-2 py-2.5 text-sm font-light ${cadence.success_rate > 5 ? 'text-ibm-blue' : 'text-text-primary'}`}>{cadence.success_rate.toFixed(2)}%</td>
                     <td className="px-2 py-2.5 text-right">
-                      <ChevronRight className="w-4 h-4 text-text-tertiary" />
+                      <div className="flex items-center justify-end space-x-2">
+                        {cadence.status === 'draft' && (
+                          <button
+                            onClick={(e) => togglePublishStatus(cadence.id, e)}
+                            className="px-2 py-1 text-xs font-medium text-text-tertiary hover:text-text-primary border border-border hover:border-text-tertiary bg-bg-surface hover:bg-bg-raised transition-colors"
+                          >
+                            Publish
+                          </button>
+                        )}
+                        {cadence.status !== 'draft' && (
+                          <button
+                            onClick={(e) => togglePublishStatus(cadence.id, e)}
+                            className="px-2 py-1 text-xs font-medium text-text-tertiary hover:text-text-primary border border-border hover:border-text-tertiary bg-bg-surface hover:bg-bg-raised transition-colors"
+                          >
+                            Unpublish
+                          </button>
+                        )}
+                        <ChevronRight className="w-4 h-4 text-text-tertiary" />
+                      </div>
                     </td>
                   </tr>
                 ))}
