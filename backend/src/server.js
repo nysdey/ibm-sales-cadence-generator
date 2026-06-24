@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import config, { validateConfig } from './config/config.js';
+import { initializeDatabase, seedDatabase } from './config/database.js';
 import cadenceRoutes from './routes/cadence.js';
 import trainingRoutes from './routes/training.js';
 import feedbackRoutes from './routes/feedback.js';
@@ -79,36 +80,54 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server
+// Initialize database and start server
 const PORT = config.port;
-app.listen(PORT, () => {
-  console.log('\n' + '='.repeat(60));
-  console.log('🚀 IBM Fusion Cadence Generator - Backend Server');
-  console.log('='.repeat(60));
-  console.log(`📡 Server running on: http://localhost:${PORT}`);
-  console.log(`🌍 Environment: ${config.nodeEnv}`);
-  console.log(`🔐 CORS enabled for: ${config.corsOrigin}`);
-  console.log(`🤖 Watsonx.ai: ${config.watsonx.endpoint ? '✓ Configured' : '✗ Not configured'}`);
-  console.log('='.repeat(60));
-  console.log('\n📋 Available endpoints:');
-  console.log('  GET  /health                         - Health check');
-  console.log('  POST /api/cadence/generate           - Generate cadences');
-  console.log('  GET  /api/cadence/test               - Test Watsonx.ai connection');
-  console.log('  GET  /api/training/examples          - Get training examples');
-  console.log('  POST /api/training/examples          - Add training example');
-  console.log('  PUT  /api/training/examples/:id      - Update training example');
-  console.log('  DELETE /api/training/examples/:id    - Delete training example');
-  console.log('  GET  /api/feedback/emails            - Get generated emails');
-  console.log('  POST /api/feedback/emails            - Save generated email');
-  console.log('  PUT  /api/feedback/emails/:id/rating - Rate email');
-  console.log('  POST /api/feedback/emails/:id/comment - Add comment');
-  console.log('  DELETE /api/feedback/emails/:id      - Delete email');
-  console.log('  GET  /api/database/:type             - Get database');
-  console.log('  PUT  /api/database/:type             - Update database');
-  console.log('  POST /api/database/training/example  - Add training example');
-  console.log('  POST /api/database/intelligence/company - Add company intel');
-  console.log('\n✨ Ready to generate personalized cadences!\n');
-});
+
+async function startServer() {
+  try {
+    // Initialize database schema
+    await initializeDatabase();
+    await seedDatabase();
+    
+    // Start Express server
+    app.listen(PORT, () => {
+      console.log('\n' + '='.repeat(60));
+      console.log('🚀 IBM Sales Cadence Builder - Backend Server');
+      console.log('='.repeat(60));
+      console.log(`📡 Server running on: http://localhost:${PORT}`);
+      console.log(`🌍 Environment: ${config.nodeEnv}`);
+      console.log(`🔐 CORS enabled for: ${config.corsOrigin}`);
+      console.log(`🤖 Watsonx.ai: ${config.watsonx.endpoint ? '✓ Configured' : '✗ Not configured'}`);
+      console.log(`💾 Database: ✓ Connected & Initialized`);
+      console.log('='.repeat(60));
+      console.log('\n📋 Available endpoints:');
+      console.log('  GET  /health                         - Health check');
+      console.log('  POST /api/cadence/generate           - Generate cadences');
+      console.log('  GET  /api/cadence/test               - Test Watsonx.ai connection');
+      console.log('  GET  /api/training/examples          - Get training examples');
+      console.log('  POST /api/training/examples          - Add training example');
+      console.log('  PUT  /api/training/examples/:id      - Update training example');
+      console.log('  DELETE /api/training/examples/:id    - Delete training example');
+      console.log('  GET  /api/feedback/emails            - Get generated emails');
+      console.log('  POST /api/feedback/emails            - Save generated email');
+      console.log('  PUT  /api/feedback/emails/:id/rating - Rate email');
+      console.log('  POST /api/feedback/emails/:id/comment - Add comment');
+      console.log('  DELETE /api/feedback/emails/:id      - Delete email');
+      console.log('  GET  /api/database/:type             - Get database');
+      console.log('  PUT  /api/database/:type             - Update database');
+      console.log('  POST /api/database/training/example  - Add training example');
+      console.log('  POST /api/database/intelligence/company - Add company intel');
+      console.log('\n✨ Ready to generate personalized cadences!\n');
+    });
+  } catch (error) {
+    console.error('\n❌ Failed to start server:', error);
+    console.error('\nPlease ensure PostgreSQL is running and configured correctly.');
+    console.error('See docs/DATABASE_SETUP.md for setup instructions.\n');
+    process.exit(1);
+  }
+}
+
+startServer();
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
