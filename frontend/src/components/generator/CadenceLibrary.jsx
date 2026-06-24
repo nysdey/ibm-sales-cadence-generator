@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { AlertCircle, Loader2, Plus, Upload, Search, Filter, X, Mail, Phone, Linkedin, ChevronRight, ArrowLeft, Edit2, Copy, Check, Save } from 'lucide-react';
+import { AlertCircle, Loader2, Plus, Upload, Search, Filter, X, Mail, Phone, Linkedin, ChevronRight, ArrowLeft, Edit2, Copy, Check, Save, CheckSquare, Square, Eye, EyeOff, Trash2, Download } from 'lucide-react';
 import { generateCadences, saveGeneratedEmail } from '../../services/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
@@ -232,6 +232,8 @@ const CadenceLibrary = () => {
   const [selectedStep, setSelectedStep] = useState(null);
   const [showPersonalizeModal, setShowPersonalizeModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedItems, setSelectedItems] = useState([]);
   const [personalizationData, setPersonalizationData] = useState({
     prospectName: '',
     prospectTitle: '',
@@ -499,6 +501,51 @@ const CadenceLibrary = () => {
     }
   };
 
+  const toggleSelectMode = () => {
+    setSelectMode(!selectMode);
+    setSelectedItems([]);
+  };
+
+  const toggleSelectItem = (id) => {
+    setSelectedItems(prev =>
+      prev.includes(id)
+        ? prev.filter(item => item !== id)
+        : [...prev, id]
+    );
+  };
+
+  const selectAll = () => {
+    const allIds = filteredCadences.map(c => c.id);
+    setSelectedItems(allIds);
+  };
+
+  const deselectAll = () => {
+    setSelectedItems([]);
+  };
+
+  const handleBulkPublish = () => {
+    console.log('Bulk publish:', selectedItems);
+    alert(`Published ${selectedItems.length} cadences`);
+  };
+
+  const handleBulkUnpublish = () => {
+    console.log('Bulk unpublish:', selectedItems);
+    alert(`Unpublished ${selectedItems.length} cadences`);
+  };
+
+  const handleBulkDelete = () => {
+    if (confirm(`Are you sure you want to delete ${selectedItems.length} cadences?`)) {
+      console.log('Bulk delete:', selectedItems);
+      setSelectedItems([]);
+      setSelectMode(false);
+    }
+  };
+
+  const handleBulkExport = () => {
+    console.log('Bulk export:', selectedItems);
+    alert(`Exported ${selectedItems.length} cadences`);
+  };
+
   // List View
   if (!selectedCadence) {
     return (
@@ -512,17 +559,85 @@ const CadenceLibrary = () => {
             </p>
           </div>
           <div className="flex space-x-2">
-            <button className="btn-purple flex items-center space-x-1.5 text-sm">
-              <Upload className="w-3.5 h-3.5" />
-              <span>Import</span>
-            </button>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="btn-primary flex items-center space-x-1.5 text-sm"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Create</span>
-            </button>
+            {!selectMode ? (
+              <>
+                <button
+                  onClick={toggleSelectMode}
+                  className="bg-ibm-blue/10 hover:bg-ibm-blue/20 text-ibm-blue font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-ibm-blue/30"
+                >
+                  <CheckSquare className="w-4 h-4" />
+                  <span>Select</span>
+                </button>
+                <button className="btn-purple flex items-center space-x-1.5 text-sm">
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>Import</span>
+                </button>
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="btn-primary flex items-center space-x-1.5 text-sm"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Create</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={toggleSelectMode}
+                  className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-border"
+                >
+                  <X className="w-4 h-4" />
+                  <span>Cancel</span>
+                </button>
+                <button
+                  onClick={selectAll}
+                  className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-border"
+                >
+                  <CheckSquare className="w-4 h-4" />
+                  <span>Select All</span>
+                </button>
+                {selectedItems.length > 0 && (
+                  <>
+                    <button
+                      onClick={deselectAll}
+                      className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-border"
+                    >
+                      <Square className="w-4 h-4" />
+                      <span>Deselect All</span>
+                    </button>
+                    <div className="h-6 w-px bg-border"></div>
+                    <button
+                      onClick={handleBulkPublish}
+                      className="bg-ibm-blue hover:bg-ibm-blue/90 text-white font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2"
+                    >
+                      <Eye className="w-4 h-4" />
+                      <span>Publish ({selectedItems.length})</span>
+                    </button>
+                    <button
+                      onClick={handleBulkUnpublish}
+                      className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-border"
+                    >
+                      <EyeOff className="w-4 h-4" />
+                      <span>Unpublish</span>
+                    </button>
+                    <button
+                      onClick={handleBulkExport}
+                      className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-border"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Export</span>
+                    </button>
+                    <button
+                      onClick={handleBulkDelete}
+                      className="bg-red-500/10 hover:bg-red-500/20 text-red-400 font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-red-500/30"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>Delete</span>
+                    </button>
+                  </>
+                )}
+              </>
+            )}
           </div>
         </div>
 
@@ -665,8 +780,25 @@ const CadenceLibrary = () => {
                   <tr
                     key={cadence.id}
                     className={`hover:bg-bg-raised cursor-pointer transition-all duration-150 border-b border-border ${cadence.status === 'draft' ? 'bg-text-tertiary/5' : ''}`}
-                    onClick={() => setSelectedCadence(cadence)}
+                    onClick={() => !selectMode && setSelectedCadence(cadence)}
                   >
+                    {selectMode && (
+                      <td className="px-3 py-2.5">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleSelectItem(cadence.id);
+                          }}
+                          className="flex items-center justify-center"
+                        >
+                          {selectedItems.includes(cadence.id) ? (
+                            <CheckSquare className="w-5 h-5 text-ibm-blue" />
+                          ) : (
+                            <Square className="w-5 h-5 text-text-tertiary" />
+                          )}
+                        </button>
+                      </td>
+                    )}
                     <td className="px-3 py-2.5">
                       <div className="flex items-center space-x-2">
                         <div className="text-sm font-light text-text-primary">{cadence.name}</div>

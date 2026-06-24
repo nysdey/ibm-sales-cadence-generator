@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Database, Download, Trash2, Search, Building2, Briefcase, Cpu, FileText, Edit2, X, Plus, Users } from 'lucide-react';
+import { Database, Download, Trash2, Search, Building2, Briefcase, Cpu, FileText, Edit2, X, Plus, Users, MoreVertical, CheckSquare, Square, Eye, EyeOff } from 'lucide-react';
 
 // Sample database records with expanded industry data
 const SAMPLE_RECORDS = {
@@ -412,6 +412,9 @@ const DatabaseManager = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIndustry, setSelectedIndustry] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
+  const [showActionsMenu, setShowActionsMenu] = useState(null);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedItems, setSelectedItems] = useState([]);
 
   const tabs = [
     { id: 'companies', label: 'Companies', icon: Building2 },
@@ -450,30 +453,107 @@ const DatabaseManager = () => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
+  const toggleSelectMode = () => {
+    setSelectMode(!selectMode);
+    setSelectedItems([]);
+  };
+
+  const toggleSelectItem = (id) => {
+    setSelectedItems(prev =>
+      prev.includes(id)
+        ? prev.filter(item => item !== id)
+        : [...prev, id]
+    );
+  };
+
+  const selectAll = () => {
+    const allIds = filteredData.map(item => item.id);
+    setSelectedItems(allIds);
+  };
+
+  const deselectAll = () => {
+    setSelectedItems([]);
+  };
+
+  const handleBulkDelete = () => {
+    if (confirm(`Are you sure you want to delete ${selectedItems.length} items?`)) {
+      console.log('Bulk delete:', selectedItems);
+      setSelectedItems([]);
+      setSelectMode(false);
+    }
+  };
+
+  const handleBulkPublish = () => {
+    console.log('Bulk publish:', selectedItems);
+    alert(`Published ${selectedItems.length} items`);
+  };
+
+  const handleBulkUnpublish = () => {
+    console.log('Bulk unpublish:', selectedItems);
+    alert(`Unpublished ${selectedItems.length} items`);
+  };
+
+  const handleBulkExport = () => {
+    console.log('Bulk export:', selectedItems);
+    alert(`Exported ${selectedItems.length} items`);
+  };
+
   const renderCompaniesTable = () => (
     <div className="grid grid-cols-1 gap-4">
       {filteredData.map((company) => (
-        <div key={company.id} className="bg-bg-surface border border-border p-6 hover:border-ibm-blue transition-all cursor-pointer">
+        <div key={company.id} className="bg-bg-surface border border-border p-6 hover:border-ibm-blue transition-all cursor-pointer relative">
           <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <div className="flex items-center space-x-3 mb-2">
-                <h3 className="text-xl font-light text-text-primary">{company.name}</h3>
-                <span className="px-2.5 py-1 bg-ibm-blue/10 text-ibm-blue text-xs font-normal border border-border">
-                  {company.keyContacts} contacts
-                </span>
-                <span className="px-2.5 py-1 bg-ibm-purple/10 text-ibm-purple text-xs font-normal border border-border">
-                  {company.industry}
-                </span>
-              </div>
-              <p className="text-base text-text-secondary font-light">{company.size} • {company.revenue}</p>
-            </div>
-            <div className="flex space-x-2">
-              <button onClick={() => handleEdit(company)} className="p-2 hover:bg-bg-raised transition-colors">
-                <Edit2 className="w-4 h-4 text-text-tertiary" />
+            <div className="flex items-center space-x-3 flex-1">
+              {selectMode && (
+                <button
+                  onClick={() => toggleSelectItem(company.id)}
+                  className="flex-shrink-0"
+                >
+                  {selectedItems.includes(company.id) ? (
+                    <CheckSquare className="w-5 h-5 text-ibm-blue" />
+                  ) : (
+                    <Square className="w-5 h-5 text-text-tertiary" />
+                  )}
+                </button>
+              )}
+               <div className="flex-1">
+                 <div className="flex items-center space-x-3 mb-2">
+                   <h3 className="text-xl font-light text-text-primary">{company.name}</h3>
+                   <span className="px-2.5 py-1 bg-ibm-blue/10 text-ibm-blue text-xs font-normal border border-border">
+                     {company.keyContacts} contacts
+                   </span>
+                   <span className="px-2.5 py-1 bg-ibm-purple/10 text-ibm-purple text-xs font-normal border border-border">
+                     {company.industry}
+                   </span>
+                 </div>
+                 <p className="text-base text-text-secondary font-light">{company.size} • {company.revenue}</p>
+               </div>
+             </div>
+            <div className="relative">
+              <button
+                onClick={() => setShowActionsMenu(showActionsMenu === company.id ? null : company.id)}
+                className="p-2 hover:bg-bg-raised transition-colors"
+              >
+                <MoreVertical className="w-4 h-4 text-text-tertiary" />
               </button>
-              <button onClick={() => handleDelete(company.id)} className="p-2 hover:bg-bg-raised transition-colors">
-                <Trash2 className="w-4 h-4 text-text-tertiary" />
-              </button>
+              {showActionsMenu === company.id && (
+                <div className="absolute right-0 top-full mt-1 bg-bg-surface border border-border shadow-lg z-10 min-w-[120px]">
+                  <button
+                    onClick={() => { handleEdit(company); setShowActionsMenu(null); }}
+                    className="w-full px-3 py-2 text-left text-sm text-text-primary hover:bg-bg-raised flex items-center space-x-2"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                    <span>Edit</span>
+                  </button>
+                  <button
+                    onClick={() => { handleDelete(company.id); setShowActionsMenu(null); }}
+                    className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-bg-raised flex items-center space-x-2"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
           
@@ -573,15 +653,69 @@ const DatabaseManager = () => {
     }
 
     return (
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-3 gap-4">
         {filteredData.map((industry) => (
-          <button
+          <div
             key={industry.id}
-            onClick={() => setSelectedIndustry(industry.id)}
-            className="bg-bg-surface border border-border p-4 hover:bg-bg-raised hover:border-ibm-blue transition-all text-left"
+            className="bg-bg-surface border border-border p-5 hover:bg-bg-raised hover:border-ibm-blue transition-all relative cursor-pointer"
+            onClick={() => !selectMode && setSelectedIndustry(industry.id)}
           >
-            <h3 className="text-sm font-normal text-text-primary">{industry.name}</h3>
-          </button>
+            {selectMode && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleSelectItem(industry.id);
+                }}
+                className="absolute top-3 right-3"
+              >
+                {selectedItems.includes(industry.id) ? (
+                  <CheckSquare className="w-5 h-5 text-ibm-blue" />
+                ) : (
+                  <Square className="w-5 h-5 text-text-tertiary" />
+                )}
+              </button>
+            )}
+            
+            <h3 className="text-base font-normal text-text-primary mb-3">{industry.name}</h3>
+            
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs text-text-tertiary mb-1.5 font-normal">Summary</p>
+                <p className="text-xs text-text-secondary font-light line-clamp-2">{industry.summary}</p>
+              </div>
+              
+              <div>
+                <p className="text-xs text-text-tertiary mb-1.5 font-normal">Example Companies</p>
+                <div className="flex flex-wrap gap-1">
+                  {industry.examples.slice(0, 3).map((example, idx) => (
+                    <span key={idx} className="px-2 py-0.5 bg-bg-raised text-text-secondary text-xs border border-border">
+                      {example}
+                    </span>
+                  ))}
+                  {industry.examples.length > 3 && (
+                    <span className="px-2 py-0.5 text-text-tertiary text-xs">
+                      +{industry.examples.length - 3} more
+                    </span>
+                  )}
+                </div>
+              </div>
+              
+              <div>
+                <p className="text-xs text-text-tertiary mb-1.5 font-normal">Key Pain Points</p>
+                <ul className="text-xs text-text-secondary space-y-0.5 font-light">
+                  {industry.painPoints.slice(0, 2).map((point, idx) => (
+                    <li key={idx}>• {point}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            
+            <div className="mt-3 pt-3 border-t border-border">
+              <span className="text-xs text-ibm-blue hover:text-ibm-blue/80 font-normal">
+                View Details →
+              </span>
+            </div>
+          </div>
         ))}
       </div>
     );
@@ -590,19 +724,51 @@ const DatabaseManager = () => {
   const renderTechKnowledgeTable = () => (
     <div className="grid grid-cols-1 gap-4">
       {filteredData.map((tech) => (
-        <div key={tech.id} className="bg-bg-surface border border-border p-5">
+        <div key={tech.id} className="bg-bg-surface border border-border p-5 relative">
           <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <h3 className="text-lg font-light text-text-primary mb-1">{tech.useCase}</h3>
-              <p className="text-sm text-text-secondary font-light">{tech.description}</p>
-            </div>
-            <div className="flex space-x-2">
-              <button onClick={() => handleEdit(tech)} className="p-2 hover:bg-bg-raised transition-colors">
-                <Edit2 className="w-4 h-4 text-text-tertiary" />
+            <div className="flex items-center space-x-3 flex-1">
+              {selectMode && (
+                <button
+                  onClick={() => toggleSelectItem(tech.id)}
+                  className="flex-shrink-0"
+                >
+                  {selectedItems.includes(tech.id) ? (
+                    <CheckSquare className="w-5 h-5 text-ibm-blue" />
+                  ) : (
+                    <Square className="w-5 h-5 text-text-tertiary" />
+                  )}
+                </button>
+              )}
+               <div className="flex-1">
+                 <h3 className="text-lg font-light text-text-primary mb-1">{tech.useCase}</h3>
+                 <p className="text-sm text-text-secondary font-light">{tech.description}</p>
+               </div>
+             </div>
+            <div className="relative">
+              <button
+                onClick={() => setShowActionsMenu(showActionsMenu === tech.id ? null : tech.id)}
+                className="p-2 hover:bg-bg-raised transition-colors"
+              >
+                <MoreVertical className="w-4 h-4 text-text-tertiary" />
               </button>
-              <button onClick={() => handleDelete(tech.id)} className="p-2 hover:bg-bg-raised transition-colors">
-                <Trash2 className="w-4 h-4 text-text-tertiary" />
-              </button>
+              {showActionsMenu === tech.id && (
+                <div className="absolute right-0 top-full mt-1 bg-bg-surface border border-border shadow-lg z-10 min-w-[120px]">
+                  <button
+                    onClick={() => { handleEdit(tech); setShowActionsMenu(null); }}
+                    className="w-full px-3 py-2 text-left text-sm text-text-primary hover:bg-bg-raised flex items-center space-x-2"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                    <span>Edit</span>
+                  </button>
+                  <button
+                    onClick={() => { handleDelete(tech.id); setShowActionsMenu(null); }}
+                    className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-bg-raised flex items-center space-x-2"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
           
@@ -665,24 +831,54 @@ const DatabaseManager = () => {
   const renderTrainingDataTable = () => (
     <div className="space-y-4">
       {filteredData.map((example) => (
-        <div key={example.id} className="bg-bg-surface border border-border p-5">
+        <div key={example.id} className="bg-bg-surface border border-border p-5 relative">
           <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 flex-1">
+              {selectMode && (
+                <button
+                  onClick={() => toggleSelectItem(example.id)}
+                  className="flex-shrink-0"
+                >
+                  {selectedItems.includes(example.id) ? (
+                    <CheckSquare className="w-5 h-5 text-ibm-blue" />
+                  ) : (
+                    <Square className="w-5 h-5 text-text-tertiary" />
+                  )}
+                </button>
+              )}
               <span className={`px-2.5 py-1 text-xs font-normal border ${
-                example.type === 'good' 
-                  ? 'bg-ibm-blue/10 text-ibm-blue border-ibm-blue/30' 
+                example.type === 'good'
+                  ? 'bg-ibm-blue/10 text-ibm-blue border-ibm-blue/30'
                   : 'bg-gray-70 text-gray-30 border-gray-60'
               }`}>
                 {example.type === 'good' ? '✓ Good Example' : '✗ Avoid This'}
               </span>
             </div>
-            <div className="flex space-x-2">
-              <button onClick={() => handleEdit(example)} className="p-2 hover:bg-bg-raised transition-colors">
-                <Edit2 className="w-4 h-4 text-text-tertiary" />
+            <div className="relative">
+              <button
+                onClick={() => setShowActionsMenu(showActionsMenu === example.id ? null : example.id)}
+                className="p-2 hover:bg-bg-raised transition-colors"
+              >
+                <MoreVertical className="w-4 h-4 text-text-tertiary" />
               </button>
-              <button onClick={() => handleDelete(example.id)} className="p-2 hover:bg-bg-raised transition-colors">
-                <Trash2 className="w-4 h-4 text-text-tertiary" />
-              </button>
+              {showActionsMenu === example.id && (
+                <div className="absolute right-0 top-full mt-1 bg-bg-surface border border-border shadow-lg z-10 min-w-[120px]">
+                  <button
+                    onClick={() => { handleEdit(example); setShowActionsMenu(null); }}
+                    className="w-full px-3 py-2 text-left text-sm text-text-primary hover:bg-bg-raised flex items-center space-x-2"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                    <span>Edit</span>
+                  </button>
+                  <button
+                    onClick={() => { handleDelete(example.id); setShowActionsMenu(null); }}
+                    className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-bg-raised flex items-center space-x-2"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -722,20 +918,96 @@ const DatabaseManager = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-light text-text-primary">Knowledge Base</h2>
-          <p className="text-sm text-text-secondary mt-1 font-light">
+          <h2 className="text-3xl font-light text-text-primary">Knowledge Base</h2>
+          <p className="text-base text-text-secondary mt-1.5 font-light">
             Manage companies, industries, and technical knowledge for AI personalization
           </p>
         </div>
         <div className="flex space-x-3">
-          <button className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-border">
-            <Plus className="w-3.5 h-3.5" />
-            <span>Add New</span>
-          </button>
-          <button onClick={handleExportCSV} className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-border">
-            <Download className="w-3.5 h-3.5" />
-            <span>Export</span>
-          </button>
+          {!selectMode ? (
+            <>
+              <button
+                onClick={toggleSelectMode}
+                className="bg-ibm-blue/10 hover:bg-ibm-blue/20 text-ibm-blue font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-ibm-blue/30"
+              >
+                <CheckSquare className="w-4 h-4" />
+                <span>Select</span>
+              </button>
+              <button className="bg-ibm-blue hover:bg-ibm-blue/90 text-white font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2">
+                <Plus className="w-4 h-4" />
+                <span>Add New</span>
+              </button>
+              <button onClick={handleExportCSV} className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-border">
+                <Download className="w-4 h-4" />
+                <span>Export</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={toggleSelectMode}
+                className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-border"
+              >
+                <X className="w-4 h-4" />
+                <span>Cancel</span>
+              </button>
+              <button
+                onClick={selectAll}
+                className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-border"
+              >
+                <CheckSquare className="w-4 h-4" />
+                <span>Select All</span>
+              </button>
+              {selectedItems.length > 0 && (
+                <>
+                  <button
+                    onClick={deselectAll}
+                    className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-border"
+                  >
+                    <Square className="w-4 h-4" />
+                    <span>Deselect All</span>
+                  </button>
+                  <div className="h-6 w-px bg-border"></div>
+                  
+                  {/* Training Data tab: Publish/Unpublish/Export/Delete */}
+                  {activeTab === 'trainingData' && (
+                    <>
+                      <button
+                        onClick={handleBulkPublish}
+                        className="bg-ibm-blue hover:bg-ibm-blue/90 text-white font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2"
+                      >
+                        <Eye className="w-4 h-4" />
+                        <span>Publish ({selectedItems.length})</span>
+                      </button>
+                      <button
+                        onClick={handleBulkUnpublish}
+                        className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-border"
+                      >
+                        <EyeOff className="w-4 h-4" />
+                        <span>Unpublish</span>
+                      </button>
+                      <button
+                        onClick={handleBulkExport}
+                        className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-border"
+                      >
+                        <Download className="w-4 h-4" />
+                        <span>Export</span>
+                      </button>
+                    </>
+                  )}
+                  
+                  {/* All tabs: Delete button */}
+                  <button
+                    onClick={handleBulkDelete}
+                    className="bg-red-500/10 hover:bg-red-500/20 text-red-400 font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-red-500/30"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span>Delete</span>
+                  </button>
+                </>
+              )}
+            </>
+          )}
         </div>
       </div>
 

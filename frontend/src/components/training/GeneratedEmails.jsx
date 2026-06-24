@@ -1,6 +1,32 @@
 import { useState, useEffect } from 'react';
-import { Mail, Calendar, User, Building2, Search, ChevronDown, ChevronRight, Copy, Check, ArrowLeft, TrendingUp, BarChart3, Star, Send, X } from 'lucide-react';
-import { getGeneratedEmails } from '../../services/api';
+import { Mail, Calendar, User, Building2, Search, ChevronDown, ChevronRight, Copy, Check, ArrowLeft, TrendingUp, BarChart3, Star, Send, X, Plus } from 'lucide-react';
+import { getGeneratedEmails, saveGeneratedEmail } from '../../services/api';
+
+// RatingStars component
+const RatingStars = ({ label, value, onChange }) => {
+  return (
+    <div className="flex items-center justify-between py-3 border-b border-border last:border-b-0">
+      <span className="text-sm text-text-secondary font-light">{label}</span>
+      <div className="flex space-x-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            onClick={() => onChange(star)}
+            className="focus:outline-none transition-colors"
+          >
+            <Star
+              className={`w-5 h-5 ${
+                star <= value
+                  ? 'fill-ibm-blue text-ibm-blue'
+                  : 'text-text-tertiary hover:text-ibm-blue'
+              }`}
+            />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 // Mock generated emails data
 const MOCK_EMAILS = [
@@ -165,6 +191,20 @@ const GeneratedEmails = () => {
   });
   const [ratingFeedback, setRatingFeedback] = useState('');
   const [submittingRating, setSubmittingRating] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newEmail, setNewEmail] = useState({
+    subject: '',
+    body: '',
+    prospectName: '',
+    companyName: '',
+    cadenceName: '',
+    cadenceType: '',
+    industry: '',
+    stepDay: 1,
+    grade: '',
+    gradeReason: ''
+  });
+  const [creatingEmail, setCreatingEmail] = useState(false);
 
   // Load emails from database on mount
   useEffect(() => {
@@ -254,6 +294,66 @@ const GeneratedEmails = () => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
+  const handleRatingChange = (aspect, value) => {
+    setRatings(prev => ({
+      ...prev,
+      [aspect]: value
+    }));
+  };
+
+  const closeRatingModal = () => {
+    setShowRatingModal(false);
+    setEmailToRate(null);
+    setRatings({
+      relevance: 0,
+      personalization: 0,
+      clarity: 0,
+      callToAction: 0,
+      tone: 0
+    });
+    setRatingFeedback('');
+  };
+
+  const submitRating = async () => {
+    setSubmittingRating(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Rating submitted:', { emailId: emailToRate.id, ratings, feedback: ratingFeedback });
+      closeRatingModal();
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+    } finally {
+      setSubmittingRating(false);
+    }
+  };
+
+  const handleCreateEmail = async () => {
+    setCreatingEmail(true);
+    try {
+      const savedEmail = await saveGeneratedEmail(newEmail);
+      setEmails(prev => [...prev, savedEmail]);
+      setShowCreateModal(false);
+      setNewEmail({
+        subject: '',
+        body: '',
+        prospectName: '',
+        companyName: '',
+        cadenceName: '',
+        cadenceType: '',
+        industry: '',
+        stepDay: 1,
+        grade: '',
+        gradeReason: ''
+      });
+    } catch (error) {
+      console.error('Error creating email:', error);
+      alert('Failed to create email. Please try again.');
+    } finally {
+      setCreatingEmail(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -315,22 +415,34 @@ const GeneratedEmails = () => {
                 )}
               </div>
             </div>
-            <button
-              onClick={() => copyToClipboard(`Subject: ${selectedEmail.subject}\n\n${selectedEmail.body}`, selectedEmail.id)}
-              className="btn-secondary flex items-center space-x-1.5 text-sm"
-            >
-              {copiedId === selectedEmail.id ? (
-                <>
-                  <Check className="w-4 h-4" />
-                  <span>Copied!</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-4 h-4" />
-                  <span>Copy</span>
-                </>
-              )}
-            </button>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => {
+                  setEmailToRate(selectedEmail);
+                  setShowRatingModal(true);
+                }}
+                className="btn-primary flex items-center space-x-1.5 text-sm"
+              >
+                <Star className="w-4 h-4" />
+                <span>Rate Email</span>
+              </button>
+              <button
+                onClick={() => copyToClipboard(`Subject: ${selectedEmail.subject}\n\n${selectedEmail.body}`, selectedEmail.id)}
+                className="btn-secondary flex items-center space-x-1.5 text-sm"
+              >
+                {copiedId === selectedEmail.id ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
           <div className="bg-bg-surface border border-border p-4">
@@ -378,8 +490,8 @@ const GeneratedEmails = () => {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-light text-text-primary">Generated Emails</h2>
-          <p className="text-sm text-text-secondary mt-1 font-light">
+          <h2 className="text-3xl font-light text-text-primary">Generated Emails</h2>
+          <p className="text-base text-text-secondary mt-1.5 font-light">
             Review and rate AI-generated emails to improve model performance
           </p>
         </div>
@@ -633,6 +745,181 @@ const GeneratedEmails = () => {
                       <span>Submit for Retraining</span>
                     </>
                   )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Email Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-bg-surface border border-border max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <h3 className="text-xl font-light text-text-primary">Add Generated Email</h3>
+                  <p className="text-sm text-text-secondary mt-1 font-light">
+                    Manually add an email to the training dataset
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className="text-text-tertiary hover:text-text-primary transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-text-secondary mb-2 font-light">
+                      Prospect Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={newEmail.prospectName}
+                      onChange={(e) => setNewEmail(prev => ({ ...prev, prospectName: e.target.value }))}
+                      className="w-full px-3 py-2 text-sm bg-bg-base text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none"
+                      placeholder="John Smith"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-text-secondary mb-2 font-light">
+                      Company Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={newEmail.companyName}
+                      onChange={(e) => setNewEmail(prev => ({ ...prev, companyName: e.target.value }))}
+                      className="w-full px-3 py-2 text-sm bg-bg-base text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none"
+                      placeholder="Acme Corp"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-text-secondary mb-2 font-light">
+                      Cadence Name
+                    </label>
+                    <input
+                      type="text"
+                      value={newEmail.cadenceName}
+                      onChange={(e) => setNewEmail(prev => ({ ...prev, cadenceName: e.target.value }))}
+                      className="w-full px-3 py-2 text-sm bg-bg-base text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none"
+                      placeholder="US | Select | Infrastructure"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-text-secondary mb-2 font-light">
+                      Industry
+                    </label>
+                    <input
+                      type="text"
+                      value={newEmail.industry}
+                      onChange={(e) => setNewEmail(prev => ({ ...prev, industry: e.target.value }))}
+                      className="w-full px-3 py-2 text-sm bg-bg-base text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none"
+                      placeholder="Financial Services"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm text-text-secondary mb-2 font-light">
+                      Cadence Type
+                    </label>
+                    <input
+                      type="text"
+                      value={newEmail.cadenceType}
+                      onChange={(e) => setNewEmail(prev => ({ ...prev, cadenceType: e.target.value }))}
+                      className="w-full px-3 py-2 text-sm bg-bg-base text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none"
+                      placeholder="Fusion"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-text-secondary mb-2 font-light">
+                      Step Day
+                    </label>
+                    <input
+                      type="number"
+                      value={newEmail.stepDay}
+                      onChange={(e) => setNewEmail(prev => ({ ...prev, stepDay: parseInt(e.target.value) || 1 }))}
+                      className="w-full px-3 py-2 text-sm bg-bg-base text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none"
+                      min="1"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-text-secondary mb-2 font-light">
+                      Grade
+                    </label>
+                    <input
+                      type="text"
+                      value={newEmail.grade}
+                      onChange={(e) => setNewEmail(prev => ({ ...prev, grade: e.target.value }))}
+                      className="w-full px-3 py-2 text-sm bg-bg-base text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none"
+                      placeholder="A, B+, etc."
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm text-text-secondary mb-2 font-light">
+                    Subject *
+                  </label>
+                  <input
+                    type="text"
+                    value={newEmail.subject}
+                    onChange={(e) => setNewEmail(prev => ({ ...prev, subject: e.target.value }))}
+                    className="w-full px-3 py-2 text-sm bg-bg-base text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none"
+                    placeholder="Email subject line"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-text-secondary mb-2 font-light">
+                    Body *
+                  </label>
+                  <textarea
+                    value={newEmail.body}
+                    onChange={(e) => setNewEmail(prev => ({ ...prev, body: e.target.value }))}
+                    rows={8}
+                    className="w-full px-3 py-2 text-sm bg-bg-base text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none resize-none"
+                    placeholder="Email body content..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-text-secondary mb-2 font-light">
+                    Grade Reason
+                  </label>
+                  <textarea
+                    value={newEmail.gradeReason}
+                    onChange={(e) => setNewEmail(prev => ({ ...prev, gradeReason: e.target.value }))}
+                    rows={3}
+                    className="w-full px-3 py-2 text-sm bg-bg-base text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none resize-none"
+                    placeholder="Why this email received this grade..."
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end space-x-3 mt-6">
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  disabled={creatingEmail}
+                  className="btn-secondary text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCreateEmail}
+                  disabled={creatingEmail || !newEmail.subject || !newEmail.body || !newEmail.prospectName || !newEmail.companyName}
+                  className="btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {creatingEmail ? 'Creating...' : 'Create Email'}
                 </button>
               </div>
             </div>

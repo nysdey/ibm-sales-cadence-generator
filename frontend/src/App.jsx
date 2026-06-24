@@ -20,18 +20,18 @@ function App() {
       <header className="bg-bg-base border-b border-border">
         <div className="max-w-7xl mx-auto px-6 pt-8 pb-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              {/* IBM Logo - Slightly larger to fill space */}
+            <div className="flex items-center gap-2">
+              {/* IBM Logo - Increased size */}
               <img
                 src="/ibm-blue-bee.png"
                 alt="IBM"
-                className="h-14 w-auto"
+                className="h-16 w-auto"
               />
               <div>
-                <h1 className="text-3xl font-light text-text-primary tracking-tight">
+                <h1 className="text-4xl font-light text-text-primary tracking-tight">
                   IBM Seller Studio
                 </h1>
-                <p className="text-sm text-text-secondary mt-0.5 font-light">
+                <p className="text-base text-text-secondary mt-1 font-light">
                   AI-Powered Sales Intelligence & Outreach
                 </p>
               </div>
