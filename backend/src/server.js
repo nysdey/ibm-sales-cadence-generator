@@ -85,9 +85,18 @@ const PORT = config.port;
 
 async function startServer() {
   try {
-    // Initialize database schema
-    await initializeDatabase();
-    await seedDatabase();
+    // Try to initialize database (optional)
+    let dbStatus = '✗ Not configured (file-based mode)';
+    try {
+      const dbInit = await initializeDatabase();
+      const dbSeed = await seedDatabase();
+      if (dbInit) {
+        dbStatus = '✓ Connected & Initialized';
+      }
+    } catch (dbError) {
+      console.warn('⚠️  Database initialization failed:', dbError.message);
+      console.log('ℹ️  Continuing in file-based mode...');
+    }
     
     // Start Express server
     app.listen(PORT, () => {
@@ -98,7 +107,7 @@ async function startServer() {
       console.log(`🌍 Environment: ${config.nodeEnv}`);
       console.log(`🔐 CORS enabled for: ${config.corsOrigin}`);
       console.log(`🤖 Watsonx.ai: ${config.watsonx.endpoint ? '✓ Configured' : '✗ Not configured'}`);
-      console.log(`💾 Database: ✓ Connected & Initialized`);
+      console.log(`💾 Database: ${dbStatus}`);
       console.log('='.repeat(60));
       console.log('\n📋 Available endpoints:');
       console.log('  GET  /health                         - Health check');
@@ -121,8 +130,6 @@ async function startServer() {
     });
   } catch (error) {
     console.error('\n❌ Failed to start server:', error);
-    console.error('\nPlease ensure PostgreSQL is running and configured correctly.');
-    console.error('See docs/DATABASE_SETUP.md for setup instructions.\n');
     process.exit(1);
   }
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Mail, Calendar, User, Building2, Search, ChevronDown, ChevronRight, Copy, Check, ArrowLeft, TrendingUp, BarChart3, Star, Send, X, Plus } from 'lucide-react';
-import { getGeneratedEmails, saveGeneratedEmail } from '../../services/api';
+import { getGeneratedEmails, saveGeneratedEmail, submitEmailRating, addEmailComment } from '../../services/api';
 
 // RatingStars component
 const RatingStars = ({ label, value, onChange }) => {

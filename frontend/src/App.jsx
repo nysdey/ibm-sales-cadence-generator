@@ -21,9 +21,9 @@ function App() {
 
   return (
     <div className="min-h-screen bg-bg-base">
-      {/* Header with thin white border at bottom - non-sticky with more padding */}
+      {/* Header with thin white border at bottom - non-sticky with reduced padding */}
       <header className="bg-bg-base border-b border-border">
-        <div className="max-w-7xl mx-auto px-6 pt-6 pb-4">
+        <div className="max-w-7xl mx-auto px-6 pt-6 pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {/* IBM Logo - Increased size */}
@@ -95,7 +95,7 @@ function App() {
 
         {/* Tab Navigation with thin white border */}
         <div className="max-w-7xl mx-auto px-6">
-          <nav className="flex space-x-8 border-t border-border pt-3 pb-3">
+          <nav className="flex space-x-8 border-t border-border pt-2 pb-2">
             {tabs.map((tab) => (
               <button
                 key={tab.id}

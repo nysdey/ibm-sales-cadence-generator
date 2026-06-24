@@ -5,34 +5,50 @@ dotenv.config();
 
 const { Pool } = pg;
 
+// Check if database is enabled
+const DB_ENABLED = process.env.DB_ENABLED !== 'false';
+
 // Database configuration
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '5432'),
   database: process.env.DB_NAME || 'sales_cadence_builder',
   user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'password',
+  password: process.env.DB_PASSWORD || '',
   ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
   max: 20, // Maximum number of clients in the pool
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
 };
 
-// Create connection pool
-const pool = new Pool(dbConfig);
+// Create connection pool only if database is enabled
+let pool = null;
+let dbConnected = false;
 
-// Test connection
-pool.on('connect', () => {
-  console.log('✅ Connected to PostgreSQL database');
-});
+if (DB_ENABLED) {
+  pool = new Pool(dbConfig);
 
-pool.on('error', (err) => {
-  console.error('❌ Unexpected error on idle client', err);
-  process.exit(-1);
-});
+  // Test connection
+  pool.on('connect', () => {
+    console.log('✅ Connected to PostgreSQL database');
+    dbConnected = true;
+  });
+
+  pool.on('error', (err) => {
+    console.warn('⚠️  Database connection error:', err.message);
+    dbConnected = false;
+  });
+} else {
+  console.log('ℹ️  Database disabled - running in file-based mode');
+}
 
 // Query helper function
 export const query = async (text, params) => {
+  if (!pool || !DB_ENABLED) {
+    console.warn('⚠️  Database not available, query skipped');
+    return { rows: [], rowCount: 0 };
+  }
+  
   const start = Date.now();
   try {
     const res = await pool.query(text, params);
@@ -47,6 +63,11 @@ export const query = async (text, params) => {
 
 // Transaction helper
 export const transaction = async (callback) => {
+  if (!pool || !DB_ENABLED) {
+    console.warn('⚠️  Database not available, transaction skipped');
+    return null;
+  }
+  
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -63,6 +84,11 @@ export const transaction = async (callback) => {
 
 // Initialize database schema
 export const initializeDatabase = async () => {
+  if (!pool || !DB_ENABLED) {
+    console.log('ℹ️  Database disabled, skipping initialization');
+    return false;
+  }
+  
   try {
     console.log('🔄 Initializing database schema...');
 
@@ -180,12 +206,17 @@ export const initializeDatabase = async () => {
 
 // Seed initial data
 export const seedDatabase = async () => {
+  if (!pool || !DB_ENABLED) {
+    console.log('ℹ️  Database disabled, skipping seeding');
+    return false;
+  }
+  
   try {
     // Check if users exist
     const userCheck = await query('SELECT COUNT(*) FROM users');
-    if (parseInt(userCheck.rows[0].count) > 0) {
+    if (userCheck.rows && userCheck.rows[0] && parseInt(userCheck.rows[0].count) > 0) {
       console.log('ℹ️  Database already seeded, skipping...');
-      return;
+      return true;
     }
 
     console.log('🌱 Seeding database with initial data...');
@@ -200,8 +231,10 @@ export const seedDatabase = async () => {
     `);
 
     console.log('✅ Database seeded successfully');
+    return true;
   } catch (error) {
     console.error('❌ Error seeding database:', error);
+    return false;
     throw error;
   }
 };

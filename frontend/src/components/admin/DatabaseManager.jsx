@@ -1010,23 +1010,9 @@ const DatabaseManager = () => {
                   </button>
                   <div className="h-6 w-px bg-border"></div>
                   
-                  {/* Training Data tab: Publish/Unpublish/Export/Delete */}
+                  {/* Training Data tab: Export/Delete only */}
                   {activeTab === 'trainingData' && (
                     <>
-                      <button
-                        onClick={handleBulkPublish}
-                        className="bg-ibm-blue hover:bg-ibm-blue/90 text-white font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2"
-                      >
-                        <Eye className="w-4 h-4" />
-                        <span>Publish ({selectedItems.length})</span>
-                      </button>
-                      <button
-                        onClick={handleBulkUnpublish}
-                        className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-border"
-                      >
-                        <EyeOff className="w-4 h-4" />
-                        <span>Unpublish</span>
-                      </button>
                       <button
                         onClick={handleBulkExport}
                         className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-border"

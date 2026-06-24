@@ -683,83 +683,137 @@ const CadenceLibrary = () => {
     alert(`Exported ${selectedItems.length} cadences`);
   };
 
+  const handleCreateCadence = () => {
+    // Build cadence name from form data
+    const cadenceName = `${createCadenceData.country}|${createCadenceData.market}|${createCadenceData.portfolio}|${createCadenceData.recipients}${createCadenceData.customFields ? `|${createCadenceData.customFields}` : ''}`;
+    
+    // Create new cadence object
+    const newCadence = {
+      id: `${Date.now()}`,
+      name: cadenceName,
+      region: createCadenceData.country,
+      segment: createCadenceData.market,
+      category: createCadenceData.portfolio,
+      persona: createCadenceData.recipients,
+      type: 'Outbound',
+      campaign: createCadenceData.customFields.split('|')[0] || 'Custom',
+      fiscal_year: 'FY26',
+      duration: parseInt(createCadenceData.days) || 15,
+      people_added: 0,
+      people_started: 0,
+      people_finished: 0,
+      bounced: 0,
+      success_rate: 0,
+      open_rate: 0,
+      click_rate: 0,
+      reply_rate: 0,
+      meeting_rate: 0,
+      status: 'draft',
+      created_by: currentUser.id,
+      created_by_name: currentUser.name,
+      archived: false,
+      steps: [] // Will be populated by AI generation later
+    };
+    
+    // Add to cadences list
+    setCadences(prevCadences => [newCadence, ...prevCadences]);
+    
+    // Reset form and close modal
+    setCreateCadenceData({
+      country: 'US',
+      market: 'Select',
+      portfolio: 'Infrastructure',
+      recipients: '',
+      customFields: '',
+      steps: '10',
+      days: '15',
+      description: '',
+      context: ''
+    });
+    setShowCreateModal(false);
+    
+    // Show success message
+    alert(`Cadence "${cadenceName}" created successfully as a draft. You can now add steps and publish it.`);
+  };
+
   // List View
   if (!selectedCadence) {
     return (
       <div className="space-y-5">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-4">
-              <h2 className="text-2xl font-light text-text-primary">Cadences</h2>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setViewMode('all')}
-                  className={`px-3 py-1 text-sm font-normal transition-all ${
-                    viewMode === 'all'
-                      ? 'bg-ibm-blue text-white'
-                      : 'bg-bg-surface text-text-tertiary hover:text-text-primary border border-border'
-                  }`}
-                >
-                  All
-                </button>
-                <button
-                  onClick={() => setViewMode('active')}
-                  className={`px-3 py-1 text-sm font-normal transition-all ${
-                    viewMode === 'active'
-                      ? 'bg-ibm-blue text-white'
-                      : 'bg-bg-surface text-text-tertiary hover:text-text-primary border border-border'
-                  }`}
-                >
-                  Active
-                </button>
-                <button
-                  onClick={() => setViewMode('drafts')}
-                  className={`px-3 py-1 text-sm font-normal transition-all ${
-                    viewMode === 'drafts'
-                      ? 'bg-ibm-blue text-white'
-                      : 'bg-bg-surface text-text-tertiary hover:text-text-primary border border-border'
-                  }`}
-                >
-                  Drafts
-                </button>
-                <button
-                  onClick={() => setViewMode('archived')}
-                  className={`px-3 py-1 text-sm font-normal transition-all flex items-center gap-1.5 ${
-                    viewMode === 'archived'
-                      ? 'bg-ibm-blue text-white'
-                      : 'bg-bg-surface text-text-tertiary hover:text-text-primary border border-border'
-                  }`}
-                >
-                  <Archive className="w-3.5 h-3.5" />
-                  Archived
-                </button>
-              </div>
-            </div>
-            <p className="text-base text-text-secondary mt-2 font-light">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <h2 className="text-2xl font-light text-text-primary">Cadences</h2>
+            <p className="text-base text-text-secondary mt-1 font-light">
               {viewMode === 'all' ? 'View all cadences across all statuses' :
                viewMode === 'active' ? 'Manage and personalize your sales cadences' :
                viewMode === 'drafts' ? 'Review and publish draft cadences' :
                'View and restore archived cadences'}
             </p>
           </div>
-          <div className="flex space-x-2">
+          <div className="flex items-center gap-2">
+            {/* View Mode Tabs */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setViewMode('all')}
+                className={`px-3 py-1.5 text-sm font-normal transition-all ${
+                  viewMode === 'all'
+                    ? 'bg-ibm-blue text-white'
+                    : 'bg-bg-surface text-text-tertiary hover:text-text-primary border border-border'
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setViewMode('active')}
+                className={`px-3 py-1.5 text-sm font-normal transition-all ${
+                  viewMode === 'active'
+                    ? 'bg-ibm-blue text-white'
+                    : 'bg-bg-surface text-text-tertiary hover:text-text-primary border border-border'
+                }`}
+              >
+                Active
+              </button>
+              <button
+                onClick={() => setViewMode('drafts')}
+                className={`px-3 py-1.5 text-sm font-normal transition-all ${
+                  viewMode === 'drafts'
+                    ? 'bg-ibm-blue text-white'
+                    : 'bg-bg-surface text-text-tertiary hover:text-text-primary border border-border'
+                }`}
+              >
+                Drafts
+              </button>
+              <button
+                onClick={() => setViewMode('archived')}
+                className={`px-3 py-1.5 text-sm font-normal transition-all flex items-center gap-1.5 ${
+                  viewMode === 'archived'
+                    ? 'bg-ibm-blue text-white'
+                    : 'bg-bg-surface text-text-tertiary hover:text-text-primary border border-border'
+                }`}
+              >
+                <Archive className="w-3.5 h-3.5" />
+                Archived
+              </button>
+            </div>
+            <div className="h-5 w-px bg-border"></div>
+            {/* Action Buttons */}
             {!selectMode ? (
               <>
                 <button
                   onClick={toggleSelectMode}
-                  className="bg-ibm-blue/10 hover:bg-ibm-blue/20 text-ibm-blue font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-ibm-blue/30"
+                  className="bg-ibm-blue/10 hover:bg-ibm-blue/20 text-ibm-blue font-normal py-1.5 px-3 text-sm transition-all flex items-center space-x-1.5 border border-ibm-blue/30"
                 >
-                  <CheckSquare className="w-4 h-4" />
+                  <CheckSquare className="w-3.5 h-3.5" />
                   <span>Select</span>
                 </button>
-                <button className="btn-purple flex items-center space-x-1.5 text-sm">
+                <button className="btn-purple flex items-center space-x-1.5 text-sm py-1.5 px-3">
                   <Download className="w-3.5 h-3.5" />
                   <span>Import</span>
                 </button>
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="btn-primary flex items-center space-x-1.5 text-sm"
+                  className="btn-primary flex items-center space-x-1.5 text-sm py-1.5 px-3"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Create</span>
@@ -769,9 +823,9 @@ const CadenceLibrary = () => {
               <>
                 <button
                   onClick={toggleSelectMode}
-                  className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-border"
+                  className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5 border border-border"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3.5 h-3.5" />
                   <span>Cancel</span>
                 </button>
                 <button
@@ -791,7 +845,69 @@ const CadenceLibrary = () => {
                       <span>Deselect All</span>
                     </button>
                     <div className="h-5 w-px bg-border"></div>
-                    {viewMode === 'active' ? (
+                    {viewMode === 'archived' ? (
+                      <>
+                        <button
+                          onClick={handleBulkRestore}
+                          className="bg-ibm-blue hover:bg-ibm-blue/90 text-white font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5"
+                        >
+                          <ArchiveRestore className="w-3.5 h-3.5" />
+                          <span>Restore ({selectedItems.length})</span>
+                        </button>
+                        <button
+                          onClick={handleBulkDelete}
+                          className="bg-red-500/10 hover:bg-red-500/20 text-red-400 font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5 border border-red-500/30"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Delete Permanently</span>
+                        </button>
+                      </>
+                    ) : viewMode === 'all' ? (
+                      <>
+                        {(() => {
+                          const selectedCadences = cadences.filter(c => selectedItems.includes(c.id));
+                          const hasArchived = selectedCadences.some(c => c.archived);
+                          const hasUnarchived = selectedCadences.some(c => !c.archived);
+                          
+                          return (
+                            <>
+                              {hasArchived && (
+                                <button
+                                  onClick={handleBulkRestore}
+                                  className="bg-ibm-blue hover:bg-ibm-blue/90 text-white font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5"
+                                >
+                                  <ArchiveRestore className="w-3.5 h-3.5" />
+                                  <span>Restore</span>
+                                </button>
+                              )}
+                              {hasUnarchived && (
+                                <button
+                                  onClick={handleBulkArchive}
+                                  className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5 border border-border"
+                                >
+                                  <Archive className="w-3.5 h-3.5" />
+                                  <span>Archive</span>
+                                </button>
+                              )}
+                            </>
+                          );
+                        })()}
+                        <button
+                          onClick={handleBulkExport}
+                          className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5 border border-border"
+                        >
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>Export</span>
+                        </button>
+                        <button
+                          onClick={handleBulkDelete}
+                          className="bg-red-500/10 hover:bg-red-500/20 text-red-400 font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5 border border-red-500/30"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Delete</span>
+                        </button>
+                      </>
+                    ) : (
                       <>
                         {(() => {
                           const selectedCadences = cadences.filter(c => selectedItems.includes(c.id));
@@ -800,30 +916,24 @@ const CadenceLibrary = () => {
                           
                           return (
                             <>
-                              <button
-                                onClick={handleBulkPublish}
-                                disabled={!hasUnpublished}
-                                className={`font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5 ${
-                                  hasUnpublished
-                                    ? 'bg-ibm-blue hover:bg-ibm-blue/90 text-white'
-                                    : 'bg-gray-500/20 text-gray-500 cursor-not-allowed'
-                                }`}
-                              >
-                                <Eye className="w-3.5 h-3.5" />
-                                <span>Publish ({selectedItems.length})</span>
-                              </button>
-                              <button
-                                onClick={handleBulkUnpublish}
-                                disabled={!hasPublished}
-                                className={`font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5 border ${
-                                  hasPublished
-                                    ? 'bg-bg-raised hover:bg-bg-elevated text-text-primary border-border'
-                                    : 'bg-gray-500/20 text-gray-500 border-gray-500/30 cursor-not-allowed'
-                                }`}
-                              >
-                                <EyeOff className="w-3.5 h-3.5" />
-                                <span>Unpublish</span>
-                              </button>
+                              {hasUnpublished && (
+                                <button
+                                  onClick={handleBulkPublish}
+                                  className="bg-ibm-blue hover:bg-ibm-blue/90 text-white font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5"
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                  <span>Publish</span>
+                                </button>
+                              )}
+                              {hasPublished && (
+                                <button
+                                  onClick={handleBulkUnpublish}
+                                  className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5 border border-border"
+                                >
+                                  <EyeOff className="w-3.5 h-3.5" />
+                                  <span>Unpublish</span>
+                                </button>
+                              )}
                             </>
                           );
                         })()}
@@ -847,23 +957,6 @@ const CadenceLibrary = () => {
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                           <span>Delete</span>
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={handleBulkRestore}
-                          className="bg-ibm-blue hover:bg-ibm-blue/90 text-white font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5"
-                        >
-                          <ArchiveRestore className="w-3.5 h-3.5" />
-                          <span>Restore ({selectedItems.length})</span>
-                        </button>
-                        <button
-                          onClick={handleBulkDelete}
-                          className="bg-red-500/10 hover:bg-red-500/20 text-red-400 font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5 border border-red-500/30"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                          <span>Delete Permanently</span>
                         </button>
                       </>
                     )}
@@ -1148,7 +1241,7 @@ const CadenceLibrary = () => {
             {canEdit(selectedCadence) && (
               <button
                 onClick={() => handleEditCadence(selectedCadence)}
-                className="btn-secondary flex items-center space-x-1.5 text-sm"
+                className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-3 text-sm transition-all flex items-center space-x-1.5 border border-border"
               >
                 <Edit2 className="w-3.5 h-3.5" />
                 <span>Edit</span>
@@ -1710,10 +1803,7 @@ const CadenceLibrary = () => {
                   Cancel
                 </button>
                 <button
-                  onClick={() => {
-                    alert('Cadence creation functionality will generate AI-powered cadence steps based on your inputs. This will be integrated with the backend API.');
-                    setShowCreateModal(false);
-                  }}
+                  onClick={handleCreateCadence}
                   disabled={!createCadenceData.recipients}
                   className="px-4 py-2 text-sm font-normal text-white bg-ibm-blue hover:bg-ibm-blue/90 border border-ibm-blue transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >

@@ -132,7 +132,57 @@ export const saveGeneratedEmail = async (emailData) => {
  */
 export const getGeneratedEmails = async () => {
   try {
-    const response = await api.get('/training/generated-emails');
+    const response = await api.get('/feedback/emails');
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Submit email rating
+ * @param {string} emailId - Email ID
+ * @param {string} criterion - Rating criterion
+ * @param {number} score - Rating score (1-5)
+ * @returns {Promise} - Updated email
+ */
+export const submitEmailRating = async (emailId, criterion, score) => {
+  try {
+    const response = await api.put(`/feedback/emails/${emailId}/rating`, {
+      criterion,
+      score
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Add email comment
+ * @param {string} emailId - Email ID
+ * @param {string} comment - Comment text
+ * @returns {Promise} - Created comment
+ */
+export const addEmailComment = async (emailId, comment) => {
+  try {
+    const response = await api.post(`/feedback/emails/${emailId}/comment`, {
+      comment
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Delete generated email
+ * @param {string} emailId - Email ID
+ * @returns {Promise}
+ */
+export const deleteGeneratedEmail = async (emailId) => {
+  try {
+    const response = await api.delete(`/feedback/emails/${emailId}`);
     return response.data;
   } catch (error) {
     throw error;
