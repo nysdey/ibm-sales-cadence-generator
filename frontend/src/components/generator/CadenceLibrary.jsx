@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { AlertCircle, Loader2, Plus, Upload, Search, Filter, X, Mail, Phone, Linkedin, ChevronRight, ArrowLeft, Edit2, Copy, Check, Save, CheckSquare, Square, Eye, EyeOff, Trash2, Download } from 'lucide-react';
+import { AlertCircle, Loader2, Plus, Download, Upload, ArrowUp, ArrowDown, Search, Filter, X, Mail, Phone, Linkedin, ChevronRight, ArrowLeft, Edit2, Copy, Check, Save, CheckSquare, Square, Eye, EyeOff, Trash2, Archive, ArchiveRestore, RefreshCw } from 'lucide-react';
 import { generateCadences, saveGeneratedEmail } from '../../services/api';
+import { useUser } from '../../contexts/UserContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
@@ -26,6 +27,10 @@ const SAMPLE_CADENCES = [
     click_rate: 28.70,
     reply_rate: 0.80,
     meeting_rate: 0.90,
+    status: 'published',
+    created_by: '1',
+    created_by_name: 'Sydney Chin',
+    archived: false,
     steps: [
       {
         day: 1,
@@ -102,6 +107,10 @@ const SAMPLE_CADENCES = [
     click_rate: 13.50,
     reply_rate: 3.90,
     meeting_rate: 6.10,
+    status: 'published',
+    created_by: '2',
+    created_by_name: 'Bob',
+    archived: false,
     steps: [
       {
         day: 1,
@@ -148,6 +157,10 @@ const SAMPLE_CADENCES = [
     click_rate: 25.60,
     reply_rate: 0.30,
     meeting_rate: 0.50,
+    status: 'published',
+    created_by: '3',
+    created_by_name: 'John Manager',
+    archived: false,
     steps: [
       {
         day: 1,
@@ -195,6 +208,9 @@ const SAMPLE_CADENCES = [
     reply_rate: 0.00,
     meeting_rate: 0.00,
     status: 'draft',
+    created_by: '4',
+    created_by_name: 'Jane Seller',
+    archived: false,
     steps: [
       {
         day: 1,
@@ -224,6 +240,7 @@ const SAMPLE_CADENCES = [
 ];
 
 const CadenceLibrary = () => {
+  const { currentUser, canEdit, canDelete, canPublish } = useUser();
   const [cadences, setCadences] = useState(SAMPLE_CADENCES);
   const [filteredCadences, setFilteredCadences] = useState(SAMPLE_CADENCES);
   const [searchTerm, setSearchTerm] = useState('');
@@ -234,6 +251,7 @@ const CadenceLibrary = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
+  const [viewMode, setViewMode] = useState('active'); // 'active' or 'archived'
   const [personalizationData, setPersonalizationData] = useState({
     prospectName: '',
     prospectTitle: '',
@@ -324,11 +342,24 @@ const CadenceLibrary = () => {
   useEffect(() => {
     let filtered = cadences;
 
+    // Filter by view mode
+    if (viewMode === 'all') {
+      // Show all cadences
+      filtered = cadences;
+    } else if (viewMode === 'active') {
+      filtered = filtered.filter(c => !c.archived && c.status === 'published');
+    } else if (viewMode === 'drafts') {
+      filtered = filtered.filter(c => !c.archived && c.status === 'draft');
+    } else if (viewMode === 'archived') {
+      filtered = filtered.filter(c => c.archived);
+    }
+
     if (searchTerm) {
       filtered = filtered.filter(cadence =>
         cadence.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         cadence.campaign.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cadence.persona.toLowerCase().includes(searchTerm.toLowerCase())
+        cadence.persona.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        cadence.created_by_name?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -339,7 +370,7 @@ const CadenceLibrary = () => {
     if (filters.campaign !== 'all') filtered = filtered.filter(c => c.campaign === filters.campaign);
 
     setFilteredCadences(filtered);
-  }, [searchTerm, filters, cadences]);
+  }, [searchTerm, filters, cadences, viewMode]);
 
   const handleFilterChange = (filterType, value) => {
     setFilters(prev => ({ ...prev, [filterType]: value }));
@@ -524,13 +555,119 @@ const CadenceLibrary = () => {
   };
 
   const handleBulkPublish = () => {
-    console.log('Bulk publish:', selectedItems);
-    alert(`Published ${selectedItems.length} cadences`);
+    // Only publish draft cadences
+    const selectedCadences = cadences.filter(c => selectedItems.includes(c.id));
+    const draftCadences = selectedCadences.filter(c => c.status === 'draft');
+    
+    if (draftCadences.length === 0) {
+      alert('No draft cadences selected. Only draft cadences can be published.');
+      return;
+    }
+    
+    if (draftCadences.length < selectedItems.length) {
+      alert(`Publishing ${draftCadences.length} draft cadences. ${selectedItems.length - draftCadences.length} already published cadences were skipped.`);
+    } else {
+      alert(`Published ${draftCadences.length} cadences`);
+    }
+    
+    console.log('Bulk publish:', draftCadences.map(c => c.id));
   };
 
   const handleBulkUnpublish = () => {
     console.log('Bulk unpublish:', selectedItems);
     alert(`Unpublished ${selectedItems.length} cadences`);
+  };
+
+  const handleBulkArchive = () => {
+    setCadences(prevCadences =>
+      prevCadences.map(c =>
+        selectedItems.includes(c.id) ? { ...c, archived: true, status: 'draft' } : c
+      )
+    );
+    setSelectedItems([]);
+    setSelectMode(false);
+    alert(`Archived ${selectedItems.length} cadences`);
+  };
+
+  const handleBulkRestore = () => {
+    setCadences(prevCadences =>
+      prevCadences.map(c =>
+        selectedItems.includes(c.id) ? { ...c, archived: false } : c
+      )
+    );
+    setSelectedItems([]);
+    setSelectMode(false);
+    alert(`Restored ${selectedItems.length} cadences`);
+  };
+
+  // Individual cadence actions
+  const handleEditCadence = (cadence) => {
+    if (!canEdit(cadence)) {
+      alert('You do not have permission to edit this cadence');
+      return;
+    }
+    alert(`Edit cadence: ${cadence.name}\n(Edit functionality to be implemented)`);
+  };
+
+  const handleArchiveCadence = (cadence) => {
+    if (!canDelete(cadence)) {
+      alert('You do not have permission to archive this cadence');
+      return;
+    }
+    setCadences(prevCadences =>
+      prevCadences.map(c =>
+        c.id === cadence.id ? { ...c, archived: true, status: 'draft' } : c
+      )
+    );
+    setSelectedCadence(null);
+  };
+
+  const handleRestoreCadence = (cadence) => {
+    setCadences(prevCadences =>
+      prevCadences.map(c =>
+        c.id === cadence.id ? { ...c, archived: false } : c
+      )
+    );
+  };
+
+  const handleDeleteCadence = (cadence) => {
+    if (!canDelete(cadence)) {
+      alert('You do not have permission to delete this cadence');
+      return;
+    }
+    if (confirm(`Are you sure you want to permanently delete "${cadence.name}"?`)) {
+      setCadences(prevCadences => prevCadences.filter(c => c.id !== cadence.id));
+      setSelectedCadence(null);
+      alert('Cadence deleted successfully');
+    }
+  };
+
+  const handleSaveAsDraft = (cadence) => {
+    if (!canPublish(cadence)) {
+      alert('You do not have permission to change publish status');
+      return;
+    }
+    if (confirm(`Are you sure you want to unpublish "${cadence.name}"?`)) {
+      setCadences(prevCadences =>
+        prevCadences.map(c =>
+          c.id === cadence.id ? { ...c, status: 'draft' } : c
+        )
+      );
+    }
+  };
+
+  const handlePublishCadence = (cadence) => {
+    if (!canPublish(cadence)) {
+      alert('You do not have permission to publish cadences');
+      return;
+    }
+    if (confirm(`Are you sure you want to publish "${cadence.name}"?`)) {
+      setCadences(prevCadences =>
+        prevCadences.map(c =>
+          c.id === cadence.id ? { ...c, status: 'published' } : c
+        )
+      );
+    }
   };
 
   const handleBulkDelete = () => {
@@ -553,9 +690,57 @@ const CadenceLibrary = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-light text-text-primary">Cadences</h2>
-            <p className="text-base text-text-secondary mt-1 font-light">
-              Manage and personalize your sales cadences
+            <div className="flex items-center gap-4">
+              <h2 className="text-2xl font-light text-text-primary">Cadences</h2>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setViewMode('all')}
+                  className={`px-3 py-1 text-sm font-normal transition-all ${
+                    viewMode === 'all'
+                      ? 'bg-ibm-blue text-white'
+                      : 'bg-bg-surface text-text-tertiary hover:text-text-primary border border-border'
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setViewMode('active')}
+                  className={`px-3 py-1 text-sm font-normal transition-all ${
+                    viewMode === 'active'
+                      ? 'bg-ibm-blue text-white'
+                      : 'bg-bg-surface text-text-tertiary hover:text-text-primary border border-border'
+                  }`}
+                >
+                  Active
+                </button>
+                <button
+                  onClick={() => setViewMode('drafts')}
+                  className={`px-3 py-1 text-sm font-normal transition-all ${
+                    viewMode === 'drafts'
+                      ? 'bg-ibm-blue text-white'
+                      : 'bg-bg-surface text-text-tertiary hover:text-text-primary border border-border'
+                  }`}
+                >
+                  Drafts
+                </button>
+                <button
+                  onClick={() => setViewMode('archived')}
+                  className={`px-3 py-1 text-sm font-normal transition-all flex items-center gap-1.5 ${
+                    viewMode === 'archived'
+                      ? 'bg-ibm-blue text-white'
+                      : 'bg-bg-surface text-text-tertiary hover:text-text-primary border border-border'
+                  }`}
+                >
+                  <Archive className="w-3.5 h-3.5" />
+                  Archived
+                </button>
+              </div>
+            </div>
+            <p className="text-base text-text-secondary mt-2 font-light">
+              {viewMode === 'all' ? 'View all cadences across all statuses' :
+               viewMode === 'active' ? 'Manage and personalize your sales cadences' :
+               viewMode === 'drafts' ? 'Review and publish draft cadences' :
+               'View and restore archived cadences'}
             </p>
           </div>
           <div className="flex space-x-2">
@@ -569,7 +754,7 @@ const CadenceLibrary = () => {
                   <span>Select</span>
                 </button>
                 <button className="btn-purple flex items-center space-x-1.5 text-sm">
-                  <Upload className="w-3.5 h-3.5" />
+                  <Download className="w-3.5 h-3.5" />
                   <span>Import</span>
                 </button>
                 <button
@@ -591,49 +776,97 @@ const CadenceLibrary = () => {
                 </button>
                 <button
                   onClick={selectAll}
-                  className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-border"
+                  className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5 border border-border"
                 >
-                  <CheckSquare className="w-4 h-4" />
+                  <CheckSquare className="w-3.5 h-3.5" />
                   <span>Select All</span>
                 </button>
                 {selectedItems.length > 0 && (
                   <>
                     <button
                       onClick={deselectAll}
-                      className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-border"
+                      className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5 border border-border"
                     >
-                      <Square className="w-4 h-4" />
+                      <Square className="w-3.5 h-3.5" />
                       <span>Deselect All</span>
                     </button>
-                    <div className="h-6 w-px bg-border"></div>
-                    <button
-                      onClick={handleBulkPublish}
-                      className="bg-ibm-blue hover:bg-ibm-blue/90 text-white font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2"
-                    >
-                      <Eye className="w-4 h-4" />
-                      <span>Publish ({selectedItems.length})</span>
-                    </button>
-                    <button
-                      onClick={handleBulkUnpublish}
-                      className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-border"
-                    >
-                      <EyeOff className="w-4 h-4" />
-                      <span>Unpublish</span>
-                    </button>
-                    <button
-                      onClick={handleBulkExport}
-                      className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-border"
-                    >
-                      <Download className="w-4 h-4" />
-                      <span>Export</span>
-                    </button>
-                    <button
-                      onClick={handleBulkDelete}
-                      className="bg-red-500/10 hover:bg-red-500/20 text-red-400 font-normal py-2 px-4 text-sm transition-all flex items-center space-x-2 border border-red-500/30"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      <span>Delete</span>
-                    </button>
+                    <div className="h-5 w-px bg-border"></div>
+                    {viewMode === 'active' ? (
+                      <>
+                        {(() => {
+                          const selectedCadences = cadences.filter(c => selectedItems.includes(c.id));
+                          const hasUnpublished = selectedCadences.some(c => c.status === 'draft');
+                          const hasPublished = selectedCadences.some(c => c.status === 'published');
+                          
+                          return (
+                            <>
+                              <button
+                                onClick={handleBulkPublish}
+                                disabled={!hasUnpublished}
+                                className={`font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5 ${
+                                  hasUnpublished
+                                    ? 'bg-ibm-blue hover:bg-ibm-blue/90 text-white'
+                                    : 'bg-gray-500/20 text-gray-500 cursor-not-allowed'
+                                }`}
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                                <span>Publish ({selectedItems.length})</span>
+                              </button>
+                              <button
+                                onClick={handleBulkUnpublish}
+                                disabled={!hasPublished}
+                                className={`font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5 border ${
+                                  hasPublished
+                                    ? 'bg-bg-raised hover:bg-bg-elevated text-text-primary border-border'
+                                    : 'bg-gray-500/20 text-gray-500 border-gray-500/30 cursor-not-allowed'
+                                }`}
+                              >
+                                <EyeOff className="w-3.5 h-3.5" />
+                                <span>Unpublish</span>
+                              </button>
+                            </>
+                          );
+                        })()}
+                        <button
+                          onClick={handleBulkExport}
+                          className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5 border border-border"
+                        >
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>Export</span>
+                        </button>
+                        <button
+                          onClick={handleBulkArchive}
+                          className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5 border border-border"
+                        >
+                          <Archive className="w-3.5 h-3.5" />
+                          <span>Archive</span>
+                        </button>
+                        <button
+                          onClick={handleBulkDelete}
+                          className="bg-red-500/10 hover:bg-red-500/20 text-red-400 font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5 border border-red-500/30"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Delete</span>
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={handleBulkRestore}
+                          className="bg-ibm-blue hover:bg-ibm-blue/90 text-white font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5"
+                        >
+                          <ArchiveRestore className="w-3.5 h-3.5" />
+                          <span>Restore ({selectedItems.length})</span>
+                        </button>
+                        <button
+                          onClick={handleBulkDelete}
+                          className="bg-red-500/10 hover:bg-red-500/20 text-red-400 font-normal py-1.5 px-3 text-xs transition-all flex items-center space-x-1.5 border border-red-500/30"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Delete Permanently</span>
+                        </button>
+                      </>
+                    )}
                   </>
                 )}
               </>
@@ -736,50 +969,54 @@ const CadenceLibrary = () => {
             <table className="min-w-full">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="px-3 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
+                  {selectMode && (
+                    <th className="px-3 py-2.5 w-12"></th>
+                  )}
+                  <th className="px-4 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Cadence Name
                   </th>
-                  <th className="px-2 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
+                  <th className="px-3 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Steps
                   </th>
-                  <th className="px-2 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
+                  <th className="px-3 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Days
                   </th>
-                  <th className="px-2 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
+                  <th className="px-3 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Total People
                   </th>
-                  <th className="px-2 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
+                  <th className="px-3 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Active People
                   </th>
-                  <th className="px-2 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
+                  <th className="px-3 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Calls Logged
                   </th>
-                  <th className="px-2 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
+                  <th className="px-3 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Emails Delivered
                   </th>
-                  <th className="px-2 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
+                  <th className="px-3 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Reply Rate
                   </th>
-                  <th className="px-2 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
+                  <th className="px-3 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Click Rate
                   </th>
-                  <th className="px-2 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
+                  <th className="px-3 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Open Rate
                   </th>
-                  <th className="px-2 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
+                  <th className="px-3 py-2.5 text-left text-sm font-normal text-text-tertiary tracking-wider">
                     Meeting Ratio
                   </th>
-                  <th className="px-2 py-2.5 text-sm font-normal text-text-tertiary tracking-wider">
+                  <th className="px-3 py-2.5 text-sm font-normal text-text-tertiary tracking-wider">
                     Opp Ratio
                   </th>
-                  <th className="px-2 py-2.5"></th>
+                  <th className="px-3 py-2.5"></th>
                 </tr>
               </thead>
               <tbody>
-                {filteredCadences.map((cadence) => (
+                {filteredCadences.map((cadence) => {
+                  return (
                   <tr
                     key={cadence.id}
-                    className={`hover:bg-bg-raised cursor-pointer transition-all duration-150 border-b border-border ${cadence.status === 'draft' ? 'bg-text-tertiary/5' : ''}`}
+                    className="hover:bg-bg-raised cursor-pointer transition-all duration-150 border-b border-border"
                     onClick={() => !selectMode && setSelectedCadence(cadence)}
                   >
                     {selectMode && (
@@ -799,12 +1036,17 @@ const CadenceLibrary = () => {
                         </button>
                       </td>
                     )}
-                    <td className="px-3 py-2.5">
+                    <td className="px-4 py-2.5">
                       <div className="flex items-center space-x-2">
                         <div className="text-sm font-light text-text-primary">{cadence.name}</div>
                         {cadence.status === 'draft' && (
                           <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-text-tertiary/10 text-text-tertiary border border-text-tertiary/30">
                             DRAFT
+                          </span>
+                        )}
+                        {cadence.archived && (
+                          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-yellow-500/10 text-yellow-500 border border-yellow-500/30">
+                            ARCHIVED
                           </span>
                         )}
                       </div>
@@ -817,40 +1059,25 @@ const CadenceLibrary = () => {
                         </span>
                       </div>
                     </td>
-                    <td className="px-2 py-2.5 text-sm font-light text-text-primary">{cadence.steps?.length || 0}</td>
-                    <td className="px-2 py-2.5 text-sm font-light text-text-primary">{cadence.duration}</td>
-                    <td className="px-2 py-2.5 text-sm font-light text-text-primary">{cadence.people_added.toLocaleString()}</td>
-                    <td className="px-2 py-2.5 text-sm font-light text-text-primary">{cadence.people_started.toLocaleString()}</td>
-                    <td className="px-2 py-2.5 text-sm font-light text-text-primary">{cadence.people_finished.toLocaleString()}</td>
-                    <td className="px-2 py-2.5 text-sm font-light text-text-primary">{cadence.bounced.toLocaleString()}</td>
-                    <td className={`px-2 py-2.5 text-sm font-light ${cadence.reply_rate > 5 ? 'text-ibm-blue' : 'text-text-primary'}`}>{cadence.reply_rate.toFixed(2)}%</td>
-                    <td className={`px-2 py-2.5 text-sm font-light ${cadence.click_rate > 5 ? 'text-ibm-blue' : 'text-text-primary'}`}>{cadence.click_rate.toFixed(2)}%</td>
-                    <td className={`px-2 py-2.5 text-sm font-light ${cadence.open_rate > 5 ? 'text-ibm-blue' : 'text-text-primary'}`}>{cadence.open_rate.toFixed(2)}%</td>
-                    <td className={`px-2 py-2.5 text-sm font-light ${cadence.meeting_rate > 5 ? 'text-ibm-blue' : 'text-text-primary'}`}>{cadence.meeting_rate.toFixed(2)}%</td>
-                    <td className={`px-2 py-2.5 text-sm font-light ${cadence.success_rate > 5 ? 'text-ibm-blue' : 'text-text-primary'}`}>{cadence.success_rate.toFixed(2)}%</td>
-                    <td className="px-2 py-2.5 text-right">
+                    <td className="px-3 py-2.5 text-sm font-light text-text-primary">{cadence.steps?.length || 0}</td>
+                    <td className="px-3 py-2.5 text-sm font-light text-text-primary">{cadence.duration}</td>
+                    <td className="px-3 py-2.5 text-sm font-light text-text-primary">{cadence.people_added.toLocaleString()}</td>
+                    <td className="px-3 py-2.5 text-sm font-light text-text-primary">{cadence.people_started.toLocaleString()}</td>
+                    <td className="px-3 py-2.5 text-sm font-light text-text-primary">{cadence.people_finished.toLocaleString()}</td>
+                    <td className="px-3 py-2.5 text-sm font-light text-text-primary">{cadence.bounced.toLocaleString()}</td>
+                    <td className={`px-3 py-2.5 text-sm font-light ${cadence.reply_rate > 5 ? 'text-ibm-blue' : 'text-text-primary'}`}>{cadence.reply_rate.toFixed(2)}%</td>
+                    <td className={`px-3 py-2.5 text-sm font-light ${cadence.click_rate > 5 ? 'text-ibm-blue' : 'text-text-primary'}`}>{cadence.click_rate.toFixed(2)}%</td>
+                    <td className={`px-3 py-2.5 text-sm font-light ${cadence.open_rate > 5 ? 'text-ibm-blue' : 'text-text-primary'}`}>{cadence.open_rate.toFixed(2)}%</td>
+                    <td className={`px-3 py-2.5 text-sm font-light ${cadence.meeting_rate > 5 ? 'text-ibm-blue' : 'text-text-primary'}`}>{cadence.meeting_rate.toFixed(2)}%</td>
+                    <td className={`px-3 py-2.5 text-sm font-light ${cadence.success_rate > 5 ? 'text-ibm-blue' : 'text-text-primary'}`}>{cadence.success_rate.toFixed(2)}%</td>
+                    <td className="px-3 py-2.5 text-right">
                       <div className="flex items-center justify-end space-x-2">
-                        {cadence.status === 'draft' && (
-                          <button
-                            onClick={(e) => togglePublishStatus(cadence.id, e)}
-                            className="px-2 py-1 text-xs font-medium text-text-tertiary hover:text-text-primary border border-border hover:border-text-tertiary bg-bg-surface hover:bg-bg-raised transition-colors"
-                          >
-                            Publish
-                          </button>
-                        )}
-                        {cadence.status !== 'draft' && (
-                          <button
-                            onClick={(e) => togglePublishStatus(cadence.id, e)}
-                            className="px-2 py-1 text-xs font-medium text-text-tertiary hover:text-text-primary border border-border hover:border-text-tertiary bg-bg-surface hover:bg-bg-raised transition-colors"
-                          >
-                            Unpublish
-                          </button>
-                        )}
                         <ChevronRight className="w-4 h-4 text-text-tertiary" />
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -879,17 +1106,31 @@ const CadenceLibrary = () => {
 
       {/* Cadence Header */}
       <div className="card">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
-            <h2 className="text-xl font-light text-text-primary mb-2">
-              {selectedCadence.name}
-            </h2>
+            <div className="flex items-center gap-3 mb-2">
+              <h2 className="text-xl font-light text-text-primary">
+                {selectedCadence.name}
+              </h2>
+              {selectedCadence.status === 'draft' && (
+                <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-text-tertiary/10 text-text-tertiary border border-text-tertiary/30">
+                  DRAFT
+                </span>
+              )}
+              {selectedCadence.archived && (
+                <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-yellow-500/10 text-yellow-500 border border-yellow-500/30">
+                  ARCHIVED
+                </span>
+              )}
+            </div>
             <div className="flex items-center space-x-4 text-sm text-text-tertiary">
               <span>{selectedCadence.steps?.length || 0} steps</span>
               <span>•</span>
               <span>{selectedCadence.duration} days</span>
               <span>•</span>
               <span>{selectedCadence.people_added.toLocaleString()} people added</span>
+              <span>•</span>
+              <span>Created by {selectedCadence.created_by_name}</span>
             </div>
             <div className="mt-3 flex items-center space-x-2">
               <span className="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-ibm-blue/10 text-ibm-blue border border-border">
@@ -903,6 +1144,55 @@ const CadenceLibrary = () => {
               </span>
             </div>
           </div>
+          <div className="flex items-center gap-2">
+            {canEdit(selectedCadence) && (
+              <button
+                onClick={() => handleEditCadence(selectedCadence)}
+                className="btn-secondary flex items-center space-x-1.5 text-sm"
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+                <span>Edit</span>
+              </button>
+            )}
+            {!selectedCadence.archived && canDelete(selectedCadence) && (
+              <button
+                onClick={() => handleArchiveCadence(selectedCadence)}
+                className="bg-bg-raised hover:bg-bg-elevated text-text-primary font-normal py-2 px-3 text-sm transition-all flex items-center space-x-1.5 border border-border"
+              >
+                <Archive className="w-3.5 h-3.5" />
+                <span>Archive</span>
+              </button>
+            )}
+            {selectedCadence.archived && (
+              <button
+                onClick={() => handleRestoreCadence(selectedCadence)}
+                className="bg-ibm-blue hover:bg-ibm-blue/90 text-white font-normal py-2 px-3 text-sm transition-all flex items-center space-x-1.5"
+              >
+                <ArchiveRestore className="w-3.5 h-3.5" />
+                <span>Restore</span>
+              </button>
+            )}
+            {canDelete(selectedCadence) && (
+              <button
+                onClick={() => handleDeleteCadence(selectedCadence)}
+                className="bg-red-500/10 hover:bg-red-500/20 text-red-400 font-normal py-2 px-3 text-sm transition-all flex items-center space-x-1.5 border border-red-500/30"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete</span>
+              </button>
+            )}
+            {canPublish(selectedCadence) && selectedCadence.status === 'draft' && (
+              <button
+                onClick={() => handlePublishCadence(selectedCadence)}
+                className="bg-ibm-blue hover:bg-ibm-blue/90 text-white font-normal py-2 px-3 text-sm transition-all flex items-center space-x-1.5"
+              >
+                <Eye className="w-3.5 h-3.5" />
+                <span>Publish</span>
+              </button>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center justify-between border-t border-border pt-4">
           <div className="flex items-center space-x-6">
             <div className="grid grid-cols-4 gap-6 text-center">
               <div>
@@ -1123,19 +1413,16 @@ const CadenceLibrary = () => {
                     <label className="block text-xs font-medium text-text-secondary mb-1">
                       Location
                     </label>
-                    <input
-                      type="text"
-                      list="locations"
+                    <select
                       value={personalizationData.location}
                       onChange={(e) => setPersonalizationData({...personalizationData, location: e.target.value})}
-                      placeholder="e.g., New York, NY"
                       className="input-field"
-                    />
-                    <datalist id="locations">
+                    >
+                      <option value="">Select location...</option>
                       {LOCATIONS.map(loc => (
-                        <option key={loc} value={loc} />
+                        <option key={loc} value={loc}>{loc}</option>
                       ))}
-                    </datalist>
+                    </select>
                   </div>
                 </div>
                 <div className="mt-3">

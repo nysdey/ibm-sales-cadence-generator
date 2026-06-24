@@ -1,0 +1,278 @@
+{
+  "products": {
+    "fusion_hci": {
+      "name": "IBM Fusion HCI",
+      "short_name": "Fusion HCI",
+      "category": "Infrastructure",
+      "description": "Engineered, turnkey hyper-converged platform that fuses bare-metal Red Hat OpenShift, integrated Fusion data-service operators, NVMe storage, and optional GPU acceleration. Runs containers, virtual machines and generative-AI workloads on-premises.",
+      "key_features": [
+        "Bare-metal Red Hat OpenShift integration",
+        "Integrated Fusion data-service operators",
+        "NVMe storage with optional GPU acceleration",
+        "Full-stack automation with built-in high-availability",
+        "Disaster-recovery and policy-driven backup",
+        "Content-aware storage capabilities",
+        "GitOps-driven management UI",
+        "Self-service 'cluster-on-demand' provisioning",
+        "Simplified day-1/day-2 operations",
+        "Hybrid-cloud, multicloud and edge support"
+      ],
+      "use_cases": [
+        {
+          "name": "AI Inference / Generative-AI (on-prem)",
+          "description": "Run AI workloads on-premises with GPU acceleration",
+          "benefit": "Meets data-sovereignty and latency requirements while leveraging GPU-accelerated nodes"
+        },
+        {
+          "name": "OpenShift Resiliency",
+          "description": "Add HA, policy-driven backup and DR to container platforms",
+          "benefit": "Differentiates IBM from pure-cloud OpenShift offerings"
+        },
+        {
+          "name": "VM Consolidation",
+          "description": "Run legacy VM workloads alongside modern containers",
+          "benefit": "Allows coexistence of legacy and modern workloads on a single stack"
+        },
+        {
+          "name": "Data-Lakehouse / Asset-Life-Cycle Pipelines",
+          "description": "Scalable storage for data pipelines and analytics",
+          "benefit": "Accelerates pipeline execution and reduces OPEX with NVMe storage"
+        },
+        {
+          "name": "Hybrid-Cloud Burst Capacity",
+          "description": "Self-service cluster provisioning for dynamic workloads",
+          "benefit": "Spin up resources in days-to-weeks, avoiding over-provisioning"
+        }
+      ],
+      "target_personas": [
+        "CIO",
+        "CTO",
+        "CDO",
+        "CISO",
+        "Platform Engineers",
+        "Enterprise Architects",
+        "Infrastructure Managers",
+        "Cloud Architects"
+      ],
+      "target_industries": [
+        "Financial Services",
+        "Healthcare",
+        "Manufacturing",
+        "Telecommunications",
+        "Government",
+        "Retail",
+        "Energy & Utilities"
+      ],
+      "competitive_advantages": [
+        "Single-vendor, integrated stack eliminates complexity of multiple vendors",
+        "GitOps-driven UI provides unified, code-centric management",
+        "Scalable, data-sovereign architecture with watsonx integration",
+        "80-90% TCO savings compared to traditional infrastructure",
+        "Dramatically faster time-to-value for AI pipelines and data-lakehouse use cases",
+        "Built-in Red Hat AI and IBM Cloud Paks integration"
+      ],
+      "benefits": [
+        "Rapid provisioning (days-to-weeks vs months)",
+        "Reduced operational complexity",
+        "Lower total cost of ownership (80-90% savings)",
+        "Data sovereignty and compliance",
+        "Hybrid-cloud flexibility",
+        "Future-proof AI infrastructure",
+        "Simplified management with GitOps"
+      ],
+      "technical_specs": {
+        "compute": "Bare-metal Red Hat OpenShift",
+        "storage": "NVMe storage with integrated data-service operators",
+        "acceleration": "Optional GPU acceleration for AI workloads",
+        "management": "GitOps-driven UI",
+        "deployment": "Days-to-weeks provisioning time",
+        "scalability": "Cluster-on-demand self-service",
+        "availability": "Built-in high-availability and disaster-recovery"
+      },
+      "common_objections": [
+        {
+          "objection": "We already have VMware/traditional infrastructure",
+          "response": "Fusion HCI allows you to run both VMs and containers on the same platform, providing a migration path while maintaining existing investments"
+        },
+        {
+          "objection": "Cloud is cheaper than on-premises",
+          "response": "For data-sovereign workloads and AI inference, Fusion HCI delivers 80-90% TCO savings compared to cloud alternatives while meeting compliance requirements"
+        },
+        {
+          "objection": "OpenShift is complex to manage",
+          "response": "Fusion HCI's GitOps-driven UI and full-stack automation dramatically simplifies day-1 and day-2 operations compared to DIY OpenShift deployments"
+        },
+        {
+          "objection": "We're not ready for AI workloads",
+          "response": "Fusion HCI is infrastructure-ready for when you are, while delivering immediate benefits for container and VM workloads today"
+        }
+      ],
+      "pricing_model": "Contact IBM for custom pricing based on configuration and scale"
+    },
+    "powervs": {
+      "name": "IBM Power Virtual Server",
+      "short_name": "PowerVS",
+      "category": "Infrastructure",
+      "description": "IBM's cloud-based Power virtual server offering for AIX, IBM i, and Linux workloads. Provides enterprise-grade performance and reliability in the cloud.",
+      "key_features": [
+        "Support for AIX, IBM i, and Linux",
+        "High-availability architecture",
+        "Native watsonx integration",
+        "Same-silicon continuity with on-premises Power systems",
+        "99.999% availability SLA",
+        "Integrated security and compliance",
+        "IBM Cloud ecosystem integration"
+      ],
+      "use_cases": [
+        {
+          "name": "Hybrid-Cloud Extension",
+          "description": "Extend on-premises Power workloads to the cloud",
+          "benefit": "Maintain application compatibility while gaining cloud flexibility"
+        },
+        {
+          "name": "SAP Migration",
+          "description": "Migrate SAP workloads to cloud-based Power infrastructure",
+          "benefit": "Reduce infrastructure costs while maintaining performance"
+        },
+        {
+          "name": "AI/ML Workloads",
+          "description": "Run AI and machine learning workloads on Power architecture",
+          "benefit": "Leverage Power's performance for data-intensive AI applications"
+        },
+        {
+          "name": "Disaster Recovery",
+          "description": "Cloud-based DR for on-premises Power systems",
+          "benefit": "Cost-effective business continuity without duplicate hardware"
+        }
+      ],
+      "target_personas": [
+        "CIO",
+        "CTO",
+        "Platform Engineer",
+        "Infrastructure Manager",
+        "SAP Basis Administrator",
+        "AIX Administrator"
+      ],
+      "target_industries": [
+        "Financial Services",
+        "Manufacturing",
+        "Telecommunications",
+        "Retail",
+        "Healthcare"
+      ],
+      "competitive_advantages": [
+        "Same-silicon continuity with on-premises Power systems",
+        "99.999% availability SLA",
+        "Integrated security and compliance",
+        "IBM Cloud ecosystem benefits",
+        "Native support for AIX and IBM i"
+      ],
+      "benefits": [
+        "Reduced infrastructure costs",
+        "Cloud flexibility with enterprise reliability",
+        "Seamless hybrid-cloud integration",
+        "High-performance computing",
+        "Enterprise-grade security"
+      ],
+      "technical_specs": {
+        "os_support": "AIX, IBM i, Linux",
+        "availability": "99.999% SLA",
+        "integration": "Native watsonx and IBM Cloud integration",
+        "architecture": "Power 10/Power 11 processors"
+      },
+      "common_objections": [
+        {
+          "objection": "Cloud is not secure enough for our workloads",
+          "response": "PowerVS provides enterprise-grade security with 99.999% availability and integrated compliance features"
+        },
+        {
+          "objection": "Migration is too complex",
+          "response": "Same-silicon continuity ensures application compatibility, and IBM provides migration services and tools"
+        }
+      ],
+      "pricing_model": "Pay-as-you-go or reserved capacity pricing"
+    },
+    "flashsystem": {
+      "name": "IBM FlashSystem",
+      "short_name": "FlashSystem",
+      "category": "Storage",
+      "description": "IBM's enterprise-class all-flash storage platform delivering high-performance, low-latency storage for mission-critical workloads.",
+      "key_features": [
+        "NVMe technology for ultra-low latency",
+        "Advanced data reduction",
+        "End-to-end encryption",
+        "IBM Cloud integration",
+        "AI-driven predictive analytics",
+        "Industry-leading reliability",
+        "Scalable architecture"
+      ],
+      "use_cases": [
+        {
+          "name": "High-Performance Databases",
+          "description": "Accelerate database workloads with NVMe storage",
+          "benefit": "Dramatically reduce query times and improve application performance"
+        },
+        {
+          "name": "Analytics & AI",
+          "description": "Fast storage for data analytics and AI training",
+          "benefit": "Reduce time-to-insight and accelerate AI model training"
+        },
+        {
+          "name": "Virtual Desktop Infrastructure (VDI)",
+          "description": "High-IOPS storage for VDI environments",
+          "benefit": "Deliver consistent user experience with low latency"
+        },
+        {
+          "name": "Backup & Disaster Recovery",
+          "description": "Fast, reliable backup and recovery infrastructure",
+          "benefit": "Reduce backup windows and recovery time objectives"
+        }
+      ],
+      "target_personas": [
+        "Storage Architect",
+        "CIO",
+        "Infrastructure Manager",
+        "Database Administrator",
+        "IT Director"
+      ],
+      "target_industries": [
+        "Financial Services",
+        "Media & Entertainment",
+        "Life Sciences",
+        "Healthcare",
+        "Manufacturing"
+      ],
+      "competitive_advantages": [
+        "AI-driven predictive analytics in support program",
+        "End-to-end IBM Cloud integration",
+        "Industry-leading reliability and performance",
+        "Advanced data reduction reduces TCO",
+        "NVMe technology for lowest latency"
+      ],
+      "benefits": [
+        "Ultra-low latency for critical workloads",
+        "High IOPS for demanding applications",
+        "Reduced total cost of ownership",
+        "Simplified management",
+        "Enterprise-grade reliability"
+      ],
+      "technical_specs": {
+        "technology": "NVMe all-flash",
+        "protocols": "NVMe, FC, iSCSI",
+        "features": "Data reduction, encryption, replication",
+        "integration": "IBM Cloud, AI-driven analytics"
+      },
+      "common_objections": [
+        {
+          "objection": "All-flash is too expensive",
+          "response": "FlashSystem's data reduction and lower operational costs deliver better TCO than traditional storage"
+        },
+        {
+          "objection": "We don't need that level of performance",
+          "response": "FlashSystem's performance enables new use cases and future-proofs your infrastructure as workloads grow"
+        }
+      ],
+      "pricing_model": "Contact IBM for custom pricing based on capacity and features"
+    }
+  }
+}

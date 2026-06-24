@@ -317,9 +317,22 @@ const GeneratedEmails = () => {
   const submitRating = async () => {
     setSubmittingRating(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Rating submitted:', { emailId: emailToRate.id, ratings, feedback: ratingFeedback });
+      // Sample/mock emails have no backend record, so persisting ratings for
+      // them would 404 - only emails saved through the API can be rated.
+      const isPersistedEmail = typeof emailToRate.id === 'string' && emailToRate.id.startsWith('email_');
+
+      if (isPersistedEmail) {
+        await Promise.all(
+          Object.entries(ratings)
+            .filter(([, score]) => score > 0)
+            .map(([criterion, score]) => submitEmailRating(emailToRate.id, criterion, score))
+        );
+
+        if (ratingFeedback.trim()) {
+          await addEmailComment(emailToRate.id, ratingFeedback.trim());
+        }
+      }
+
       closeRatingModal();
     } catch (error) {
       console.error('Error submitting rating:', error);
@@ -374,99 +387,193 @@ const GeneratedEmails = () => {
           <span className="text-sm font-medium">Back to All Emails</span>
         </button>
 
-        <div className="card">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <h2 className="text-xl font-light text-text-primary mb-2">{selectedEmail.subject}</h2>
-              <div className="flex items-center space-x-4 text-sm text-text-tertiary">
-                <div className="flex items-center space-x-1.5">
-                  <User className="w-4 h-4" />
-                  <span>{selectedEmail.prospectName}</span>
+        <div className={`grid gap-5 ${showRatingModal ? 'grid-cols-2' : 'grid-cols-1'}`}>
+          {/* Email Content */}
+          <div className="card">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-1">
+                <h2 className="text-xl font-light text-text-primary mb-2">{selectedEmail.subject}</h2>
+                <div className="flex items-center space-x-4 text-sm text-text-tertiary">
+                  <div className="flex items-center space-x-1.5">
+                    <User className="w-4 h-4" />
+                    <span>{selectedEmail.prospectName}</span>
+                  </div>
+                  <div className="flex items-center space-x-1.5">
+                    <Building2 className="w-4 h-4" />
+                    <span>{selectedEmail.companyName}</span>
+                  </div>
+                  <div className="flex items-center space-x-1.5">
+                    <Calendar className="w-4 h-4" />
+                    <span>{formatDate(selectedEmail.generatedAt)}</span>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-1.5">
-                  <Building2 className="w-4 h-4" />
-                  <span>{selectedEmail.companyName}</span>
-                </div>
-                <div className="flex items-center space-x-1.5">
-                  <Calendar className="w-4 h-4" />
-                  <span>{formatDate(selectedEmail.generatedAt)}</span>
+                <div className="mt-3 flex items-center space-x-2">
+                  <span className="px-2.5 py-1 text-xs font-medium bg-ibm-blue/10 text-ibm-blue border border-border">
+                    {selectedEmail.cadenceName}
+                  </span>
+                  <span className="px-2.5 py-1 text-xs font-medium bg-gray-80/50 text-gray-30 border border-border">
+                    Day {selectedEmail.stepDay}
+                  </span>
+                  {selectedEmail.industry && (
+                    <span className="px-2.5 py-1 text-xs font-medium bg-ibm-purple/10 text-ibm-purple border border-border">
+                      {selectedEmail.industry}
+                    </span>
+                  )}
+                  {selectedEmail.grade && (
+                    <span className={`px-2.5 py-1 text-xs font-medium border ${
+                      ['A', 'A-'].includes(selectedEmail.grade) ? 'bg-green-500/10 text-green-400 border-green-500/30' :
+                      ['B+', 'B'].includes(selectedEmail.grade) ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
+                      'bg-yellow-500/10 text-yellow-400 border-yellow-500/30'
+                    }`}>
+                      Grade: {selectedEmail.grade}
+                    </span>
+                  )}
                 </div>
               </div>
-              <div className="mt-3 flex items-center space-x-2">
-                <span className="px-2.5 py-1 text-xs font-medium bg-ibm-blue/10 text-ibm-blue border border-border">
-                  {selectedEmail.cadenceName}
-                </span>
-                <span className="px-2.5 py-1 text-xs font-medium bg-gray-80/50 text-gray-30 border border-border">
-                  Day {selectedEmail.stepDay}
-                </span>
-                {selectedEmail.industry && (
-                  <span className="px-2.5 py-1 text-xs font-medium bg-ibm-purple/10 text-ibm-purple border border-border">
-                    {selectedEmail.industry}
-                  </span>
-                )}
-                {selectedEmail.grade && (
-                  <span className={`px-2.5 py-1 text-xs font-medium border ${
-                    ['A', 'A-'].includes(selectedEmail.grade) ? 'bg-green-500/10 text-green-400 border-green-500/30' :
-                    ['B+', 'B'].includes(selectedEmail.grade) ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
-                    'bg-yellow-500/10 text-yellow-400 border-yellow-500/30'
-                  }`}>
-                    Grade: {selectedEmail.grade}
-                  </span>
-                )}
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => {
+                    setEmailToRate(selectedEmail);
+                    setShowRatingModal(true);
+                  }}
+                  className="btn-primary flex items-center space-x-1.5 text-sm"
+                >
+                  <Star className="w-4 h-4" />
+                  <span>Rate Email</span>
+                </button>
+                <button
+                  onClick={() => copyToClipboard(`Subject: ${selectedEmail.subject}\n\n${selectedEmail.body}`, selectedEmail.id)}
+                  className="btn-secondary flex items-center space-x-1.5 text-sm"
+                >
+                  {copiedId === selectedEmail.id ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      <span>Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => {
-                  setEmailToRate(selectedEmail);
-                  setShowRatingModal(true);
-                }}
-                className="btn-primary flex items-center space-x-1.5 text-sm"
-              >
-                <Star className="w-4 h-4" />
-                <span>Rate Email</span>
-              </button>
-              <button
-                onClick={() => copyToClipboard(`Subject: ${selectedEmail.subject}\n\n${selectedEmail.body}`, selectedEmail.id)}
-                className="btn-secondary flex items-center space-x-1.5 text-sm"
-              >
-                {copiedId === selectedEmail.id ? (
-                  <>
-                    <Check className="w-4 h-4" />
-                    <span>Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4" />
-                    <span>Copy</span>
-                  </>
-                )}
-              </button>
+
+            <div className="bg-bg-surface border border-border p-4">
+              <div className="mb-4">
+                <div className="text-xs text-text-tertiary mb-1.5 font-medium">Subject:</div>
+                <div className="text-sm text-text-primary">{selectedEmail.subject}</div>
+              </div>
+              <div>
+                <div className="text-xs text-text-tertiary mb-1.5 font-medium">Body:</div>
+                <div className="text-sm text-text-primary whitespace-pre-wrap leading-relaxed">{selectedEmail.body}</div>
+              </div>
             </div>
+
+            {selectedEmail.additionalContext && (
+              <div className="bg-bg-surface border border-border p-4 mt-4">
+                <div className="text-xs text-text-tertiary mb-1.5 font-medium">Additional Context Used:</div>
+                <div className="text-sm text-text-primary">{selectedEmail.additionalContext}</div>
+              </div>
+            )}
+            
+            {selectedEmail.gradeReason && (
+              <div className="bg-bg-surface border border-border p-4 mt-4">
+                <div className="text-xs text-text-tertiary mb-1.5 font-medium">Quality Assessment:</div>
+                <div className="text-sm text-text-primary">{selectedEmail.gradeReason}</div>
+              </div>
+            )}
           </div>
 
-          <div className="bg-bg-surface border border-border p-4">
-            <div className="mb-4">
-              <div className="text-xs text-text-tertiary mb-1.5 font-medium">Subject:</div>
-              <div className="text-sm text-text-primary">{selectedEmail.subject}</div>
-            </div>
-            <div>
-              <div className="text-xs text-text-tertiary mb-1.5 font-medium">Body:</div>
-              <div className="text-sm text-text-primary whitespace-pre-wrap leading-relaxed">{selectedEmail.body}</div>
-            </div>
-          </div>
+          {/* Rating Panel - Side by Side */}
+          {showRatingModal && emailToRate && (
+            <div className="card">
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <h3 className="text-xl font-light text-text-primary">Rate Email Quality</h3>
+                  <p className="text-sm text-text-secondary mt-1 font-light">
+                    Your feedback helps improve AI-generated emails
+                  </p>
+                </div>
+                <button
+                  onClick={closeRatingModal}
+                  className="text-text-tertiary hover:text-text-primary transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
-          {selectedEmail.additionalContext && (
-            <div className="bg-bg-surface border border-border p-4 mt-4">
-              <div className="text-xs text-text-tertiary mb-1.5 font-medium">Additional Context Used:</div>
-              <div className="text-sm text-text-primary">{selectedEmail.additionalContext}</div>
-            </div>
-          )}
-          
-          {selectedEmail.gradeReason && (
-            <div className="bg-bg-surface border border-border p-4 mt-4">
-              <div className="text-xs text-text-tertiary mb-1.5 font-medium">Quality Assessment:</div>
-              <div className="text-sm text-text-primary">{selectedEmail.gradeReason}</div>
+              {/* Rating Aspects */}
+              <div className="space-y-1 mb-6">
+                <RatingStars
+                  label="Relevance to Prospect"
+                  value={ratings.relevance}
+                  onChange={(value) => handleRatingChange('relevance', value)}
+                />
+                <RatingStars
+                  label="Personalization Quality"
+                  value={ratings.personalization}
+                  onChange={(value) => handleRatingChange('personalization', value)}
+                />
+                <RatingStars
+                  label="Clarity & Conciseness"
+                  value={ratings.clarity}
+                  onChange={(value) => handleRatingChange('clarity', value)}
+                />
+                <RatingStars
+                  label="Call-to-Action Strength"
+                  value={ratings.callToAction}
+                  onChange={(value) => handleRatingChange('callToAction', value)}
+                />
+                <RatingStars
+                  label="Professional Tone"
+                  value={ratings.tone}
+                  onChange={(value) => handleRatingChange('tone', value)}
+                />
+              </div>
+
+              {/* Feedback Text */}
+              <div className="mb-6">
+                <label className="block text-sm text-text-secondary mb-2 font-light">
+                  Additional Feedback (Optional)
+                </label>
+                <textarea
+                  value={ratingFeedback}
+                  onChange={(e) => setRatingFeedback(e.target.value)}
+                  placeholder="Share specific suggestions for improvement..."
+                  rows={4}
+                  className="w-full px-3 py-2 text-sm bg-bg-base text-text-primary placeholder-text-tertiary border border-border focus:ring-2 focus:ring-ibm-blue outline-none resize-none"
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-end space-x-3">
+                <button
+                  onClick={closeRatingModal}
+                  disabled={submittingRating}
+                  className="btn-secondary text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={submitRating}
+                  disabled={submittingRating || Object.values(ratings).every(r => r === 0)}
+                  className="btn-primary flex items-center space-x-1.5 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {submittingRating ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Submitting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      <span>Submit for Retraining</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -488,13 +595,11 @@ const GeneratedEmails = () => {
   // List view
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-light text-text-primary">Generated Emails</h2>
-          <p className="text-base text-text-secondary mt-1.5 font-light">
-            Review and rate AI-generated emails to improve model performance
-          </p>
-        </div>
+      <div>
+        <h2 className="text-3xl font-light text-text-primary">Generated Emails</h2>
+        <p className="text-base text-text-secondary mt-1.5 font-light">
+          Review and rate AI-generated emails to improve model performance
+        </p>
       </div>
 
       {/* Analytics Cards */}
@@ -651,106 +756,6 @@ const GeneratedEmails = () => {
         </div>
       )}
 
-      {/* Rating Modal */}
-      {showRatingModal && emailToRate && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-bg-surface border border-border max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-start justify-between mb-6">
-                <div>
-                  <h3 className="text-xl font-light text-text-primary">Rate Email Quality</h3>
-                  <p className="text-sm text-text-secondary mt-1 font-light">
-                    Your feedback helps improve AI-generated emails
-                  </p>
-                </div>
-                <button
-                  onClick={closeRatingModal}
-                  className="text-text-tertiary hover:text-text-primary transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Email Preview */}
-              <div className="bg-bg-raised border border-border p-4 mb-6">
-                <div className="text-xs text-text-tertiary mb-2 font-medium">Email Subject:</div>
-                <div className="text-sm text-text-primary font-light">{emailToRate.subject}</div>
-              </div>
-
-              {/* Rating Aspects */}
-              <div className="space-y-1 mb-6">
-                <RatingStars
-                  label="Relevance to Prospect"
-                  value={ratings.relevance}
-                  onChange={(value) => handleRatingChange('relevance', value)}
-                />
-                <RatingStars
-                  label="Personalization Quality"
-                  value={ratings.personalization}
-                  onChange={(value) => handleRatingChange('personalization', value)}
-                />
-                <RatingStars
-                  label="Clarity & Conciseness"
-                  value={ratings.clarity}
-                  onChange={(value) => handleRatingChange('clarity', value)}
-                />
-                <RatingStars
-                  label="Call-to-Action Strength"
-                  value={ratings.callToAction}
-                  onChange={(value) => handleRatingChange('callToAction', value)}
-                />
-                <RatingStars
-                  label="Professional Tone"
-                  value={ratings.tone}
-                  onChange={(value) => handleRatingChange('tone', value)}
-                />
-              </div>
-
-              {/* Feedback Text */}
-              <div className="mb-6">
-                <label className="block text-sm text-text-secondary mb-2 font-light">
-                  Additional Feedback (Optional)
-                </label>
-                <textarea
-                  value={ratingFeedback}
-                  onChange={(e) => setRatingFeedback(e.target.value)}
-                  placeholder="Share specific suggestions for improvement..."
-                  rows={4}
-                  className="w-full px-3 py-2 text-sm bg-bg-base text-text-primary placeholder-text-tertiary border border-border focus:ring-2 focus:ring-ibm-blue outline-none resize-none"
-                />
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center justify-end space-x-3">
-                <button
-                  onClick={closeRatingModal}
-                  disabled={submittingRating}
-                  className="btn-secondary text-sm"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={submitRating}
-                  disabled={submittingRating || Object.values(ratings).every(r => r === 0)}
-                  className="btn-primary flex items-center space-x-1.5 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {submittingRating ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Submitting...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-4 h-4" />
-                      <span>Submit for Retraining</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Create Email Modal */}
       {showCreateModal && (

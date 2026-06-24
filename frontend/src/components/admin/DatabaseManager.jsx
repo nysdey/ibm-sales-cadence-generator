@@ -415,6 +415,9 @@ const DatabaseManager = () => {
   const [showActionsMenu, setShowActionsMenu] = useState(null);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
+  const [showContactsModal, setShowContactsModal] = useState(null);
+  const [showEditIndustryModal, setShowEditIndustryModal] = useState(null);
+  const [editIndustryValue, setEditIndustryValue] = useState('');
 
   const tabs = [
     { id: 'companies', label: 'Companies', icon: Building2 },
@@ -519,12 +522,27 @@ const DatabaseManager = () => {
                <div className="flex-1">
                  <div className="flex items-center space-x-3 mb-2">
                    <h3 className="text-xl font-light text-text-primary">{company.name}</h3>
-                   <span className="px-2.5 py-1 bg-ibm-blue/10 text-ibm-blue text-xs font-normal border border-border">
-                     {company.keyContacts} contacts
-                   </span>
-                   <span className="px-2.5 py-1 bg-ibm-purple/10 text-ibm-purple text-xs font-normal border border-border">
-                     {company.industry}
-                   </span>
+                   <button
+                     onClick={(e) => {
+                       e.stopPropagation();
+                       setShowContactsModal(company);
+                     }}
+                     className="px-2.5 py-1 bg-ibm-blue/10 text-ibm-blue text-xs font-normal border border-border hover:bg-ibm-blue/20 transition-colors flex items-center space-x-1"
+                   >
+                     <Users className="w-3 h-3" />
+                     <span>{company.keyContacts} contacts</span>
+                   </button>
+                   <button
+                     onClick={(e) => {
+                       e.stopPropagation();
+                       setShowEditIndustryModal(company);
+                       setEditIndustryValue(company.industry);
+                     }}
+                     className="px-2.5 py-1 bg-ibm-purple/10 text-ibm-purple text-xs font-normal border border-border hover:bg-ibm-purple/20 transition-colors flex items-center space-x-1"
+                   >
+                     <span>{company.industry}</span>
+                     <Edit2 className="w-3 h-3" />
+                   </button>
                  </div>
                  <p className="text-base text-text-secondary font-light">{company.size} • {company.revenue}</p>
                </div>
@@ -830,59 +848,73 @@ const DatabaseManager = () => {
 
   const renderTrainingDataTable = () => (
     <div className="space-y-4">
-      {filteredData.map((example) => (
-        <div key={example.id} className="bg-bg-surface border border-border p-5 relative">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center space-x-3 flex-1">
-              {selectMode && (
-                <button
-                  onClick={() => toggleSelectItem(example.id)}
-                  className="flex-shrink-0"
-                >
-                  {selectedItems.includes(example.id) ? (
-                    <CheckSquare className="w-5 h-5 text-ibm-blue" />
-                  ) : (
-                    <Square className="w-5 h-5 text-text-tertiary" />
+      {filteredData.map((example, index) => {
+        // Top 3 good examples get special ranking badges for RAG
+        const isTopRanked = example.type === 'good' && index < 3;
+        const rankBadge = isTopRanked ? ['🥇 Top Example', '🥈 High Priority', '🥉 Recommended'][index] : null;
+        
+        return (
+          <div key={example.id} className={`bg-bg-surface border p-5 relative ${
+            isTopRanked ? 'border-ibm-blue shadow-lg' : 'border-border'
+          }`}>
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center space-x-3 flex-1">
+                {selectMode && (
+                  <button
+                    onClick={() => toggleSelectItem(example.id)}
+                    className="flex-shrink-0"
+                  >
+                    {selectedItems.includes(example.id) ? (
+                      <CheckSquare className="w-5 h-5 text-ibm-blue" />
+                    ) : (
+                      <Square className="w-5 h-5 text-text-tertiary" />
+                    )}
+                  </button>
+                )}
+                <div className="flex items-center space-x-2">
+                  <span className={`px-2.5 py-1 text-xs font-medium border ${
+                    example.type === 'good'
+                      ? 'bg-ibm-blue/10 text-ibm-blue border-ibm-blue/30'
+                      : 'bg-gray-70 text-gray-30 border-gray-60'
+                  }`}>
+                    {example.type === 'good' ? '✓ Good Example' : '✗ Avoid This'}
+                  </span>
+                  {rankBadge && (
+                    <span className="px-2.5 py-1 text-xs font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/30">
+                      {rankBadge}
+                    </span>
                   )}
-                </button>
-              )}
-              <span className={`px-2.5 py-1 text-xs font-normal border ${
-                example.type === 'good'
-                  ? 'bg-ibm-blue/10 text-ibm-blue border-ibm-blue/30'
-                  : 'bg-gray-70 text-gray-30 border-gray-60'
-              }`}>
-                {example.type === 'good' ? '✓ Good Example' : '✗ Avoid This'}
-              </span>
-            </div>
-            <div className="relative">
-              <button
-                onClick={() => setShowActionsMenu(showActionsMenu === example.id ? null : example.id)}
-                className="p-2 hover:bg-bg-raised transition-colors"
-              >
-                <MoreVertical className="w-4 h-4 text-text-tertiary" />
-              </button>
-              {showActionsMenu === example.id && (
-                <div className="absolute right-0 top-full mt-1 bg-bg-surface border border-border shadow-lg z-10 min-w-[120px]">
-                  <button
-                    onClick={() => { handleEdit(example); setShowActionsMenu(null); }}
-                    className="w-full px-3 py-2 text-left text-sm text-text-primary hover:bg-bg-raised flex items-center space-x-2"
-                  >
-                    <Edit2 className="w-3.5 h-3.5" />
-                    <span>Edit</span>
-                  </button>
-                  <button
-                    onClick={() => { handleDelete(example.id); setShowActionsMenu(null); }}
-                    className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-bg-raised flex items-center space-x-2"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Delete</span>
-                  </button>
                 </div>
-              )}
+              </div>
+              <div className="relative">
+                <button
+                  onClick={() => setShowActionsMenu(showActionsMenu === example.id ? null : example.id)}
+                  className="p-2 hover:bg-bg-raised transition-colors"
+                >
+                  <MoreVertical className="w-4 h-4 text-text-tertiary" />
+                </button>
+                {showActionsMenu === example.id && (
+                  <div className="absolute right-0 top-full mt-1 bg-bg-surface border border-border shadow-lg z-10 min-w-[120px]">
+                    <button
+                      onClick={() => { handleEdit(example); setShowActionsMenu(null); }}
+                      className="w-full px-3 py-2 text-left text-sm text-text-primary hover:bg-bg-raised flex items-center space-x-2"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span>Edit</span>
+                    </button>
+                    <button
+                      onClick={() => { handleDelete(example.id); setShowActionsMenu(null); }}
+                      className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-bg-raised flex items-center space-x-2"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-3">
+            <div className="space-y-3">
             <div>
               <span className="text-xs text-text-tertiary font-normal">Prompt:</span>
               <p className="text-sm text-text-primary mt-1 font-light">{example.prompt}</p>
@@ -908,8 +940,17 @@ const DatabaseManager = () => {
               </div>
             )}
           </div>
+          
+          {isTopRanked && (
+            <div className="mt-3 pt-3 border-t border-ibm-blue/30 bg-ibm-blue/5 -mx-5 -mb-5 px-5 py-3">
+              <p className="text-xs text-ibm-blue font-medium">
+                ⭐ This example is prioritized for RAG retrieval and model training
+              </p>
+            </div>
+          )}
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 
@@ -1060,6 +1101,121 @@ const DatabaseManager = () => {
           </div>
         )}
       </div>
+
+      {/* Contacts Modal */}
+      {showContactsModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-bg-surface border border-border max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <h3 className="text-xl font-light text-text-primary">Contacts at {showContactsModal.name}</h3>
+                  <p className="text-sm text-text-secondary mt-1 font-light">
+                    {showContactsModal.keyContacts} key contacts
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowContactsModal(null)}
+                  className="text-text-tertiary hover:text-text-primary transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {/* Sample contacts - in real app, these would come from the company data */}
+                {[...Array(showContactsModal.keyContacts)].map((_, idx) => (
+                  <div key={idx} className="bg-bg-raised border border-border p-4">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h4 className="text-base font-normal text-text-primary">Contact {idx + 1}</h4>
+                        <p className="text-sm text-text-secondary mt-1">Title: VP of Infrastructure</p>
+                        <p className="text-sm text-text-secondary">Email: contact{idx + 1}@{showContactsModal.name.toLowerCase().replace(/\s+/g, '')}.com</p>
+                        <p className="text-sm text-text-secondary">Phone: +1 (555) 000-{String(idx).padStart(4, '0')}</p>
+                      </div>
+                      <button className="text-ibm-blue hover:text-ibm-blue/80 text-sm">
+                        View Full Profile
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end mt-6">
+                <button
+                  onClick={() => setShowContactsModal(null)}
+                  className="btn-secondary"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Industry Modal */}
+      {showEditIndustryModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-bg-surface border border-border max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <h3 className="text-xl font-light text-text-primary">Edit Industry</h3>
+                  <p className="text-sm text-text-secondary mt-1 font-light">
+                    {showEditIndustryModal.name}
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowEditIndustryModal(null);
+                    setEditIndustryValue('');
+                  }}
+                  className="text-text-tertiary hover:text-text-primary transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm text-text-secondary mb-2 font-light">
+                  Industry
+                </label>
+                <input
+                  type="text"
+                  value={editIndustryValue}
+                  onChange={(e) => setEditIndustryValue(e.target.value)}
+                  className="w-full px-3 py-2 text-sm bg-bg-base text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none"
+                  placeholder="e.g., Financial Services"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => {
+                    setShowEditIndustryModal(null);
+                    setEditIndustryValue('');
+                  }}
+                  className="btn-secondary"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    console.log('Update industry to:', editIndustryValue);
+                    alert(`Industry updated to: ${editIndustryValue}`);
+                    setShowEditIndustryModal(null);
+                    setEditIndustryValue('');
+                  }}
+                  className="btn-primary"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
