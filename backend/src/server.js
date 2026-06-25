@@ -5,7 +5,6 @@ import rateLimit from 'express-rate-limit';
 import config, { validateConfig } from './config/config.js';
 import { initializeDatabase, seedDatabase } from './config/database.js';
 import cadenceRoutes from './routes/cadence.js';
-import cadencesRoutes from './routes/cadences.js';
 import trainingRoutes from './routes/training.js';
 import feedbackRoutes from './routes/feedback.js';
 import databaseRoutes from './routes/database.js';
@@ -51,7 +50,7 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/api/cadence', cadenceRoutes);
-app.use('/api/cadences', cadencesRoutes);
+app.use('/api/cadences', cadenceRoutes);
 app.use('/api/training', trainingRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/database', databaseRoutes);

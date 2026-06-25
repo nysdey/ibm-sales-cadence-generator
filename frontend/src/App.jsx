@@ -10,7 +10,13 @@ import { useUser } from './contexts/UserContext'
 function App() {
   const [activeTab, setActiveTab] = useState('library')
   const [showProfileDropdown, setShowProfileDropdown] = useState(false)
+  const [emailsFocus, setEmailsFocus] = useState(null) // { cadenceName, stepDay? }
   const { currentUser, users, switchUser } = useUser()
+
+  const focusGeneratedEmails = (cadenceName, stepDay = null) => {
+    setEmailsFocus({ cadenceName, stepDay })
+    setActiveTab('emails')
+  }
 
   const tabs = [
     { id: 'library', label: 'Cadences' },
@@ -21,10 +27,12 @@ function App() {
 
   return (
     <div className="min-h-screen bg-bg-base">
+      {/* Header with thin white border at bottom - non-sticky with reduced padding */}
       <header className="bg-bg-base border-b border-border">
         <div className="max-w-7xl mx-auto px-6 pt-8 pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
+              {/* IBM Logo - Increased size */}
               <img
                 src="/ibm-blue-bee.png"
                 alt="IBM"
@@ -91,6 +99,7 @@ function App() {
           </div>
         </div>
 
+        {/* Tab Navigation with thin white border */}
         <div className="max-w-7xl mx-auto px-6">
           <nav className="flex space-x-8 border-t border-border pt-1 pb-1">
             {tabs.map((tab) => (
@@ -115,8 +124,8 @@ function App() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {activeTab === 'library' && <CadenceLibrary />}
-        {activeTab === 'emails' && <GeneratedEmails />}
+        {activeTab === 'library' && <CadenceLibrary onViewEmails={focusGeneratedEmails} />}
+        {activeTab === 'emails' && <GeneratedEmails focus={emailsFocus} onFocusHandled={() => setEmailsFocus(null)} />}
         {activeTab === 'database' && <DatabaseManager />}
         {activeTab === 'users' && <UserManager />}
         {activeTab === 'profile' && <UserProfile />}
@@ -139,3 +148,5 @@ function App() {
 }
 
 export default App
+
+// Made with Bob

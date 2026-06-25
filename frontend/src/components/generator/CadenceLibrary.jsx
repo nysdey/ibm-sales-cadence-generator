@@ -239,7 +239,13 @@ const SAMPLE_CADENCES = [
   }
 ];
 
-const CadenceLibrary = () => {
+// Predefined use case tags for cadence creation, drawn from existing campaign types
+const USE_CASE_TAGS = [
+  'Outbound', 'Client-Intro', 'Fusion', 'Flash Availability', 'watsonx',
+  'Power Modernization', 'Storage Modernization', 'AI Infrastructure', 'FY26'
+];
+
+const CadenceLibrary = ({ onViewEmails } = {}) => {
   const { currentUser, canEdit, canDelete, canPublish } = useUser();
   const [cadences, setCadences] = useState(SAMPLE_CADENCES);
   const [filteredCadences, setFilteredCadences] = useState(SAMPLE_CADENCES);
@@ -304,7 +310,7 @@ const CadenceLibrary = () => {
     market: 'Select',
     portfolio: 'Infrastructure',
     recipients: '',
-    customFields: '',
+    useCaseTags: [],
     steps: '10',
     days: '15',
     description: '',
@@ -312,6 +318,7 @@ const CadenceLibrary = () => {
   });
   const [generatingEmail, setGeneratingEmail] = useState(false);
   const [generatedEmail, setGeneratedEmail] = useState(null);
+  const [regenerateCount, setRegenerateCount] = useState(0);
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [savingEmail, setSavingEmail] = useState(false);
   const [emailSaved, setEmailSaved] = useState(false);
@@ -412,12 +419,22 @@ const CadenceLibrary = () => {
       setShowPersonalizeModal(true);
       setGeneratedEmail(null);
       setCopiedEmail(false);
+      setRegenerateCount(0);
     }
   };
+
+  const CLOSING_VARIANTS = [
+    'Would you be open to a brief conversation?',
+    'Does this seem worth a quick 15-minute call?',
+    'Happy to share more detail whenever it works for you - interested?',
+    'Worth a short chat this week?'
+  ];
 
   const handleGenerateEmail = async () => {
     setGeneratingEmail(true);
     setEmailSaved(false);
+    const attempt = regenerateCount;
+    setRegenerateCount(c => c + 1);
     try {
       // Build enhanced context for AI generation
       const finalIndustry = personalizationData.industry === 'Other'
@@ -429,17 +446,19 @@ const CadenceLibrary = () => {
         companyName: personalizationData.companyName,
         cadenceTypes: [selectedCadence.campaign.toLowerCase().replace(/\s+/g, '_')],
         industry: finalIndustry,
-        additionalContext: personalizationData.additionalContext
+        additionalContext: personalizationData.additionalContext,
+        // Nudges the model toward a fresh variation on each regenerate click
+        variationSeed: attempt
       };
 
       // Use the actual AI generation API with enhanced context
       const result = await generateCadences(enhancedContext);
-      
+
       // Get the first email from the generated cadence
       if (result.cadences && result.cadences.length > 0) {
         const firstCadence = result.cadences[0];
         const emailStep = firstCadence.steps.find(step => step.channel === 'Email');
-        
+
         if (emailStep) {
           setGeneratedEmail({
             subject: emailStep.subject,
@@ -454,11 +473,13 @@ const CadenceLibrary = () => {
         throw new Error('No cadences generated');
       }
     } catch (error) {
-      console.error('Error generating email:', error);
-      // Fallback to template-based generation if AI fails
+      console.error(`Error generating email (AI fell back to template, attempt ${attempt}):`, error.message || error);
+      // Fallback to template-based generation if AI fails. Vary the closing
+      // line by attempt number so regenerating still produces a different email.
       let personalizedSubject = selectedStep.subject || '';
-      let personalizedBody = selectedStep.body || '';
-      
+      let personalizedBody = (selectedStep.body || '')
+        .replace(/Would you be open to a brief conversation\?/, CLOSING_VARIANTS[attempt % CLOSING_VARIANTS.length]);
+
       const firstName = personalizationData.prospectName.split(' ')[0];
       personalizedSubject = personalizedSubject.replace(/\{\{first_name\}\}/g, firstName);
       personalizedBody = personalizedBody
@@ -466,7 +487,7 @@ const CadenceLibrary = () => {
         .replace(/\{\{company_name\}\}/g, personalizationData.companyName)
         .replace(/\{\{industry\}\}/g, personalizationData.industry || 'your industry')
         .replace(/\{\{sender_name\}\}/g, 'Your Name');
-      
+
       // Integrate additional context naturally into the email body
       if (personalizationData.additionalContext) {
         // Find a natural place to insert the context (after first paragraph)
@@ -529,7 +550,7 @@ const CadenceLibrary = () => {
       setTimeout(() => setEmailSaved(false), 3000);
     } catch (error) {
       console.error('Error saving email:', error);
-      alert('Failed to save email. Please try again.');
+      alert(error.response?.data?.error || error.message || 'Failed to save email. Please try again.');
     } finally {
       setSavingEmail(false);
     }
@@ -726,7 +747,8 @@ const CadenceLibrary = () => {
     setCreatingCadence(true);
     try {
       // Build cadence name from form data
-      const cadenceName = `${createCadenceData.country}|${createCadenceData.market}|${createCadenceData.portfolio}|${createCadenceData.recipients}${createCadenceData.customFields ? `|${createCadenceData.customFields}` : ''}`;
+      const tagsSuffix = createCadenceData.useCaseTags.join('|');
+      const cadenceName = `${createCadenceData.country}|${createCadenceData.market}|${createCadenceData.portfolio}|${createCadenceData.recipients}${tagsSuffix ? `|${tagsSuffix}` : ''}`;
       const duration = parseInt(createCadenceData.days) || 15;
       const numSteps = parseInt(createCadenceData.steps) || 5;
 
@@ -735,7 +757,7 @@ const CadenceLibrary = () => {
       const cadencePayload = {
         name: cadenceName,
         persona: createCadenceData.recipients,
-        campaign: createCadenceData.customFields.split('|')[0] || 'Custom',
+        campaign: createCadenceData.useCaseTags[0] || 'Custom',
         type: 'Outbound',
         duration,
         steps,
@@ -794,7 +816,7 @@ const CadenceLibrary = () => {
         market: 'Select',
         portfolio: 'Infrastructure',
         recipients: '',
-        customFields: '',
+        useCaseTags: [],
         steps: '10',
         days: '15',
         description: '',
@@ -802,7 +824,8 @@ const CadenceLibrary = () => {
       });
       setShowCreateModal(false);
 
-      alert(`Cadence "${cadenceName}" created with ${steps.length} steps as a draft. You can now personalize each step and publish it.`);
+      // Jump straight into the newly created cadence's detail view
+      setSelectedCadence(newCadence);
     } finally {
       setCreatingCadence(false);
     }
@@ -1329,17 +1352,36 @@ const CadenceLibrary = () => {
 
                 <div>
                   <label className="block text-xs font-normal text-text-secondary mb-1.5">
-                    Custom Fields (separated by |)
+                    Use Case Tags
                   </label>
-                  <input
-                    type="text"
-                    value={createCadenceData.customFields}
-                    onChange={(e) => setCreateCadenceData({...createCadenceData, customFields: e.target.value})}
-                    placeholder="e.g., Outbound|Fusion|FY26"
-                    className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary placeholder-text-tertiary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
-                  />
+                  <div className="flex flex-wrap gap-2 p-3 bg-bg-elevated border border-border">
+                    {USE_CASE_TAGS.map(tag => {
+                      const selected = createCadenceData.useCaseTags.includes(tag);
+                      return (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => {
+                            setCreateCadenceData(prev => ({
+                              ...prev,
+                              useCaseTags: selected
+                                ? prev.useCaseTags.filter(t => t !== tag)
+                                : [...prev.useCaseTags, tag]
+                            }));
+                          }}
+                          className={`px-2.5 py-1 text-xs font-medium border transition-colors ${
+                            selected
+                              ? 'bg-ibm-blue text-white border-ibm-blue'
+                              : 'bg-bg-surface text-text-secondary border-border hover:bg-bg-raised'
+                          }`}
+                        >
+                          {tag}
+                        </button>
+                      );
+                    })}
+                  </div>
                   <p className="text-xs text-text-tertiary mt-1 font-light">
-                    Example: Outbound|Fusion|FY26 will create: {createCadenceData.country}|{createCadenceData.market}|{createCadenceData.portfolio}|{createCadenceData.recipients}|Outbound|Fusion|FY26
+                    Select one or more tags. Order selected determines name order.
                   </p>
                 </div>
 
@@ -1401,7 +1443,7 @@ const CadenceLibrary = () => {
                 <div className="bg-bg-elevated border border-border p-4">
                   <h4 className="text-sm font-normal text-text-primary mb-2">Preview Cadence Name:</h4>
                   <p className="text-sm text-ibm-blue font-light">
-                    {createCadenceData.country}|{createCadenceData.market}|{createCadenceData.portfolio}|{createCadenceData.recipients}{createCadenceData.customFields ? `|${createCadenceData.customFields}` : ''}
+                    {createCadenceData.country}|{createCadenceData.market}|{createCadenceData.portfolio}|{createCadenceData.recipients}{createCadenceData.useCaseTags.length > 0 ? `|${createCadenceData.useCaseTags.join('|')}` : ''}
                   </p>
                 </div>
 
@@ -1550,10 +1592,7 @@ const CadenceLibrary = () => {
               </div>
             </div>
             <button
-              onClick={() => {
-                const emailsTab = document.querySelector('[data-tab="emails"]');
-                if (emailsTab) emailsTab.click();
-              }}
+              onClick={() => onViewEmails?.(selectedCadence.name)}
               className="btn-secondary flex items-center space-x-2 text-sm whitespace-nowrap"
             >
               <Mail className="w-4 h-4" />
@@ -1619,8 +1658,7 @@ const CadenceLibrary = () => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            const emailsTab = document.querySelector('[data-tab="emails"]');
-                            if (emailsTab) emailsTab.click();
+                            onViewEmails?.(selectedCadence.name, step.day);
                           }}
                           className="btn-secondary flex items-center space-x-1.5 text-xs py-1 px-2"
                         >

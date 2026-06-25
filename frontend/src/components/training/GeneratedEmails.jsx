@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Mail, Calendar, User, Building2, Search, ChevronDown, ChevronRight, Copy, Check, ArrowLeft, TrendingUp, BarChart3, Star, Send, X, Plus } from 'lucide-react';
-import { getGeneratedEmails, saveGeneratedEmail, submitEmailRating, addEmailComment } from '../../services/api';
+import { getGeneratedEmails, saveGeneratedEmail, submitEmailRating, addEmailComment, getCadenceEmails, submitCadenceEmailRating, addCadenceEmailComment } from '../../services/api';
 
 // RatingStars component
 const RatingStars = ({ label, value, onChange }) => {
@@ -172,7 +172,7 @@ const MOCK_EMAILS = [
   }
 ];
 
-const GeneratedEmails = () => {
+const GeneratedEmails = ({ focus, onFocusHandled } = {}) => {
   const [emails, setEmails] = useState(MOCK_EMAILS);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -206,22 +206,42 @@ const GeneratedEmails = () => {
   });
   const [creatingEmail, setCreatingEmail] = useState(false);
 
-  // Load emails from database on mount
+  // Load emails from the file-based store and Postgres on mount
   useEffect(() => {
     const loadEmails = async () => {
+      let fileEmails = [];
+      let dbEmails = [];
       try {
         const data = await getGeneratedEmails();
-        if (data.emails && data.emails.length > 0) {
-          // Merge with mock data
-          setEmails([...MOCK_EMAILS, ...data.emails]);
-        }
+        fileEmails = data.emails || [];
       } catch (error) {
-        console.error('Error loading emails:', error);
+        console.error('Error loading file-based emails:', error);
+      }
+      try {
+        const data = await getCadenceEmails();
+        dbEmails = data.emails || [];
+      } catch (error) {
+        console.error('Error loading Postgres emails:', error);
+      }
+      if (fileEmails.length > 0 || dbEmails.length > 0) {
+        setEmails([...MOCK_EMAILS, ...fileEmails, ...dbEmails]);
       }
     };
-    
+
     loadEmails();
   }, []);
+
+  // Auto-expand a cadence (and optionally a specific step) when navigated here
+  // from the "View All Emails" buttons in the cadence detail view.
+  useEffect(() => {
+    if (!focus) return;
+    const { cadenceName, stepDay } = focus;
+    setExpandedCadences(prev => ({ ...prev, [cadenceName]: true }));
+    if (stepDay !== null && stepDay !== undefined) {
+      setExpandedSteps(prev => ({ ...prev, [`${cadenceName}-${stepDay}`]: true }));
+    }
+    if (onFocusHandled) onFocusHandled();
+  }, [focus]);
 
   // Group emails by cadence and step
   const groupedEmails = emails.reduce((acc, email) => {
@@ -318,10 +338,12 @@ const GeneratedEmails = () => {
     setSubmittingRating(true);
     try {
       // Sample/mock emails have no backend record, so persisting ratings for
-      // them would 404 - only emails saved through the API can be rated.
-      const isPersistedEmail = typeof emailToRate.id === 'string' && emailToRate.id.startsWith('email_');
+      // them would 404 - only emails saved through one of the two APIs can be rated.
+      const isMockEmail = MOCK_EMAILS.some(m => m.id === emailToRate.id);
+      const isFileBasedEmail = typeof emailToRate.id === 'string' && emailToRate.id.startsWith('email_');
+      const isDbEmail = !isMockEmail && (typeof emailToRate.id === 'number' || /^\d+$/.test(String(emailToRate.id)));
 
-      if (isPersistedEmail) {
+      if (isFileBasedEmail) {
         await Promise.all(
           Object.entries(ratings)
             .filter(([, score]) => score > 0)
@@ -331,11 +353,22 @@ const GeneratedEmails = () => {
         if (ratingFeedback.trim()) {
           await addEmailComment(emailToRate.id, ratingFeedback.trim());
         }
+      } else if (isDbEmail) {
+        await Promise.all(
+          Object.entries(ratings)
+            .filter(([, score]) => score > 0)
+            .map(([criterion, score]) => submitCadenceEmailRating(emailToRate.id, criterion, score))
+        );
+
+        if (ratingFeedback.trim()) {
+          await addCadenceEmailComment(emailToRate.id, ratingFeedback.trim());
+        }
       }
 
       closeRatingModal();
     } catch (error) {
       console.error('Error submitting rating:', error);
+      alert(error.response?.data?.error || 'Failed to submit rating. Please try again.');
     } finally {
       setSubmittingRating(false);
     }
