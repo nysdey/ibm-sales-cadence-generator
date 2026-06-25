@@ -176,7 +176,11 @@ router.post('/generated-emails', async (req, res) => {
       id,
       ...emailData,
       generatedAt: new Date().toISOString(),
-      feedback: null
+      feedback: {
+        ratings: {},
+        comments: [],
+        overall_score: null
+      }
     };
 
     // Add to emails array

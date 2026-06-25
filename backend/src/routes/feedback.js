@@ -119,8 +119,11 @@ router.put('/emails/:id/rating', async (req, res) => {
       });
     }
 
+    if (!feedbackData.emails[emailIndex].feedback) {
+      feedbackData.emails[emailIndex].feedback = { ratings: {}, comments: [], overall_score: null };
+    }
     feedbackData.emails[emailIndex].feedback.ratings[criterion] = score;
-    
+
     // Calculate overall score
     const ratings = Object.values(feedbackData.emails[emailIndex].feedback.ratings);
     if (ratings.length > 0) {
@@ -173,6 +176,9 @@ router.post('/emails/:id/comment', async (req, res) => {
       created_at: new Date().toISOString()
     };
 
+    if (!feedbackData.emails[emailIndex].feedback) {
+      feedbackData.emails[emailIndex].feedback = { ratings: {}, comments: [], overall_score: null };
+    }
     feedbackData.emails[emailIndex].feedback.comments.push(newComment);
     feedbackData.last_updated = new Date().toISOString();
 
