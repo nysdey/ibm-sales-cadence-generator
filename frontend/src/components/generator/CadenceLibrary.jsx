@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AlertCircle, Loader2, Plus, Download, Upload, ArrowUp, ArrowDown, Search, Filter, X, Mail, Phone, Linkedin, ChevronRight, ArrowLeft, Edit2, Copy, Check, Save, CheckSquare, Square, Eye, EyeOff, Trash2, Archive, ArchiveRestore, RefreshCw } from 'lucide-react';
-import { generateCadences, saveGeneratedEmail } from '../../services/api';
+import { generateCadences, saveGeneratedEmail, createCadence, saveCadenceEmail } from '../../services/api';
 import { useUser } from '../../contexts/UserContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
@@ -315,6 +315,7 @@ const CadenceLibrary = () => {
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [savingEmail, setSavingEmail] = useState(false);
   const [emailSaved, setEmailSaved] = useState(false);
+  const [creatingCadence, setCreatingCadence] = useState(false);
   
   const [filters, setFilters] = useState({
     region: 'all',
@@ -510,8 +511,20 @@ const CadenceLibrary = () => {
         additionalContext: personalizationData.additionalContext || ''
       };
       
+      // Save to the legacy file-backed store (used by the Generated Emails tab)
       await saveGeneratedEmail(emailData);
-      
+
+      // Also persist to Postgres against the cadence it belongs to, when the
+      // cadence has a real database id (locally-created cadences that failed
+      // to persist won't have one, so skip rather than 404).
+      if (selectedCadence?.id && !isNaN(Number(selectedCadence.id))) {
+        try {
+          await saveCadenceEmail(selectedCadence.id, emailData);
+        } catch (dbError) {
+          console.error('Error saving email to Postgres:', dbError);
+        }
+      }
+
       setEmailSaved(true);
       setTimeout(() => setEmailSaved(false), 3000);
     } catch (error) {
@@ -683,57 +696,116 @@ const CadenceLibrary = () => {
     alert(`Exported ${selectedItems.length} cadences`);
   };
 
-  const handleCreateCadence = () => {
-    // Build cadence name from form data
-    const cadenceName = `${createCadenceData.country}|${createCadenceData.market}|${createCadenceData.portfolio}|${createCadenceData.recipients}${createCadenceData.customFields ? `|${createCadenceData.customFields}` : ''}`;
-    
-    // Create new cadence object
-    const newCadence = {
-      id: `${Date.now()}`,
-      name: cadenceName,
-      region: createCadenceData.country,
-      segment: createCadenceData.market,
-      category: createCadenceData.portfolio,
-      persona: createCadenceData.recipients,
-      type: 'Outbound',
-      campaign: createCadenceData.customFields.split('|')[0] || 'Custom',
-      fiscal_year: 'FY26',
-      duration: parseInt(createCadenceData.days) || 15,
-      people_added: 0,
-      people_started: 0,
-      people_finished: 0,
-      bounced: 0,
-      success_rate: 0,
-      open_rate: 0,
-      click_rate: 0,
-      reply_rate: 0,
-      meeting_rate: 0,
-      status: 'draft',
-      created_by: currentUser.id,
-      created_by_name: currentUser.name,
-      archived: false,
-      steps: [] // Will be populated by AI generation later
-    };
-    
-    // Add to cadences list
-    setCadences(prevCadences => [newCadence, ...prevCadences]);
-    
-    // Reset form and close modal
-    setCreateCadenceData({
-      country: 'US',
-      market: 'Select',
-      portfolio: 'Infrastructure',
-      recipients: '',
-      customFields: '',
-      steps: '10',
-      days: '15',
-      description: '',
-      context: ''
+  // Builds the placeholder-driven step sequence for a new cadence template.
+  // Steps stay personalized per-prospect later via the per-step "Generate" modal.
+  const buildCadenceSteps = (numSteps, durationDays, portfolio, context) => {
+    const channels = ['Email', 'Call', 'Email', 'LinkedIn'];
+    const dayStep = Math.max(1, Math.round(durationDays / numSteps));
+    const productLine = portfolio === 'Infrastructure' ? 'IBM Infrastructure'
+      : portfolio === 'Data & AI' ? 'IBM Data & AI'
+      : 'IBM Automation';
+
+    return Array.from({ length: numSteps }, (_, i) => {
+      const channel = channels[i % channels.length];
+      const day = i === 0 ? 1 : Math.min(durationDays, dayStep * i + 1);
+      const isFirst = i === 0;
+      const subject = channel === 'Email'
+        ? (isFirst
+          ? `Quick introduction - ${productLine} Solutions`
+          : `Re: ${productLine} - following up`)
+        : undefined;
+      const body = isFirst
+        ? `Hi {{first_name}},\n\nI'm reaching out from ${productLine} because I think {{company_name}} could benefit from what we're building for ${createCadenceData.recipients || 'teams like yours'}.${context ? `\n\n${context}` : ''}\n\nWould you be open to a brief conversation?\n\nBest,\n{{sender_name}}`
+        : `Hi {{first_name}},\n\nFollowing up on my note about ${productLine} for {{company_name}}. Happy to share more detail whenever it's useful.\n\nBest,\n{{sender_name}}`;
+
+      return { day, channel, ...(subject ? { subject } : {}), body };
     });
-    setShowCreateModal(false);
-    
-    // Show success message
-    alert(`Cadence "${cadenceName}" created successfully as a draft. You can now add steps and publish it.`);
+  };
+
+  const handleCreateCadence = async () => {
+    setCreatingCadence(true);
+    try {
+      // Build cadence name from form data
+      const cadenceName = `${createCadenceData.country}|${createCadenceData.market}|${createCadenceData.portfolio}|${createCadenceData.recipients}${createCadenceData.customFields ? `|${createCadenceData.customFields}` : ''}`;
+      const duration = parseInt(createCadenceData.days) || 15;
+      const numSteps = parseInt(createCadenceData.steps) || 5;
+
+      const steps = buildCadenceSteps(numSteps, duration, createCadenceData.portfolio, createCadenceData.context);
+
+      const cadencePayload = {
+        name: cadenceName,
+        persona: createCadenceData.recipients,
+        campaign: createCadenceData.customFields.split('|')[0] || 'Custom',
+        type: 'Outbound',
+        duration,
+        steps,
+        status: 'draft',
+        created_by: currentUser?.id || null
+      };
+
+      let newCadence;
+      try {
+        // Persist the full cadence (with its generated steps) to Postgres
+        const saved = await createCadence(cadencePayload);
+        newCadence = {
+          ...saved,
+          region: createCadenceData.country,
+          segment: createCadenceData.market,
+          category: createCadenceData.portfolio,
+          created_by_name: currentUser?.name,
+          people_added: 0,
+          people_started: 0,
+          people_finished: 0,
+          bounced: 0,
+          success_rate: 0,
+          open_rate: 0,
+          click_rate: 0,
+          reply_rate: 0,
+          meeting_rate: 0
+        };
+      } catch (apiError) {
+        console.error('Error persisting cadence to database, keeping it local only:', apiError);
+        newCadence = {
+          id: `${Date.now()}`,
+          ...cadencePayload,
+          region: createCadenceData.country,
+          segment: createCadenceData.market,
+          category: createCadenceData.portfolio,
+          created_by_name: currentUser?.name,
+          archived: false,
+          people_added: 0,
+          people_started: 0,
+          people_finished: 0,
+          bounced: 0,
+          success_rate: 0,
+          open_rate: 0,
+          click_rate: 0,
+          reply_rate: 0,
+          meeting_rate: 0
+        };
+      }
+
+      // Add to cadences list
+      setCadences(prevCadences => [newCadence, ...prevCadences]);
+
+      // Reset form and close modal
+      setCreateCadenceData({
+        country: 'US',
+        market: 'Select',
+        portfolio: 'Infrastructure',
+        recipients: '',
+        customFields: '',
+        steps: '10',
+        days: '15',
+        description: '',
+        context: ''
+      });
+      setShowCreateModal(false);
+
+      alert(`Cadence "${cadenceName}" created with ${steps.length} steps as a draft. You can now personalize each step and publish it.`);
+    } finally {
+      setCreatingCadence(false);
+    }
   };
 
   // List View
@@ -1181,6 +1253,178 @@ const CadenceLibrary = () => {
             </div>
           )}
         </div>
+
+        {/* Create Cadence Modal */}
+        {showCreateModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
+            <div className="bg-bg-surface border border-border max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-bg-surface border-b border-border px-5 py-4 flex items-center justify-between">
+                <h3 className="text-lg font-light text-text-primary">Create New Cadence</h3>
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className="text-text-tertiary hover:text-text-primary transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-5 space-y-4">
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs font-normal text-text-secondary mb-1.5">
+                      Country <span className="text-ibm-blue">*</span>
+                    </label>
+                    <select
+                      value={createCadenceData.country}
+                      onChange={(e) => setCreateCadenceData({...createCadenceData, country: e.target.value})}
+                      className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                    >
+                      {COUNTRIES.map(country => (
+                        <option key={country} value={country}>{country}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-normal text-text-secondary mb-1.5">
+                      Market <span className="text-ibm-blue">*</span>
+                    </label>
+                    <select
+                      value={createCadenceData.market}
+                      onChange={(e) => setCreateCadenceData({...createCadenceData, market: e.target.value})}
+                      className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                    >
+                      {MARKETS.map(market => (
+                        <option key={market} value={market}>{market}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-normal text-text-secondary mb-1.5">
+                      Portfolio <span className="text-ibm-blue">*</span>
+                    </label>
+                    <select
+                      value={createCadenceData.portfolio}
+                      onChange={(e) => setCreateCadenceData({...createCadenceData, portfolio: e.target.value})}
+                      className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                    >
+                      {PORTFOLIOS.map(portfolio => (
+                        <option key={portfolio} value={portfolio}>{portfolio}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-normal text-text-secondary mb-1.5">
+                    Recipients <span className="text-ibm-blue">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={createCadenceData.recipients}
+                    onChange={(e) => setCreateCadenceData({...createCadenceData, recipients: e.target.value})}
+                    placeholder="e.g., Head of IT, CTO, VP Infrastructure"
+                    className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary placeholder-text-tertiary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-normal text-text-secondary mb-1.5">
+                    Custom Fields (separated by |)
+                  </label>
+                  <input
+                    type="text"
+                    value={createCadenceData.customFields}
+                    onChange={(e) => setCreateCadenceData({...createCadenceData, customFields: e.target.value})}
+                    placeholder="e.g., Outbound|Fusion|FY26"
+                    className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary placeholder-text-tertiary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                  />
+                  <p className="text-xs text-text-tertiary mt-1 font-light">
+                    Example: Outbound|Fusion|FY26 will create: {createCadenceData.country}|{createCadenceData.market}|{createCadenceData.portfolio}|{createCadenceData.recipients}|Outbound|Fusion|FY26
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-normal text-text-secondary mb-1.5">
+                      Number of Steps
+                    </label>
+                    <input
+                      type="number"
+                      value={createCadenceData.steps}
+                      onChange={(e) => setCreateCadenceData({...createCadenceData, steps: e.target.value})}
+                      min="1"
+                      max="20"
+                      className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-normal text-text-secondary mb-1.5">
+                      Duration (Days)
+                    </label>
+                    <input
+                      type="number"
+                      value={createCadenceData.days}
+                      onChange={(e) => setCreateCadenceData({...createCadenceData, days: e.target.value})}
+                      min="1"
+                      max="60"
+                      className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-normal text-text-secondary mb-1.5">
+                    Description & Context
+                  </label>
+                  <textarea
+                    value={createCadenceData.description}
+                    onChange={(e) => setCreateCadenceData({...createCadenceData, description: e.target.value})}
+                    placeholder="Describe the purpose and context of this cadence..."
+                    rows={3}
+                    className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary placeholder-text-tertiary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-normal text-text-secondary mb-1.5">
+                    Technical Knowledge & Context
+                  </label>
+                  <textarea
+                    value={createCadenceData.context}
+                    onChange={(e) => setCreateCadenceData({...createCadenceData, context: e.target.value})}
+                    placeholder="What products/functionality are being sold? What technical knowledge is needed?"
+                    rows={3}
+                    className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary placeholder-text-tertiary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
+                  />
+                </div>
+
+                <div className="bg-bg-elevated border border-border p-4">
+                  <h4 className="text-sm font-normal text-text-primary mb-2">Preview Cadence Name:</h4>
+                  <p className="text-sm text-ibm-blue font-light">
+                    {createCadenceData.country}|{createCadenceData.market}|{createCadenceData.portfolio}|{createCadenceData.recipients}{createCadenceData.customFields ? `|${createCadenceData.customFields}` : ''}
+                  </p>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4 border-t border-border">
+                  <button
+                    onClick={() => setShowCreateModal(false)}
+                    className="px-4 py-2 text-sm font-normal text-text-primary bg-bg-elevated border border-border hover:bg-bg-raised transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleCreateCadence}
+                    disabled={!createCadenceData.recipients || creatingCadence}
+                    className="px-4 py-2 text-sm font-normal text-white bg-ibm-blue hover:bg-ibm-blue/90 border border-ibm-blue transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {creatingCadence && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {creatingCadence ? 'Creating...' : 'Create Cadence'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -1638,177 +1882,6 @@ const CadenceLibrary = () => {
                     </button>
                   )}
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Create Cadence Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
-          <div className="bg-bg-surface border border-border max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-bg-surface border-b border-border px-5 py-4 flex items-center justify-between">
-              <h3 className="text-lg font-light text-text-primary">Create New Cadence</h3>
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="text-text-tertiary hover:text-text-primary transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-4">
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-xs font-normal text-text-secondary mb-1.5">
-                    Country <span className="text-ibm-blue">*</span>
-                  </label>
-                  <select
-                    value={createCadenceData.country}
-                    onChange={(e) => setCreateCadenceData({...createCadenceData, country: e.target.value})}
-                    className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
-                  >
-                    {COUNTRIES.map(country => (
-                      <option key={country} value={country}>{country}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-normal text-text-secondary mb-1.5">
-                    Market <span className="text-ibm-blue">*</span>
-                  </label>
-                  <select
-                    value={createCadenceData.market}
-                    onChange={(e) => setCreateCadenceData({...createCadenceData, market: e.target.value})}
-                    className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
-                  >
-                    {MARKETS.map(market => (
-                      <option key={market} value={market}>{market}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-normal text-text-secondary mb-1.5">
-                    Portfolio <span className="text-ibm-blue">*</span>
-                  </label>
-                  <select
-                    value={createCadenceData.portfolio}
-                    onChange={(e) => setCreateCadenceData({...createCadenceData, portfolio: e.target.value})}
-                    className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
-                  >
-                    {PORTFOLIOS.map(portfolio => (
-                      <option key={portfolio} value={portfolio}>{portfolio}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-normal text-text-secondary mb-1.5">
-                  Recipients <span className="text-ibm-blue">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={createCadenceData.recipients}
-                  onChange={(e) => setCreateCadenceData({...createCadenceData, recipients: e.target.value})}
-                  placeholder="e.g., Head of IT, CTO, VP Infrastructure"
-                  className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary placeholder-text-tertiary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-normal text-text-secondary mb-1.5">
-                  Custom Fields (separated by |)
-                </label>
-                <input
-                  type="text"
-                  value={createCadenceData.customFields}
-                  onChange={(e) => setCreateCadenceData({...createCadenceData, customFields: e.target.value})}
-                  placeholder="e.g., Outbound|Fusion|FY26"
-                  className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary placeholder-text-tertiary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
-                />
-                <p className="text-xs text-text-tertiary mt-1 font-light">
-                  Example: Outbound|Fusion|FY26 will create: {createCadenceData.country}|{createCadenceData.market}|{createCadenceData.portfolio}|{createCadenceData.recipients}|Outbound|Fusion|FY26
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-normal text-text-secondary mb-1.5">
-                    Number of Steps
-                  </label>
-                  <input
-                    type="number"
-                    value={createCadenceData.steps}
-                    onChange={(e) => setCreateCadenceData({...createCadenceData, steps: e.target.value})}
-                    min="1"
-                    max="20"
-                    className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-normal text-text-secondary mb-1.5">
-                    Duration (Days)
-                  </label>
-                  <input
-                    type="number"
-                    value={createCadenceData.days}
-                    onChange={(e) => setCreateCadenceData({...createCadenceData, days: e.target.value})}
-                    min="1"
-                    max="60"
-                    className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-normal text-text-secondary mb-1.5">
-                  Description & Context
-                </label>
-                <textarea
-                  value={createCadenceData.description}
-                  onChange={(e) => setCreateCadenceData({...createCadenceData, description: e.target.value})}
-                  placeholder="Describe the purpose and context of this cadence..."
-                  rows={3}
-                  className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary placeholder-text-tertiary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-normal text-text-secondary mb-1.5">
-                  Technical Knowledge & Context
-                </label>
-                <textarea
-                  value={createCadenceData.context}
-                  onChange={(e) => setCreateCadenceData({...createCadenceData, context: e.target.value})}
-                  placeholder="What products/functionality are being sold? What technical knowledge is needed?"
-                  rows={3}
-                  className="w-full px-3 py-2 text-sm bg-bg-elevated text-text-primary placeholder-text-tertiary border border-border focus:ring-2 focus:ring-ibm-blue outline-none font-light"
-                />
-              </div>
-
-              <div className="bg-bg-elevated border border-border p-4">
-                <h4 className="text-sm font-normal text-text-primary mb-2">Preview Cadence Name:</h4>
-                <p className="text-sm text-ibm-blue font-light">
-                  {createCadenceData.country}|{createCadenceData.market}|{createCadenceData.portfolio}|{createCadenceData.recipients}{createCadenceData.customFields ? `|${createCadenceData.customFields}` : ''}
-                </p>
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-4 border-t border-border">
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 text-sm font-normal text-text-primary bg-bg-elevated border border-border hover:bg-bg-raised transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleCreateCadence}
-                  disabled={!createCadenceData.recipients}
-                  className="px-4 py-2 text-sm font-normal text-white bg-ibm-blue hover:bg-ibm-blue/90 border border-ibm-blue transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Create Cadence
-                </button>
               </div>
             </div>
           </div>

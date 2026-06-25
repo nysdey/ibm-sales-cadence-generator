@@ -5,11 +5,11 @@ import rateLimit from 'express-rate-limit';
 import config, { validateConfig } from './config/config.js';
 import { initializeDatabase, seedDatabase } from './config/database.js';
 import cadenceRoutes from './routes/cadence.js';
+import cadencesRoutes from './routes/cadences.js';
 import trainingRoutes from './routes/training.js';
 import feedbackRoutes from './routes/feedback.js';
 import databaseRoutes from './routes/database.js';
 
-// Validate configuration before starting
 if (!validateConfig()) {
   console.error('\n❌ Server startup failed due to configuration errors.');
   console.error('Please create a .env file based on .env.example and configure Watsonx.ai settings.\n');
@@ -18,20 +18,16 @@ if (!validateConfig()) {
 
 const app = express();
 
-// Security middleware
 app.use(helmet());
 
-// CORS configuration
 app.use(cors({
   origin: config.corsOrigin,
   credentials: true
 }));
 
-// Body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rate limiting
 const limiter = rateLimit({
   windowMs: config.rateLimit.windowMs,
   max: config.rateLimit.maxRequests,
@@ -41,13 +37,11 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// Request logging middleware
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   next();
 });
 
-// Health check endpoint
 app.get('/health', (req, res) => {
   res.json({
     status: 'healthy',
@@ -56,13 +50,12 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API routes
 app.use('/api/cadence', cadenceRoutes);
+app.use('/api/cadences', cadencesRoutes);
 app.use('/api/training', trainingRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/database', databaseRoutes);
 
-// 404 handler
 app.use((req, res) => {
   res.status(404).json({
     error: 'Not Found',
@@ -70,22 +63,19 @@ app.use((req, res) => {
   });
 });
 
-// Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);
-  
+
   res.status(err.status || 500).json({
     error: err.message || 'Internal Server Error',
     ...(config.nodeEnv === 'development' && { stack: err.stack })
   });
 });
 
-// Initialize database and start server
 const PORT = config.port;
 
 async function startServer() {
   try {
-    // Try to initialize database (optional)
     let dbStatus = '✗ Not configured (file-based mode)';
     try {
       const dbInit = await initializeDatabase();
@@ -97,8 +87,7 @@ async function startServer() {
       console.warn('⚠️  Database initialization failed:', dbError.message);
       console.log('ℹ️  Continuing in file-based mode...');
     }
-    
-    // Start Express server
+
     app.listen(PORT, () => {
       console.log('\n' + '='.repeat(60));
       console.log('🚀 IBM Sales Cadence Builder - Backend Server');
@@ -136,7 +125,6 @@ async function startServer() {
 
 startServer();
 
-// Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('\n🛑 SIGTERM received, shutting down gracefully...');
   process.exit(0);
@@ -148,5 +136,3 @@ process.on('SIGINT', () => {
 });
 
 export default app;
-
-// Made with Bob

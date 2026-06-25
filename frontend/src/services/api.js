@@ -9,14 +9,8 @@ const api = axios.create({
   },
 });
 
-// Request interceptor for adding auth tokens (Phase 3)
 api.interceptors.request.use(
   (config) => {
-    // Future: Add auth token here
-    // const token = localStorage.getItem('token');
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
     return config;
   },
   (error) => {
@@ -24,29 +18,20 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor for error handling
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response) {
-      // Server responded with error
       console.error('API Error:', error.response.data);
     } else if (error.request) {
-      // Request made but no response
       console.error('Network Error:', error.request);
     } else {
-      // Something else happened
       console.error('Error:', error.message);
     }
     return Promise.reject(error);
   }
 );
 
-/**
- * Generate personalized cadences for a prospect
- * @param {Object} data - { prospectName, companyName, cadenceTypes }
- * @returns {Promise} - Generated cadences
- */
 export const generateCadences = async (data) => {
   try {
     const response = await api.post('/cadence/generate', data);
@@ -56,10 +41,6 @@ export const generateCadences = async (data) => {
   }
 };
 
-/**
- * Get all training examples
- * @returns {Promise} - Training examples
- */
 export const getTrainingExamples = async () => {
   try {
     const response = await api.get('/training/examples');
@@ -69,11 +50,6 @@ export const getTrainingExamples = async () => {
   }
 };
 
-/**
- * Add a new training example
- * @param {Object} example - Training example data
- * @returns {Promise} - Created example
- */
 export const addTrainingExample = async (example) => {
   try {
     const response = await api.post('/training/examples', example);
@@ -83,12 +59,6 @@ export const addTrainingExample = async (example) => {
   }
 };
 
-/**
- * Update a training example
- * @param {string} id - Example ID
- * @param {Object} example - Updated example data
- * @returns {Promise} - Updated example
- */
 export const updateTrainingExample = async (id, example) => {
   try {
     const response = await api.put(`/training/examples/${id}`, example);
@@ -98,11 +68,6 @@ export const updateTrainingExample = async (id, example) => {
   }
 };
 
-/**
- * Delete a training example
- * @param {string} id - Example ID
- * @returns {Promise}
- */
 export const deleteTrainingExample = async (id) => {
   try {
     const response = await api.delete(`/training/examples/${id}`);
@@ -112,11 +77,6 @@ export const deleteTrainingExample = async (id) => {
   }
 };
 
-/**
- * Save a generated email
- * @param {Object} emailData - Email data to save
- * @returns {Promise} - Saved email
- */
 export const saveGeneratedEmail = async (emailData) => {
   try {
     const response = await api.post('/training/generated-emails', emailData);
@@ -126,10 +86,6 @@ export const saveGeneratedEmail = async (emailData) => {
   }
 };
 
-/**
- * Get all generated emails
- * @returns {Promise} - Generated emails
- */
 export const getGeneratedEmails = async () => {
   try {
     const response = await api.get('/feedback/emails');
@@ -139,13 +95,6 @@ export const getGeneratedEmails = async () => {
   }
 };
 
-/**
- * Submit email rating
- * @param {string} emailId - Email ID
- * @param {string} criterion - Rating criterion
- * @param {number} score - Rating score (1-5)
- * @returns {Promise} - Updated email
- */
 export const submitEmailRating = async (emailId, criterion, score) => {
   try {
     const response = await api.put(`/feedback/emails/${emailId}/rating`, {
@@ -158,12 +107,6 @@ export const submitEmailRating = async (emailId, criterion, score) => {
   }
 };
 
-/**
- * Add email comment
- * @param {string} emailId - Email ID
- * @param {string} comment - Comment text
- * @returns {Promise} - Created comment
- */
 export const addEmailComment = async (emailId, comment) => {
   try {
     const response = await api.post(`/feedback/emails/${emailId}/comment`, {
@@ -175,11 +118,6 @@ export const addEmailComment = async (emailId, comment) => {
   }
 };
 
-/**
- * Delete generated email
- * @param {string} emailId - Email ID
- * @returns {Promise}
- */
 export const deleteGeneratedEmail = async (emailId) => {
   try {
     const response = await api.delete(`/feedback/emails/${emailId}`);
@@ -189,6 +127,40 @@ export const deleteGeneratedEmail = async (emailId) => {
   }
 };
 
-export default api;
+export const getCadences = async () => {
+  try {
+    const response = await api.get('/cadences');
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 
-// Made with Bob
+export const createCadence = async (cadenceData) => {
+  try {
+    const response = await api.post('/cadences', cadenceData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateCadence = async (id, updates) => {
+  try {
+    const response = await api.put(`/cadences/${id}`, updates);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const saveCadenceEmail = async (cadenceId, emailData) => {
+  try {
+    const response = await api.post(`/cadences/${cadenceId}/emails`, emailData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export default api;

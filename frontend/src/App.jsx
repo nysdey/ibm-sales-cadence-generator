@@ -21,18 +21,16 @@ function App() {
 
   return (
     <div className="min-h-screen bg-bg-base">
-      {/* Header with thin white border at bottom - non-sticky with reduced padding */}
       <header className="bg-bg-base border-b border-border">
-        <div className="max-w-7xl mx-auto px-6 pt-6 pb-3">
+        <div className="max-w-7xl mx-auto px-6 pt-8 pb-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {/* IBM Logo - Increased size */}
+            <div className="flex items-center gap-1">
               <img
                 src="/ibm-blue-bee.png"
                 alt="IBM"
                 className="h-16 w-auto"
               />
-              <div>
+              <div className="mt-1">
                 <h1 className="text-4xl font-light text-text-primary tracking-tight leading-none">
                   IBM Seller Studio
                 </h1>
@@ -93,15 +91,14 @@ function App() {
           </div>
         </div>
 
-        {/* Tab Navigation with thin white border */}
         <div className="max-w-7xl mx-auto px-6">
-          <nav className="flex space-x-8 border-t border-border pt-2 pb-2">
+          <nav className="flex space-x-8 border-t border-border pt-1 pb-1">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 data-tab={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-3 px-1 font-normal text-sm transition-all duration-200 relative ${
+                className={`py-2 px-1 font-normal text-sm transition-all duration-200 relative ${
                   activeTab === tab.id
                     ? 'text-text-primary'
                     : 'text-text-tertiary hover:text-text-primary'
@@ -142,5 +139,3 @@ function App() {
 }
 
 export default App
-
-// Made with Bob
