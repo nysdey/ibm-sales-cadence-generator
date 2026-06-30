@@ -1,16 +1,23 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { User, ChevronDown } from 'lucide-react'
 import CadenceLibrary from './components/generator/CadenceLibrary'
 import GeneratedEmails from './components/training/GeneratedEmails'
 import DatabaseManager from './components/admin/DatabaseManager'
 import UserManager from './components/admin/UserManager'
 import UserProfile from './components/admin/UserProfile'
+import AccountsManager from './components/accounts/AccountsManager'
+import ChatAssistant from './components/chat/ChatAssistant'
+import IntelligenceDashboard from './components/intelligence/IntelligenceDashboard'
+import { MOCK_LISTS } from './components/accounts/mockData'
 import { useUser } from './contexts/UserContext'
 
 function App() {
-  const [activeTab, setActiveTab] = useState('library')
+  const [activeTab, setActiveTab] = useState('accounts')
   const [showProfileDropdown, setShowProfileDropdown] = useState(false)
-  const [emailsFocus, setEmailsFocus] = useState(null) // { cadenceName, stepDay? }
+  const [emailsFocus, setEmailsFocus] = useState(null)
+  const [chatInitialPrompt, setChatInitialPrompt] = useState(null)
+  // Shared list state — AccountsManager and ChatAssistant both read/write this
+  const [sharedLists, setSharedLists] = useState(MOCK_LISTS)
   const { currentUser, users, switchUser } = useUser()
 
   const focusGeneratedEmails = (cadenceName, stepDay = null) => {
@@ -18,7 +25,30 @@ function App() {
     setActiveTab('emails')
   }
 
+  const openChatWithPrompt = useCallback((prompt) => {
+    setChatInitialPrompt(prompt)
+    setActiveTab('chat')
+  }, [])
+
+  const handleCreateListFromAI = useCallback((payload) => {
+    const newList = {
+      id: `list-ai-${Date.now()}`,
+      name: payload.name,
+      description: payload.description,
+      createdAt: new Date().toISOString().slice(0, 10),
+      updatedAt: new Date().toISOString().slice(0, 10),
+      accountIds: payload.accountIds || [],
+      color: payload.color || 'blue',
+    }
+    setSharedLists(prev => [newList, ...prev])
+    // Navigate to Accounts tab so the seller can see the new list
+    setActiveTab('accounts')
+  }, [])
+
   const tabs = [
+    { id: 'accounts', label: 'Accounts' },
+    { id: 'intelligence', label: 'Intelligence' },
+    { id: 'chat', label: 'AI Assistant' },
     { id: 'library', label: 'Cadences' },
     { id: 'emails', label: 'Generated Emails' },
     { id: 'database', label: 'Database' },
@@ -124,6 +154,15 @@ function App() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
+        {activeTab === 'accounts' && <AccountsManager sharedLists={sharedLists} setSharedLists={setSharedLists} />}
+        {activeTab === 'intelligence' && <IntelligenceDashboard onOpenChat={openChatWithPrompt} />}
+        {activeTab === 'chat' && (
+          <ChatAssistant
+            key={chatInitialPrompt}
+            initialPrompt={chatInitialPrompt}
+            onCreateList={handleCreateListFromAI}
+          />
+        )}
         {activeTab === 'library' && <CadenceLibrary onViewEmails={focusGeneratedEmails} />}
         {activeTab === 'emails' && <GeneratedEmails focus={emailsFocus} onFocusHandled={() => setEmailsFocus(null)} />}
         {activeTab === 'database' && <DatabaseManager />}

@@ -441,22 +441,22 @@ const GeneratedEmails = ({ focus, onFocusHandled } = {}) => {
                   </div>
                 </div>
                 <div className="mt-3 flex items-center space-x-2">
-                  <span className="px-2.5 py-1 text-xs font-medium bg-ibm-blue/10 text-ibm-blue border border-border">
+                  <span className="px-2.5 py-1 text-xs font-medium bg-bg-surface text-gray-20 border border-ibm-blue/50">
                     {selectedEmail.cadenceName}
                   </span>
-                  <span className="px-2.5 py-1 text-xs font-medium bg-gray-80/50 text-gray-30 border border-border">
+                  <span className="px-2.5 py-1 text-xs font-medium bg-bg-surface text-white border border-gray-50">
                     Day {selectedEmail.stepDay}
                   </span>
                   {selectedEmail.industry && (
-                    <span className="px-2.5 py-1 text-xs font-medium bg-ibm-purple/10 text-ibm-purple border border-border">
+                    <span className="px-2.5 py-1 text-xs font-medium bg-bg-surface text-white border border-ibm-purple">
                       {selectedEmail.industry}
                     </span>
                   )}
                   {selectedEmail.grade && (
-                    <span className={`px-2.5 py-1 text-xs font-medium border ${
-                      ['A', 'A-'].includes(selectedEmail.grade) ? 'bg-green-500/10 text-green-400 border-green-500/30' :
-                      ['B+', 'B'].includes(selectedEmail.grade) ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' :
-                      'bg-yellow-500/10 text-yellow-400 border-yellow-500/30'
+                    <span className={`px-2.5 py-1 text-xs font-medium bg-bg-surface text-white border ${
+                      ['A', 'A-'].includes(selectedEmail.grade) ? 'border-green-400' :
+                      ['B+', 'B'].includes(selectedEmail.grade) ? 'border-ibm-blue' :
+                      'border-yellow-400'
                     }`}>
                       Grade: {selectedEmail.grade}
                     </span>
@@ -635,42 +635,34 @@ const GeneratedEmails = ({ focus, onFocusHandled } = {}) => {
         </p>
       </div>
 
-      {/* Analytics Cards */}
-      <div className="grid grid-cols-4 gap-4">
-        <div className="card">
-          <div className="flex items-center space-x-3">
-            <Mail className="w-8 h-8 text-ibm-blue" />
-            <div>
-              <div className="text-2xl font-light text-text-primary">{totalEmails}</div>
-              <div className="text-xs text-text-tertiary mt-0.5">Total Emails</div>
-            </div>
+      {/* Analytics Cards — compact */}
+      <div className="grid grid-cols-4 gap-3">
+        <div className="bg-bg-surface border border-border px-4 py-3 flex items-center gap-3">
+          <Mail className="w-5 h-5 text-ibm-blue flex-shrink-0" />
+          <div>
+            <div className="text-lg font-light text-text-primary leading-none">{totalEmails}</div>
+            <div className="text-xs text-text-tertiary mt-0.5">Total Emails</div>
           </div>
         </div>
-        <div className="card">
-          <div className="flex items-center space-x-3">
-            <TrendingUp className="w-8 h-8 text-ibm-blue" />
-            <div>
-              <div className="text-2xl font-light text-text-primary">{avgGrade}%</div>
-              <div className="text-xs text-text-tertiary mt-0.5">Quality Score</div>
-            </div>
+        <div className="bg-bg-surface border border-border px-4 py-3 flex items-center gap-3">
+          <TrendingUp className="w-5 h-5 text-ibm-blue flex-shrink-0" />
+          <div>
+            <div className="text-lg font-light text-text-primary leading-none">{avgGrade}%</div>
+            <div className="text-xs text-text-tertiary mt-0.5">Quality Score</div>
           </div>
         </div>
-        <div className="card">
-          <div className="flex items-center space-x-3">
-            <BarChart3 className="w-8 h-8 text-ibm-blue" />
-            <div>
-              <div className="text-2xl font-light text-text-primary">{Object.keys(groupedEmails).length}</div>
-              <div className="text-xs text-text-tertiary mt-0.5">Cadences</div>
-            </div>
+        <div className="bg-bg-surface border border-border px-4 py-3 flex items-center gap-3">
+          <BarChart3 className="w-5 h-5 text-ibm-blue flex-shrink-0" />
+          <div>
+            <div className="text-lg font-light text-text-primary leading-none">{Object.keys(groupedEmails).length}</div>
+            <div className="text-xs text-text-tertiary mt-0.5">Cadences</div>
           </div>
         </div>
-        <div className="card">
-          <div className="flex items-center space-x-3">
-            <Building2 className="w-8 h-8 text-ibm-blue" />
-            <div>
-              <div className="text-2xl font-light text-text-primary">{new Set(emails.map(e => e.companyName)).size}</div>
-              <div className="text-xs text-text-tertiary mt-0.5">Companies</div>
-            </div>
+        <div className="bg-bg-surface border border-border px-4 py-3 flex items-center gap-3">
+          <Building2 className="w-5 h-5 text-ibm-blue flex-shrink-0" />
+          <div>
+            <div className="text-lg font-light text-text-primary leading-none">{new Set(emails.map(e => e.companyName)).size}</div>
+            <div className="text-xs text-text-tertiary mt-0.5">Companies</div>
           </div>
         </div>
       </div>
@@ -703,7 +695,7 @@ const GeneratedEmails = ({ focus, onFocusHandled } = {}) => {
                   <ChevronRight className="w-5 h-5 text-ibm-blue" />
                 )}
                 <div>
-                  <h3 className="text-base font-light text-ibm-blue">{cadenceName}</h3>
+                  <h3 className="text-base font-light text-gray-20">{cadenceName}</h3>
                   <p className="text-xs text-text-tertiary mt-0.5">
                     {Object.keys(steps).length} steps • {Object.values(steps).flat().length} emails
                   </p>
@@ -732,7 +724,7 @@ const GeneratedEmails = ({ focus, onFocusHandled } = {}) => {
                               <ChevronRight className="w-4 h-4 text-ibm-purple" />
                             )}
                             <div className="flex items-center space-x-2">
-                              <span className="px-2 py-0.5 text-xs font-medium bg-ibm-purple/10 text-ibm-purple border border-ibm-purple/30">
+                              <span className="px-2 py-0.5 text-xs font-medium bg-bg-surface text-white border border-ibm-purple">
                                 Day {stepDay}
                               </span>
                               <span className="text-sm text-text-secondary">

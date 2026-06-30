@@ -9,6 +9,7 @@ import cadencesRoutes from './routes/cadences.js';
 import trainingRoutes from './routes/training.js';
 import feedbackRoutes from './routes/feedback.js';
 import databaseRoutes from './routes/database.js';
+import chatRoutes from './routes/chat.js';
 
 if (!validateConfig()) {
   console.error('\n❌ Server startup failed due to configuration errors.');
@@ -55,6 +56,7 @@ app.use('/api/cadences', cadencesRoutes);
 app.use('/api/training', trainingRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/database', databaseRoutes);
+app.use('/api/chat', chatRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

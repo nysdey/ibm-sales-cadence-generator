@@ -634,7 +634,7 @@ const DatabaseManager = () => {
                 <h4 className="text-sm text-text-tertiary mb-2 font-normal">Example Companies</h4>
                 <div className="flex flex-wrap gap-2">
                   {industry.examples.map((example, idx) => (
-                    <span key={idx} className="px-3 py-1.5 bg-bg-raised text-text-primary text-sm border border-border">
+                    <span key={idx} className="px-3 py-1.5 bg-bg-surface text-white text-sm border border-border">
                       {example}
                     </span>
                   ))}
@@ -706,7 +706,7 @@ const DatabaseManager = () => {
                 <p className="text-xs text-text-tertiary mb-1.5 font-normal">Example Companies</p>
                 <div className="flex flex-wrap gap-1">
                   {industry.examples.slice(0, 3).map((example, idx) => (
-                    <span key={idx} className="px-2 py-0.5 bg-bg-raised text-text-secondary text-xs border border-border">
+                    <span key={idx} className="px-2 py-0.5 bg-bg-surface text-white text-xs border border-border">
                       {example}
                     </span>
                   ))}
@@ -795,7 +795,7 @@ const DatabaseManager = () => {
               <p className="text-xs text-text-tertiary mb-2 font-normal">Target Industries</p>
               <div className="flex flex-wrap gap-1.5">
                 {tech.targetIndustries.map((industry, idx) => (
-                  <span key={idx} className="px-2 py-0.5 bg-ibm-purple/10 text-ibm-purple text-xs border border-border">
+                  <span key={idx} className="px-2 py-0.5 bg-bg-surface text-white text-xs border border-ibm-purple">
                     {industry}
                   </span>
                 ))}
@@ -805,7 +805,7 @@ const DatabaseManager = () => {
               <p className="text-xs text-text-tertiary mb-2 font-normal">Products</p>
               <div className="flex flex-wrap gap-1.5">
                 {tech.products.map((product, idx) => (
-                  <span key={idx} className="px-2 py-0.5 bg-ibm-blue/10 text-ibm-blue text-xs border border-border">
+                  <span key={idx} className="px-2 py-0.5 bg-bg-surface text-white text-xs border border-ibm-blue">
                     {product}
                   </span>
                 ))}
@@ -872,15 +872,13 @@ const DatabaseManager = () => {
                   </button>
                 )}
                 <div className="flex items-center space-x-2">
-                  <span className={`px-2.5 py-1 text-xs font-medium border ${
-                    example.type === 'good'
-                      ? 'bg-ibm-blue/10 text-ibm-blue border-ibm-blue/30'
-                      : 'bg-gray-70 text-gray-30 border-gray-60'
+                  <span className={`px-2.5 py-1 text-xs font-medium bg-bg-surface text-white border ${
+                    example.type === 'good' ? 'border-ibm-blue' : 'border-gray-50'
                   }`}>
                     {example.type === 'good' ? '✓ Good Example' : '✗ Avoid This'}
                   </span>
                   {rankBadge && (
-                    <span className="px-2.5 py-1 text-xs font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/30">
+                    <span className="px-2.5 py-1 text-xs font-medium bg-bg-surface text-white border border-yellow-400">
                       {rankBadge}
                     </span>
                   )}

@@ -406,10 +406,10 @@ const CadenceLibrary = ({ onViewEmails } = {}) => {
 
   const getChannelColor = (channel) => {
     switch (channel.toLowerCase()) {
-      case 'email': return 'bg-ibm-blue/10 text-ibm-blue border border-border';
-      case 'call': return 'bg-gray-80/50 text-gray-30 border border-border';
-      case 'linkedin': return 'bg-ibm-purple/10 text-ibm-purple border border-border';
-      default: return 'bg-bg-raised text-text-secondary border border-border';
+      case 'email':    return 'bg-bg-surface text-white border border-ibm-blue';
+      case 'call':     return 'bg-bg-surface text-white border border-gray-50';
+      case 'linkedin': return 'bg-bg-surface text-white border border-ibm-purple';
+      default:         return 'bg-bg-surface text-white border border-border';
     }
   };
 
@@ -1228,21 +1228,21 @@ const CadenceLibrary = ({ onViewEmails } = {}) => {
                       <div className="flex items-center space-x-2">
                         <div className="text-sm font-light text-text-primary">{cadence.name}</div>
                         {cadence.status === 'draft' && (
-                          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-text-tertiary/10 text-text-tertiary border border-text-tertiary/30">
+                          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-bg-surface text-white border border-gray-50">
                             DRAFT
                           </span>
                         )}
                         {cadence.archived && (
-                          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-yellow-500/10 text-yellow-500 border border-yellow-500/30">
+                          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-bg-surface text-white border border-yellow-400">
                             ARCHIVED
                           </span>
                         )}
                       </div>
                       <div className="text-xs text-text-secondary mt-1 flex items-center space-x-2">
-                        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-ibm-blue/10 text-ibm-blue border border-border">
+                        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-bg-surface text-white border border-ibm-blue">
                           {cadence.persona}
                         </span>
-                        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-ibm-purple/10 text-ibm-purple border border-border">
+                        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-bg-surface text-white border border-ibm-purple">
                           {cadence.campaign}
                         </span>
                       </div>
@@ -1492,12 +1492,12 @@ const CadenceLibrary = ({ onViewEmails } = {}) => {
                 {selectedCadence.name}
               </h2>
               {selectedCadence.status === 'draft' && (
-                <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-text-tertiary/10 text-text-tertiary border border-text-tertiary/30">
+                <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-bg-surface text-white border border-gray-50">
                   DRAFT
                 </span>
               )}
               {selectedCadence.archived && (
-                <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-yellow-500/10 text-yellow-500 border border-yellow-500/30">
+                <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-bg-surface text-white border border-yellow-400">
                   ARCHIVED
                 </span>
               )}
@@ -1512,13 +1512,13 @@ const CadenceLibrary = ({ onViewEmails } = {}) => {
               <span>Created by {selectedCadence.created_by_name}</span>
             </div>
             <div className="mt-3 flex items-center space-x-2">
-              <span className="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-ibm-blue/10 text-ibm-blue border border-border">
+              <span className="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-bg-surface text-white border border-ibm-blue">
                 {selectedCadence.persona}
               </span>
-              <span className="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-ibm-purple/10 text-ibm-purple border border-border">
+              <span className="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-bg-surface text-white border border-ibm-purple">
                 {selectedCadence.campaign}
               </span>
-              <span className="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-gray-80/50 text-gray-30 border border-border">
+              <span className="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-bg-surface text-white border border-gray-50">
                 {selectedCadence.type}
               </span>
             </div>
